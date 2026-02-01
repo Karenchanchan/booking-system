@@ -28,6 +28,41 @@
             font-family: 'Inter', sans-serif;
         }
         
+        .bilingual-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .bilingual-text .english {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+        }
+        
+        .bilingual-text .chinese {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .bilingual-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .bilingual-label .english {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+        
+        .bilingual-label .chinese {
+            font-family: 'Noto Sans TC', sans-serif;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
         .print-header, .print-footer {
             display: none;
         }
@@ -205,10 +240,25 @@
             max-width: 800px;
             margin: 0 auto;
         }
+        
+        /* 數據庫模擬器樣式 */
+        .db-debug {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+            display: none;
+        }
     </style>
 </head>
 <body class="h-full">
-    <!-- 登入畫面 -->
+    <!-- 登入畫面 | Login Screen -->
     <div id="loginScreen" class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-100">
         <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
             <div class="text-center mb-8">
@@ -221,26 +271,26 @@
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        <span class="english-font">Name</span>
-                        <span class="chinese-font">姓名</span>
+                    <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                        <span class="english">Name</span>
+                        <span class="chinese">姓名</span>
                     </label>
-                    <input type="text" id="loginName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition english-font" placeholder="Enter your name">
+                    <input type="text" id="loginName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition english-font" placeholder="Enter your name / 輸入姓名">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        <span class="english-font">Password</span>
-                        <span class="chinese-font">密碼</span>
+                    <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                        <span class="english">Password</span>
+                        <span class="chinese">密碼</span>
                     </label>
-                    <input type="password" id="loginPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Enter password">
+                    <input type="password" id="loginPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Enter password / 輸入密碼">
                 </div>
                 
                 <div id="loginError" class="hidden text-red-500 text-sm text-center"></div>
                 
                 <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md">
                     <span class="english-font">Login</span>
-                    <span class="chinese-font">登入</span>
+                    <span class="chinese-font ml-2">登入</span>
                 </button>
             </div>
             
@@ -248,92 +298,106 @@
                 <button onclick="showStaffLogin()" class="w-full text-gray-600 hover:text-gray-800 text-sm flex items-center justify-center gap-2">
                     <i class="fas fa-user-cog"></i>
                     <span class="english-font">Staff Login</span>
-                    <span class="chinese-font">職員登入</span>
+                    <span class="chinese-font ml-2">職員登入</span>
                 </button>
             </div>
         </div>
     </div>
     
-    <!-- 租用者儀表板 -->
+    <!-- 租用者儀表板 | Renter Dashboard -->
     <div id="renterDashboard" class="hidden h-full flex flex-col">
-        <!-- 頂部導航欄 -->
+        <!-- 頂部導航欄 | Header -->
         <header class="bg-white shadow-sm sticky top-0 z-40 no-print">
             <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-door-open text-white"></i>
                     </div>
-                    <div>
-                        <h1 class="font-semibold text-gray-800 english-font">Room Booking</h1>
-                        <p class="text-sm text-gray-500 chinese-font">歡迎, <span id="renterWelcomeName" class="font-medium"></span></p>
+                    <div class="bilingual-text">
+                        <div class="english-font font-semibold text-gray-800">Room Booking</div>
+                        <div class="chinese-font text-sm text-gray-500">歡迎, <span id="renterWelcomeName" class="font-medium"></span></div>
                     </div>
                 </div>
                 
                 <button onclick="logout()" class="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition flex items-center gap-2">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="english-font">Logout</span>
-                    <span class="chinese-font">登出</span>
+                    <span class="chinese-font ml-1">登出</span>
                 </button>
             </div>
         </header>
         
-        <!-- 主要內容區 -->
+        <!-- 主要內容區 | Main Content -->
         <main class="flex-1 overflow-auto">
             <div class="max-w-7xl mx-auto px-4 py-6">
-                <!-- 頁籤導航 -->
+                <!-- 頁籤導航 | Tab Navigation -->
                 <div class="flex gap-2 mb-6 no-print">
-                    <button onclick="showRenterTab('booking')" id="renterTabBooking" class="tab-active px-4 py-2 rounded-lg font-medium transition english-font">
-                        Book Room
+                    <button onclick="showRenterTab('booking')" id="renterTabBooking" class="tab-active px-4 py-2 rounded-lg font-medium transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Book Room</div>
+                            <div class="chinese chinese-font text-xs">預約房間</div>
+                        </div>
                     </button>
-                    <button onclick="showRenterTab('myBookings')" id="renterTabMyBookings" class="tab-inactive px-4 py-2 rounded-lg font-medium transition english-font">
-                        My Bookings
+                    <button onclick="showRenterTab('myBookings')" id="renterTabMyBookings" class="tab-inactive px-4 py-2 rounded-lg font-medium transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">My Bookings</div>
+                            <div class="chinese chinese-font text-xs">我的預約</div>
+                        </div>
                     </button>
-                    <button onclick="showRenterTab('statistics')" id="renterTabStatistics" class="tab-inactive px-4 py-2 rounded-lg font-medium transition english-font">
-                        Statistics
+                    <button onclick="showRenterTab('statistics')" id="renterTabStatistics" class="tab-inactive px-4 py-2 rounded-lg font-medium transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Statistics</div>
+                            <div class="chinese chinese-font text-xs">統計</div>
+                        </div>
                     </button>
                 </div>
                 
-                <!-- 預約房間區 -->
+                <!-- 預約房間區 | Booking Section -->
                 <div id="renterBookingSection" class="fade-in">
                     <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                        <h2 class="text-lg font-semibold text-gray-800 mb-4 english-font">
-                            <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
-                            Select Branch & Date
-                            <span class="chinese-font text-sm font-normal text-gray-600 ml-2">選擇分店及日期</span>
-                        </h2>
+                        <div class="bilingual-text mb-4">
+                            <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
+                                Select Branch & Date
+                            </div>
+                            <div class="chinese chinese-font text-gray-600">選擇分店及日期</div>
+                        </div>
                         
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                                    Branch <span class="chinese-font text-gray-500">分店</span>
+                                <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                                    <span class="english">Branch</span>
+                                    <span class="chinese">分店</span>
                                 </label>
                                 <select id="renterBranchSelect" onchange="loadRoomsForBranch()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">Select Branch 選擇分店</option>
-                                    <option value="jordan">Jordan 佐敦</option>
-                                    <option value="wanchai">Wan Chai 灣仔</option>
-                                    <option value="tsuenwan">Tsuen Wan 荃灣</option>
+                                    <option value="">Select Branch / 選擇分店</option>
+                                    <option value="jordan">Jordan / 佐敦</option>
+                                    <option value="wanchai">Wan Chai / 灣仔</option>
+                                    <option value="tsuenwan">Tsuen Wan / 荃灣</option>
                                 </select>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                                    Date <span class="chinese-font text-gray-500">日期</span>
+                                <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                                    <span class="english">Date</span>
+                                    <span class="chinese">日期</span>
                                 </label>
                                 <input type="date" id="renterDateSelect" onchange="loadTimeSlots()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                                    Room <span class="chinese-font text-gray-500">房間</span>
+                                <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                                    <span class="english">Room</span>
+                                    <span class="chinese">房間</span>
                                 </label>
                                 <select id="renterRoomSelect" onchange="loadTimeSlots()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">Select Room 選擇房間</option>
+                                    <option value="">Select Room / 選擇房間</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- 房間資訊 -->
+                    <!-- 房間資訊 | Room Info -->
                     <div id="selectedRoomInfo" class="hidden bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 mb-6">
                         <div class="flex items-start justify-between">
                             <div>
@@ -341,54 +405,68 @@
                                 <p id="roomInfoFacilities" class="text-gray-600 mt-1 chinese-font"></p>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm text-gray-500 english-font">Price <span class="chinese-font">租金</span></p>
+                                <div class="bilingual-text">
+                                    <div class="english english-font text-sm text-gray-500">Price</div>
+                                    <div class="chinese chinese-font text-sm text-gray-500">租金</div>
+                                </div>
                                 <p id="roomInfoPrice" class="text-2xl font-bold text-blue-600"></p>
-                                <p class="text-xs text-gray-400 english-font">per hour <span class="chinese-font">每小時</span></p>
+                                <div class="bilingual-text">
+                                    <div class="english english-font text-xs text-gray-400">per hour</div>
+                                    <div class="chinese chinese-font text-xs text-gray-400">每小時</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- 時間段選擇 -->
+                    <!-- 時間段選擇 | Time Slots -->
                     <div id="timeSlotsContainer" class="hidden bg-white rounded-2xl shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-gray-800 mb-4 english-font">
-                            <i class="far fa-clock text-blue-500 mr-2"></i>
-                            Available Time Slots
-                            <span class="chinese-font text-sm font-normal text-gray-600 ml-2">可預約時段</span>
-                        </h2>
+                        <div class="bilingual-text mb-4">
+                            <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="far fa-clock text-blue-500 mr-2"></i>
+                                Available Time Slots
+                            </div>
+                            <div class="chinese chinese-font text-gray-600">可預約時段</div>
+                        </div>
                         
-                        <p class="text-sm text-gray-500 mb-4 english-font">
-                            Click to select time slots (each slot = 30 mins)
-                            <span class="chinese-font ml-2">點擊選擇時段（每格=30分鐘）</span>
-                        </p>
+                        <div class="bilingual-text mb-4">
+                            <div class="english english-font text-sm text-gray-500">Click to select time slots (each slot = 30 mins)</div>
+                            <div class="chinese chinese-font text-sm text-gray-500">點擊選擇時段（每格=30分鐘）</div>
+                        </div>
                         
                         <div id="timeSlots" class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2"></div>
                         
-                        <!-- 玩具租用選項 -->
+                        <!-- 玩具租用選項 | Toy Rental Option -->
                         <div id="toyRentalOption" class="hidden mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
                             <label class="flex items-center gap-3 cursor-pointer">
                                 <input type="checkbox" id="toyRentalCheckbox" onchange="updateBookingTotal()" class="w-5 h-5 text-yellow-600 rounded focus:ring-yellow-500">
                                 <div>
-                                    <span class="text-gray-700 font-medium english-font">Add Toy Rental</span>
-                                    <span class="chinese-font text-gray-700 font-medium ml-2">租用玩具</span>
-                                    <p class="text-sm text-gray-500 mt-1 english-font">
-                                        Additional <span id="toyPriceDisplay"></span>/hr
-                                        <span class="chinese-font ml-2">每小時另加顯示金額</span>
-                                    </p>
+                                    <div class="bilingual-text">
+                                        <div class="english english-font text-gray-700 font-medium">Add Toy Rental</div>
+                                        <div class="chinese chinese-font text-gray-700 font-medium">租用玩具</div>
+                                    </div>
+                                    <div class="bilingual-text mt-1">
+                                        <div class="english english-font text-sm text-gray-500">Additional <span id="toyPriceDisplay"></span>/hr</div>
+                                        <div class="chinese chinese-font text-sm text-gray-500">每小時另加顯示金額</div>
+                                    </div>
                                 </div>
                             </label>
                         </div>
                         
-                        <!-- 預約摘要 -->
+                        <!-- 預約摘要 | Booking Summary -->
                         <div id="bookingSummary" class="hidden mt-6 p-6 bg-blue-50 rounded-xl border border-blue-200">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <p class="text-sm text-gray-600 english-font">Selected Time</p>
-                                    <p class="text-sm text-gray-600 chinese-font">已選時段</p>
+                                    <div class="bilingual-text">
+                                        <div class="english english-font text-sm text-gray-600">Selected Time</div>
+                                        <div class="chinese chinese-font text-sm text-gray-600">已選時段</div>
+                                    </div>
                                     <p id="selectedTimeRange" class="font-semibold text-gray-800 text-lg mt-1"></p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-sm text-gray-600 english-font">Total</p>
-                                    <p class="text-sm text-gray-600 chinese-font">總計</p>
+                                    <div class="bilingual-text">
+                                        <div class="english english-font text-sm text-gray-600">Total</div>
+                                        <div class="chinese chinese-font text-sm text-gray-600">總計</div>
+                                    </div>
                                     <p id="bookingTotal" class="text-2xl font-bold text-blue-600 mt-1"></p>
                                 </div>
                             </div>
@@ -401,34 +479,40 @@
                     </div>
                 </div>
                 
-                <!-- 我的預約區 -->
+                <!-- 我的預約區 | My Bookings Section -->
                 <div id="renterMyBookingsSection" class="hidden fade-in">
                     <div class="bg-white rounded-2xl shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-gray-800 mb-4 english-font">
-                            <i class="far fa-calendar-check text-blue-500 mr-2"></i>
-                            My Bookings
-                            <span class="chinese-font text-sm font-normal text-gray-600 ml-2">我的預約</span>
-                        </h2>
+                        <div class="bilingual-text mb-4">
+                            <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="far fa-calendar-check text-blue-500 mr-2"></i>
+                                My Bookings
+                            </div>
+                            <div class="chinese chinese-font text-gray-600">我的預約</div>
+                        </div>
                         
                         <div id="myBookingsList" class="space-y-4"></div>
                         
                         <div id="noBookingsMessage" class="hidden text-center py-12 text-gray-500">
                             <i class="far fa-calendar-times text-5xl text-gray-300 mb-4"></i>
-                            <p class="english-font">No bookings yet</p>
-                            <p class="chinese-font mt-1">暫無預約</p>
+                            <div class="bilingual-text">
+                                <div class="english english-font">No bookings yet</div>
+                                <div class="chinese chinese-font mt-1">暫無預約</div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 統計區 -->
+                <!-- 統計區 | Statistics Section -->
                 <div id="renterStatisticsSection" class="hidden fade-in">
                     <div class="bg-white rounded-2xl shadow-lg p-6">
                         <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-lg font-semibold text-gray-800 english-font">
-                                <i class="fas fa-chart-bar text-blue-500 mr-2"></i>
-                                Monthly Statistics
-                                <span class="chinese-font text-sm font-normal text-gray-600 ml-2">月度統計</span>
-                            </h2>
+                            <div class="bilingual-text">
+                                <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-chart-bar text-blue-500 mr-2"></i>
+                                    Monthly Statistics
+                                </div>
+                                <div class="chinese chinese-font text-gray-600">月度統計</div>
+                            </div>
                             
                             <div class="flex items-center gap-2">
                                 <select id="statsMonthSelect" onchange="updateRenterStatistics()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
@@ -436,38 +520,46 @@
                             </div>
                         </div>
                         
-                        <!-- 統計卡片 -->
+                        <!-- 統計卡片 | Stats Cards -->
                         <div class="grid md:grid-cols-3 gap-4 mb-8">
                             <div class="stats-card">
-                                <p class="text-sm text-blue-600 font-medium english-font">Total Bookings</p>
-                                <p class="text-sm text-blue-600 font-medium chinese-font">總預約次數</p>
+                                <div class="bilingual-text">
+                                    <div class="english english-font text-sm text-blue-600 font-medium">Total Bookings</div>
+                                    <div class="chinese chinese-font text-sm text-blue-600 font-medium">總預約次數</div>
+                                </div>
                                 <p id="statsBookingCount" class="text-3xl font-bold text-blue-700 mt-2">0</p>
                             </div>
                             
                             <div class="stats-card" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
-                                <p class="text-sm text-green-600 font-medium english-font">Total Hours</p>
-                                <p class="text-sm text-green-600 font-medium chinese-font">總時數</p>
+                                <div class="bilingual-text">
+                                    <div class="english english-font text-sm text-green-600 font-medium">Total Hours</div>
+                                    <div class="chinese chinese-font text-sm text-green-600 font-medium">總時數</div>
+                                </div>
                                 <p id="statsTotalHours" class="text-3xl font-bold text-green-700 mt-2">0</p>
                             </div>
                             
                             <div class="stats-card" style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);">
-                                <p class="text-sm text-purple-600 font-medium english-font">Total Amount</p>
-                                <p class="text-sm text-purple-600 font-medium chinese-font">總金額</p>
+                                <div class="bilingual-text">
+                                    <div class="english english-font text-sm text-purple-600 font-medium">Total Amount</div>
+                                    <div class="chinese chinese-font text-sm text-purple-600 font-medium">總金額</div>
+                                </div>
                                 <p id="statsTotalAmount" class="text-3xl font-bold text-purple-700 mt-2">$0</p>
                             </div>
                         </div>
                         
-                        <h3 class="font-semibold text-gray-800 mb-3 english-font">
-                            Booking Details
-                            <span class="chinese-font text-sm font-normal text-gray-600 ml-2">預約詳情</span>
-                        </h3>
+                        <div class="bilingual-text mb-3">
+                            <div class="english english-font font-semibold text-gray-800">Booking Details</div>
+                            <div class="chinese chinese-font text-gray-600">預約詳情</div>
+                        </div>
                         
                         <div id="statsBookingDetails" class="space-y-3"></div>
                         
                         <div id="noStatsMessage" class="hidden text-center py-8 text-gray-500">
                             <i class="far fa-chart-bar text-4xl text-gray-300 mb-4"></i>
-                            <p class="english-font">No bookings this month</p>
-                            <p class="chinese-font mt-1">本月暫無預約</p>
+                            <div class="bilingual-text">
+                                <div class="english english-font">No bookings this month</div>
+                                <div class="chinese chinese-font mt-1">本月暫無預約</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -475,62 +567,76 @@
         </main>
     </div>
     
-    <!-- 職員儀表板 -->
+    <!-- 職員儀表板 | Staff Dashboard -->
     <div id="staffDashboard" class="hidden h-full flex flex-col">
-        <!-- 職員頂部導航欄 -->
+        <!-- 職員頂部導航欄 | Staff Header -->
         <header class="bg-gradient-to-r from-slate-800 to-slate-900 shadow-lg sticky top-0 z-40 no-print">
             <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
                         <i class="fas fa-user-cog text-white"></i>
                     </div>
-                    <div>
-                        <h1 class="font-semibold text-white english-font">Staff Portal</h1>
-                        <p class="text-sm text-slate-300 chinese-font">管理後台</p>
+                    <div class="bilingual-text">
+                        <div class="english english-font font-semibold text-white">Staff Portal</div>
+                        <div class="chinese chinese-font text-sm text-slate-300">管理後台</div>
                     </div>
                 </div>
                 
                 <button onclick="logout()" class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition flex items-center gap-2">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="english-font">Logout</span>
-                    <span class="chinese-font">登出</span>
+                    <span class="chinese-font ml-1">登出</span>
                 </button>
             </div>
         </header>
         
-        <!-- 職員主要內容區 -->
+        <!-- 職員主要內容區 | Staff Main Content -->
         <main class="flex-1 overflow-auto">
             <div class="max-w-7xl mx-auto px-4 py-6">
-                <!-- 職員頁籤導航 -->
+                <!-- 職員頁籤導航 | Staff Tab Navigation -->
                 <div class="flex flex-wrap gap-2 mb-6 no-print">
-                    <button onclick="showStaffTab('renters')" id="staffTabRenters" class="px-4 py-2 rounded-lg font-medium transition bg-slate-800 text-white english-font">
-                        Manage Renters
+                    <button onclick="showStaffTab('renters')" id="staffTabRenters" class="px-4 py-2 rounded-lg font-medium transition bg-slate-800 text-white">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Manage Renters</div>
+                            <div class="chinese chinese-font text-xs">管理租用者</div>
+                        </div>
                     </button>
-                    <button onclick="showStaffTab('rooms')" id="staffTabRooms" class="tab-inactive px-4 py-2 rounded-lg font-medium transition english-font">
-                        Room Settings
+                    <button onclick="showStaffTab('rooms')" id="staffTabRooms" class="tab-inactive px-4 py-2 rounded-lg font-medium transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Room Settings</div>
+                            <div class="chinese chinese-font text-xs">房間設定</div>
+                        </div>
                     </button>
-                    <button onclick="showStaffTab('allBookings')" id="staffTabAllBookings" class="tab-inactive px-4 py-2 rounded-lg font-medium transition english-font">
-                        All Bookings
+                    <button onclick="showStaffTab('allBookings')" id="staffTabAllBookings" class="tab-inactive px-4 py-2 rounded-lg font-medium transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">All Bookings</div>
+                            <div class="chinese chinese-font text-xs">所有預約</div>
+                        </div>
                     </button>
-                    <button onclick="showStaffTab('reports')" id="staffTabReports" class="tab-inactive px-4 py-2 rounded-lg font-medium transition english-font">
-                        Reports
+                    <button onclick="showStaffTab('reports')" id="staffTabReports" class="tab-inactive px-4 py-2 rounded-lg font-medium transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Reports</div>
+                            <div class="chinese chinese-font text-xs">報表</div>
+                        </div>
                     </button>
                 </div>
                 
-                <!-- 管理租用者區 -->
+                <!-- 管理租用者區 | Manage Renters Section -->
                 <div id="staffRentersSection" class="fade-in">
                     <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800 english-font">
-                                <i class="fas fa-users text-slate-700 mr-2"></i>
-                                Renters
-                                <span class="chinese-font text-sm font-normal text-gray-600 ml-2">租用者</span>
-                            </h2>
+                            <div class="bilingual-text">
+                                <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-users text-slate-700 mr-2"></i>
+                                    Renters
+                                </div>
+                                <div class="chinese chinese-font text-gray-600">租用者</div>
+                            </div>
                             
                             <button onclick="showAddRenterModal()" class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition flex items-center gap-2">
                                 <i class="fas fa-user-plus"></i>
                                 <span class="english-font">Add Renter</span>
-                                <span class="chinese-font">新增租用者</span>
+                                <span class="chinese-font ml-1">新增租用者</span>
                             </button>
                         </div>
                         
@@ -538,53 +644,63 @@
                         
                         <div id="noRentersMessage" class="hidden text-center py-8 text-gray-500">
                             <i class="fas fa-users-slash text-4xl text-gray-300 mb-4"></i>
-                            <p class="english-font">No renters registered</p>
-                            <p class="chinese-font mt-1">暫無租用者</p>
+                            <div class="bilingual-text">
+                                <div class="english english-font">No renters registered</div>
+                                <div class="chinese chinese-font mt-1">暫無租用者</div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 房間設定區 -->
+                <!-- 房間設定區 | Room Settings Section -->
                 <div id="staffRoomsSection" class="hidden fade-in">
                     <div class="bg-white rounded-2xl shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-gray-800 mb-4 english-font">
-                            <i class="fas fa-cog text-slate-700 mr-2"></i>
-                            Room Price Settings
-                            <span class="chinese-font text-sm font-normal text-gray-600 ml-2">房間價格設定</span>
-                        </h2>
+                        <div class="bilingual-text mb-4">
+                            <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="fas fa-cog text-slate-700 mr-2"></i>
+                                Room Price Settings
+                            </div>
+                            <div class="chinese chinese-font text-gray-600">房間價格設定</div>
+                        </div>
                         
-                        <p class="text-sm text-gray-500 mb-6 english-font">
-                            Changes will only affect new bookings
-                            <span class="chinese-font ml-2">更改只會影響新預約</span>
-                        </p>
+                        <div class="bilingual-text mb-6">
+                            <div class="english english-font text-sm text-gray-500">Changes will only affect new bookings</div>
+                            <div class="chinese chinese-font text-sm text-gray-500">更改只會影響新預約</div>
+                        </div>
                         
                         <div class="space-y-8">
-                            <!-- 佐敦分店 -->
+                            <!-- 佐敦分店 | Jordan Branch -->
                             <div>
                                 <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                                     <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
-                                    <span class="english-font">Jordan</span>
-                                    <span class="chinese-font text-gray-600">佐敦</span>
+                                    <div class="bilingual-text">
+                                        <div class="english english-font">Jordan</div>
+                                        <div class="chinese chinese-font text-gray-600">佐敦</div>
+                                    </div>
                                 </h3>
                                 <div id="jordanRooms" class="grid md:grid-cols-2 gap-3"></div>
                             </div>
                             
-                            <!-- 灣仔分店 -->
+                            <!-- 灣仔分店 | Wan Chai Branch -->
                             <div>
                                 <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                                     <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                                    <span class="english-font">Wan Chai</span>
-                                    <span class="chinese-font text-gray-600">灣仔</span>
+                                    <div class="bilingual-text">
+                                        <div class="english english-font">Wan Chai</div>
+                                        <div class="chinese chinese-font text-gray-600">灣仔</div>
+                                    </div>
                                 </h3>
                                 <div id="wanchaiRooms" class="grid md:grid-cols-2 gap-3"></div>
                             </div>
                             
-                            <!-- 荃灣分店 -->
+                            <!-- 荃灣分店 | Tsuen Wan Branch -->
                             <div>
                                 <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                                     <span class="w-3 h-3 bg-purple-500 rounded-full"></span>
-                                    <span class="english-font">Tsuen Wan</span>
-                                    <span class="chinese-font text-gray-600">荃灣</span>
+                                    <div class="bilingual-text">
+                                        <div class="english english-font">Tsuen Wan</div>
+                                        <div class="chinese chinese-font text-gray-600">荃灣</div>
+                                    </div>
                                 </h3>
                                 <div id="tsuenwanRooms" class="grid md:grid-cols-2 gap-3"></div>
                             </div>
@@ -592,26 +708,28 @@
                     </div>
                 </div>
                 
-                <!-- 所有預約區 -->
+                <!-- 所有預約區 | All Bookings Section -->
                 <div id="staffAllBookingsSection" class="hidden fade-in">
                     <div class="bg-white rounded-2xl shadow-lg p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800 english-font">
-                                <i class="fas fa-calendar-alt text-slate-700 mr-2"></i>
-                                All Bookings
-                                <span class="chinese-font text-sm font-normal text-gray-600 ml-2">所有預約</span>
-                            </h2>
+                            <div class="bilingual-text">
+                                <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-calendar-alt text-slate-700 mr-2"></i>
+                                    All Bookings
+                                </div>
+                                <div class="chinese chinese-font text-gray-600">所有預約</div>
+                            </div>
                             
                             <div class="flex items-center gap-2">
                                 <select id="staffBookingFilter" onchange="filterStaffBookings()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="all">All Renters 所有租用者</option>
+                                    <option value="all">All Renters / 所有租用者</option>
                                 </select>
                                 
                                 <select id="staffBranchFilter" onchange="filterStaffBookings()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="all">All Branches 所有分店</option>
-                                    <option value="jordan">Jordan 佐敦</option>
-                                    <option value="wanchai">Wan Chai 灣仔</option>
-                                    <option value="tsuenwan">Tsuen Wan 荃灣</option>
+                                    <option value="all">All Branches / 所有分店</option>
+                                    <option value="jordan">Jordan / 佐敦</option>
+                                    <option value="wanchai">Wan Chai / 灣仔</option>
+                                    <option value="tsuenwan">Tsuen Wan / 荃灣</option>
                                 </select>
                             </div>
                         </div>
@@ -620,22 +738,26 @@
                         
                         <div id="noAllBookingsMessage" class="hidden text-center py-8 text-gray-500">
                             <i class="far fa-calendar-times text-4xl text-gray-300 mb-4"></i>
-                            <p class="english-font">No bookings found</p>
-                            <p class="chinese-font mt-1">找不到預約</p>
+                            <div class="bilingual-text">
+                                <div class="english english-font">No bookings found</div>
+                                <div class="chinese chinese-font mt-1">找不到預約</div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 報表區 -->
+                <!-- 報表區 | Reports Section -->
                 <div id="staffReportsSection" class="hidden fade-in">
-                    <!-- 月度報表 -->
+                    <!-- 月度報表 | Monthly Report -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800 english-font">
-                                <i class="fas fa-chart-pie text-slate-700 mr-2"></i>
-                                Monthly Report
-                                <span class="chinese-font text-sm font-normal text-gray-600 ml-2">月度報表</span>
-                            </h2>
+                            <div class="bilingual-text">
+                                <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-chart-pie text-slate-700 mr-2"></i>
+                                    Monthly Report
+                                </div>
+                                <div class="chinese chinese-font text-gray-600">月度報表</div>
+                            </div>
                             
                             <div class="flex items-center gap-2">
                                 <select id="reportMonthSelect" onchange="generateReport()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
@@ -645,15 +767,17 @@
                                 <button onclick="printReport()" class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition flex items-center gap-2">
                                     <i class="fas fa-print"></i>
                                     <span class="english-font">Print</span>
-                                    <span class="chinese-font">列印</span>
+                                    <span class="chinese-font ml-1">列印</span>
                                 </button>
                             </div>
                         </div>
                         
-                        <!-- 列印表頭（僅列印時顯示） -->
+                        <!-- 列印表頭 | Print Header -->
                         <div class="print-header hidden print-only mb-6">
-                            <h1 class="text-2xl font-bold text-center text-gray-800 english-font">Monthly Booking Report</h1>
-                            <h2 class="text-xl text-center text-gray-600 chinese-font">月度預約報表</h2>
+                            <div class="text-center">
+                                <h1 class="text-2xl font-bold text-gray-800 english-font">Monthly Booking Report</h1>
+                                <h2 class="text-xl text-gray-600 chinese-font">月度預約報表</h2>
+                            </div>
                             <div class="flex justify-between mt-4 text-sm">
                                 <div>
                                     <p id="printReportPeriod" class="font-medium"></p>
@@ -666,74 +790,86 @@
                         </div>
                         
                         <div id="reportContent">
-                            <!-- 統計摘要 -->
+                            <!-- 統計摘要 | Statistics Summary -->
                             <div class="grid md:grid-cols-4 gap-4 mb-6">
                                 <div class="bg-slate-50 rounded-xl p-4 print-border">
-                                    <p class="text-sm text-slate-600 english-font">Total Bookings</p>
-                                    <p class="text-sm text-slate-600 chinese-font">總預約</p>
+                                    <div class="bilingual-text">
+                                        <div class="english english-font text-sm text-slate-600">Total Bookings</div>
+                                        <div class="chinese chinese-font text-sm text-slate-600">總預約</div>
+                                    </div>
                                     <p id="reportTotalBookings" class="text-2xl font-bold text-slate-800 mt-1">0</p>
                                 </div>
                                 
                                 <div class="bg-slate-50 rounded-xl p-4 print-border">
-                                    <p class="text-sm text-slate-600 english-font">Total Hours</p>
-                                    <p class="text-sm text-slate-600 chinese-font">總時數</p>
+                                    <div class="bilingual-text">
+                                        <div class="english english-font text-sm text-slate-600">Total Hours</div>
+                                        <div class="chinese chinese-font text-sm text-slate-600">總時數</div>
+                                    </div>
                                     <p id="reportTotalHours" class="text-2xl font-bold text-slate-800 mt-1">0</p>
                                 </div>
                                 
                                 <div class="bg-slate-50 rounded-xl p-4 print-border">
-                                    <p class="text-sm text-slate-600 english-font">Total Revenue</p>
-                                    <p class="text-sm text-slate-600 chinese-font">總收入</p>
+                                    <div class="bilingual-text">
+                                        <div class="english english-font text-sm text-slate-600">Total Revenue</div>
+                                        <div class="chinese chinese-font text-sm text-slate-600">總收入</div>
+                                    </div>
                                     <p id="reportTotalRevenue" class="text-2xl font-bold text-slate-800 mt-1">$0</p>
                                 </div>
                                 
                                 <div class="bg-slate-50 rounded-xl p-4 print-border">
-                                    <p class="text-sm text-slate-600 english-font">Active Renters</p>
-                                    <p class="text-sm text-slate-600 chinese-font">活躍租用者</p>
+                                    <div class="bilingual-text">
+                                        <div class="english english-font text-sm text-slate-600">Active Renters</div>
+                                        <div class="chinese chinese-font text-sm text-slate-600">活躍租用者</div>
+                                    </div>
                                     <p id="reportActiveRenters" class="text-2xl font-bold text-slate-800 mt-1">0</p>
                                 </div>
                             </div>
                             
-                            <h3 class="font-semibold text-gray-800 mb-3 english-font">
-                                Breakdown by Renter
-                                <span class="chinese-font text-sm font-normal text-gray-600 ml-2">按租用者分類</span>
-                            </h3>
+                            <div class="bilingual-text mb-3">
+                                <div class="english english-font font-semibold text-gray-800">Breakdown by Renter</div>
+                                <div class="chinese chinese-font text-gray-600">按租用者分類</div>
+                            </div>
                             
                             <div id="reportByRenter" class="space-y-4"></div>
                             
                             <div id="noReportMessage" class="hidden text-center py-8 text-gray-500">
                                 <i class="fas fa-chart-line text-4xl text-gray-300 mb-4"></i>
-                                <p class="english-font">No bookings this month</p>
-                                <p class="chinese-font mt-1">本月暫無預約</p>
+                                <div class="bilingual-text">
+                                    <div class="english english-font">No bookings this month</div>
+                                    <div class="chinese chinese-font mt-1">本月暫無預約</div>
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- 列印表尾（僅列印時顯示） -->
+                        <!-- 列印表尾 | Print Footer -->
                         <div class="print-footer hidden print-only mt-8 pt-4 border-t border-gray-300">
                             <div class="flex justify-between text-xs text-gray-500">
                                 <div>
-                                    <p>Generated by Counselling Room Booking System</p>
+                                    <p class="english-font">Generated by Counselling Room Booking System</p>
                                     <p class="chinese-font">心理輔導室預約系統生成</p>
                                 </div>
                                 <div class="text-right">
-                                    <p>Page <span class="page-number"></span></p>
+                                    <p class="english-font">Page <span class="page-number"></span></p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- 生成收據 -->
+                    <!-- 生成收據 | Generate Receipt -->
                     <div class="bg-white rounded-2xl shadow-lg p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800 english-font">
-                                <i class="fas fa-receipt text-slate-700 mr-2"></i>
-                                Generate Receipt
-                                <span class="chinese-font text-sm font-normal text-gray-600 ml-2">生成收據</span>
-                            </h2>
+                            <div class="bilingual-text">
+                                <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-receipt text-slate-700 mr-2"></i>
+                                    Generate Receipt
+                                </div>
+                                <div class="chinese chinese-font text-gray-600">生成收據</div>
+                            </div>
                         </div>
                         
                         <div class="flex items-center gap-4 mb-6">
                             <select id="receiptRenterSelect" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Select Renter 選擇租用者</option>
+                                <option value="">Select Renter / 選擇租用者</option>
                             </select>
                             
                             <button onclick="generateReceipt()" class="px-6 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition">
@@ -749,113 +885,119 @@
         </main>
     </div>
     
-    <!-- 模態框 -->
+    <!-- 模態框 | Modals -->
     
-    <!-- 新增租用者模態框 -->
+    <!-- 新增租用者模態框 | Add Renter Modal -->
     <div id="addRenterModal" class="hidden modal-overlay">
         <div class="modal-content">
             <div class="p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 english-font">
-                    Add New Renter
-                    <span class="chinese-font text-sm font-normal text-gray-600 ml-2">新增租用者</span>
-                </h2>
+                <div class="bilingual-text mb-4">
+                    <div class="english english-font text-xl font-semibold text-gray-800">Add New Renter</div>
+                    <div class="chinese chinese-font text-gray-600">新增租用者</div>
+                </div>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                            Name <span class="text-red-500">*</span>
-                            <span class="chinese-font text-gray-600 ml-2">姓名</span>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                            <span class="english">Name <span class="text-red-500">*</span></span>
+                            <span class="chinese">姓名</span>
                         </label>
-                        <input type="text" id="newRenterName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 english-font" placeholder="Enter renter name">
+                        <input type="text" id="newRenterName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 english-font" placeholder="Enter renter name / 輸入租用者姓名">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                            Password <span class="text-red-500">*</span>
-                            <span class="chinese-font text-gray-600 ml-2">密碼</span>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                            <span class="english">Password <span class="text-red-500">*</span></span>
+                            <span class="chinese">密碼</span>
                         </label>
-                        <input type="text" id="newRenterPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Set password for renter">
-                        <p class="text-xs text-gray-500 mt-1 english-font">
-                            Password is visible for recovery
-                            <span class="chinese-font ml-2">密碼可見以便找回</span>
-                        </p>
+                        <input type="text" id="newRenterPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Set password for renter / 為租用者設定密碼">
+                        <div class="bilingual-text mt-1">
+                            <div class="english english-font text-xs text-gray-500">Password is visible for recovery</div>
+                            <div class="chinese chinese-font text-xs text-gray-500">密碼可見以便找回</div>
+                        </div>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                            Email
-                            <span class="chinese-font text-gray-600 ml-2">電郵</span>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                            <span class="english">Email</span>
+                            <span class="chinese">電郵</span>
                         </label>
-                        <input type="email" id="newRenterEmail" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address">
+                        <input type="email" id="newRenterEmail" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address / 輸入電郵地址">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                            Phone
-                            <span class="chinese-font text-gray-600 ml-2">電話</span>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                            <span class="english">Phone</span>
+                            <span class="chinese">電話</span>
                         </label>
-                        <input type="tel" id="newRenterPhone" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter phone number">
+                        <input type="tel" id="newRenterPhone" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter phone number / 輸入電話號碼">
                     </div>
                 </div>
                 
                 <div id="addRenterError" class="hidden mt-4 text-red-500 text-sm"></div>
                 
                 <div class="flex gap-3 mt-6">
-                    <button onclick="closeAddRenterModal()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition english-font">
-                        Cancel
+                    <button onclick="closeAddRenterModal()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Cancel</div>
+                            <div class="chinese chinese-font text-xs">取消</div>
+                        </div>
                     </button>
-                    <button onclick="addRenter()" id="addRenterBtn" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition english-font">
-                        Add
+                    <button onclick="addRenter()" id="addRenterBtn" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Add</div>
+                            <div class="chinese chinese-font text-xs">新增</div>
+                        </div>
                     </button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- 編輯租用者模態框 -->
+    <!-- 編輯租用者模態框 | Edit Renter Modal -->
     <div id="editRenterModal" class="hidden modal-overlay">
         <div class="modal-content">
             <div class="p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 english-font">
-                    Edit Renter
-                    <span class="chinese-font text-sm font-normal text-gray-600 ml-2">編輯租用者</span>
-                </h2>
+                <div class="bilingual-text mb-4">
+                    <div class="english english-font text-xl font-semibold text-gray-800">Edit Renter</div>
+                    <div class="chinese chinese-font text-gray-600">編輯租用者</div>
+                </div>
                 
                 <input type="hidden" id="editRenterId">
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                            Name <span class="text-red-500">*</span>
-                            <span class="chinese-font text-gray-600 ml-2">姓名</span>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                            <span class="english">Name <span class="text-red-500">*</span></span>
+                            <span class="chinese">姓名</span>
                         </label>
                         <input type="text" id="editRenterName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 english-font">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                            Password <span class="text-red-500">*</span>
-                            <span class="chinese-font text-gray-600 ml-2">密碼</span>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                            <span class="english">Password <span class="text-red-500">*</span></span>
+                            <span class="chinese">密碼</span>
                         </label>
                         <input type="text" id="editRenterPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <p class="text-xs text-gray-500 mt-1 english-font">
-                            Password is visible for recovery
-                            <span class="chinese-font ml-2">密碼可見以便找回</span>
-                        </p>
+                        <div class="bilingual-text mt-1">
+                            <div class="english english-font text-xs text-gray-500">Password is visible for recovery</div>
+                            <div class="chinese chinese-font text-xs text-gray-500">密碼可見以便找回</div>
+                        </div>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                            Email
-                            <span class="chinese-font text-gray-600 ml-2">電郵</span>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                            <span class="english">Email</span>
+                            <span class="chinese">電郵</span>
                         </label>
                         <input type="email" id="editRenterEmail" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                            Phone
-                            <span class="chinese-font text-gray-600 ml-2">電話</span>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                            <span class="english">Phone</span>
+                            <span class="chinese">電話</span>
                         </label>
                         <input type="tel" id="editRenterPhone" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
@@ -864,51 +1006,63 @@
                 <div id="editRenterError" class="hidden mt-4 text-red-500 text-sm"></div>
                 
                 <div class="flex gap-3 mt-6">
-                    <button onclick="closeEditRenterModal()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition english-font">
-                        Cancel
+                    <button onclick="closeEditRenterModal()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Cancel</div>
+                            <div class="chinese chinese-font text-xs">取消</div>
+                        </div>
                     </button>
-                    <button onclick="saveRenterEdit()" id="saveRenterBtn" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition english-font">
-                        Save
+                    <button onclick="saveRenterEdit()" id="saveRenterBtn" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Save</div>
+                            <div class="chinese chinese-font text-xs">儲存</div>
+                        </div>
                     </button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- 職員登入模態框 -->
+    <!-- 職員登入模態框 | Staff Login Modal -->
     <div id="staffLoginModal" class="hidden modal-overlay">
         <div class="modal-content">
             <div class="p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 english-font">
-                    Staff Login
-                    <span class="chinese-font text-sm font-normal text-gray-600 ml-2">職員登入</span>
-                </h2>
+                <div class="bilingual-text mb-4">
+                    <div class="english english-font text-xl font-semibold text-gray-800">Staff Login</div>
+                    <div class="chinese chinese-font text-gray-600">職員登入</div>
+                </div>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 english-font">
-                            Password
-                            <span class="chinese-font text-gray-600 ml-2">密碼</span>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
+                            <span class="english">Password</span>
+                            <span class="chinese">密碼</span>
                         </label>
-                        <input type="password" id="staffPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter staff password">
+                        <input type="password" id="staffPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter staff password / 輸入職員密碼">
                     </div>
                 </div>
                 
                 <div id="staffLoginError" class="hidden mt-4 text-red-500 text-sm"></div>
                 
                 <div class="flex gap-3 mt-6">
-                    <button onclick="closeStaffLogin()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition english-font">
-                        Cancel
+                    <button onclick="closeStaffLogin()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Cancel</div>
+                            <div class="chinese chinese-font text-xs">取消</div>
+                        </div>
                     </button>
-                    <button onclick="handleStaffLogin()" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition english-font">
-                        Login
+                    <button onclick="handleStaffLogin()" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Login</div>
+                            <div class="chinese chinese-font text-xs">登入</div>
+                        </div>
                     </button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- 取消預約確認模態框 -->
+    <!-- 取消預約確認模態框 | Cancel Booking Confirmation Modal -->
     <div id="cancelBookingModal" class="hidden modal-overlay">
         <div class="modal-content">
             <div class="p-6 text-center">
@@ -916,103 +1070,109 @@
                     <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
                 </div>
                 
-                <h2 class="text-xl font-semibold text-gray-800 mb-2 english-font">
-                    Cancel Booking?
-                    <span class="chinese-font text-sm font-normal text-gray-600 ml-2">取消預約？</span>
-                </h2>
+                <div class="bilingual-text mb-2">
+                    <div class="english english-font text-xl font-semibold text-gray-800">Cancel Booking?</div>
+                    <div class="chinese chinese-font text-gray-600">取消預約？</div>
+                </div>
                 
                 <p id="cancelBookingDetails" class="text-gray-600 mb-6"></p>
                 
                 <input type="hidden" id="cancelBookingId">
                 
                 <div class="flex gap-3">
-                    <button onclick="closeCancelBookingModal()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition english-font">
-                        Keep
+                    <button onclick="closeCancelBookingModal()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Keep</div>
+                            <div class="chinese chinese-font text-xs">保留</div>
+                        </div>
                     </button>
-                    <button onclick="confirmCancelBooking()" id="confirmCancelBtn" class="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition english-font">
-                        Cancel Booking
+                    <button onclick="confirmCancelBooking()" id="confirmCancelBtn" class="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition">
+                        <div class="bilingual-text items-center">
+                            <div class="english english-font">Cancel Booking</div>
+                            <div class="chinese chinese-font text-xs">取消預約</div>
+                        </div>
                     </button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- 通知訊息 -->
+    <!-- 通知訊息 | Toast Notification -->
     <div id="toast" class="hidden toast"></div>
     
     <script>
-        // ============ 系統配置 ============
+        // ============ 系統配置 | System Configuration ============
         const defaultConfig = {
-            system_title: 'Counselling Room Booking System'
+            system_title: 'Counselling Room Booking System / 心理輔導室預約系統'
         };
         
         let config = { ...defaultConfig };
         
-        // ============ 狀態管理 ============
-        // 使用 localStorage 模擬數據庫
+        // ============ 狀態管理 | State Management ============
+        // 使用 localStorage 模擬數據庫 | Using localStorage to simulate database
         let renters = JSON.parse(localStorage.getItem('roomBooking_renters')) || [];
         let bookings = JSON.parse(localStorage.getItem('roomBooking_bookings')) || [];
         let roomPrices = JSON.parse(localStorage.getItem('roomBooking_roomPrices')) || [];
         let currentUser = null;
         let isStaff = false;
         let selectedSlots = [];
-        const staffPassword = '123'; // 職員默認密碼
+        const staffPassword = '123'; // 職員默認密碼 | Staff default password
         
-        // 默認房間配置
+        // 默認房間配置 | Default room configuration
         const defaultRooms = {
             jordan: [
-                { id: 'jordan-c', name: 'Room C', price: 140, facilities: '催眠椅', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'jordan-d', name: 'Room D', price: 190, facilities: '小組、沙盤遊戲治療', toyAvailable: true, toyPricePerHour: 50 },
-                { id: 'jordan-e', name: 'Room E', price: 170, facilities: '大房 家庭治療', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'jordan-f', name: 'Room F', price: 150, facilities: '落地窗輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'jordan-g', name: 'Room G', price: 150, facilities: '落地窗輔導室', toyAvailable: false, toyPricePerHour: 0 }
+                { id: 'jordan-c', name: 'Room C / 房間 C', price: 140, facilities: 'Hypnotic Chair / 催眠椅', toyAvailable: false, toyPricePerHour: 0 },
+                { id: 'jordan-d', name: 'Room D / 房間 D', price: 190, facilities: 'Group Therapy, Sandplay Therapy / 小組、沙盤遊戲治療', toyAvailable: true, toyPricePerHour: 50 },
+                { id: 'jordan-e', name: 'Room E / 房間 E', price: 170, facilities: 'Large Room for Family Therapy / 大房 家庭治療', toyAvailable: false, toyPricePerHour: 0 },
+                { id: 'jordan-f', name: 'Room F / 房間 F', price: 150, facilities: 'Floor-to-ceiling Window Counselling Room / 落地窗輔導室', toyAvailable: false, toyPricePerHour: 0 },
+                { id: 'jordan-g', name: 'Room G / 房間 G', price: 150, facilities: 'Floor-to-ceiling Window Counselling Room / 落地窗輔導室', toyAvailable: false, toyPricePerHour: 0 }
             ],
             wanchai: [
-                { id: 'wanchai-1', name: 'Room 1', price: 160, facilities: '窗口大房、長梳化', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'wanchai-2', name: 'Room 2', price: 140, facilities: '舒適輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'wanchai-3', name: 'Room 3', price: 140, facilities: '舒適輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'wanchai-4', name: 'Room 4', price: 180, facilities: '小組、沙盤遊戲治療', toyAvailable: true, toyPricePerHour: 40 }
+                { id: 'wanchai-1', name: 'Room 1 / 房間 1', price: 160, facilities: 'Large Window Room, Long Sofa / 窗口大房、長梳化', toyAvailable: false, toyPricePerHour: 0 },
+                { id: 'wanchai-2', name: 'Room 2 / 房間 2', price: 140, facilities: 'Comfortable Counselling Room / 舒適輔導室', toyAvailable: false, toyPricePerHour: 0 },
+                { id: 'wanchai-3', name: 'Room 3 / 房間 3', price: 140, facilities: 'Comfortable Counselling Room / 舒適輔導室', toyAvailable: false, toyPricePerHour: 0 },
+                { id: 'wanchai-4', name: 'Room 4 / 房間 4', price: 180, facilities: 'Group Therapy, Sandplay Therapy / 小組、沙盤遊戲治療', toyAvailable: true, toyPricePerHour: 40 }
             ],
             tsuenwan: [
-                { id: 'tsuenwan-5', name: 'Room 5', price: 130, facilities: '輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'tsuenwan-6', name: 'Room 6', price: 140, facilities: '輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'tsuenwan-7', name: 'Room 7', price: 140, facilities: '輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'tsuenwan-8', name: 'Room 8', price: 160, facilities: '大窗輔導室', toyAvailable: false, toyPricePerHour: 0 }
+                { id: 'tsuenwan-5', name: 'Room 5 / 房間 5', price: 130, facilities: 'Counselling Room / 輔導室', toyAvailable: false, toyPricePerHour: 0 },
+                { id: 'tsuenwan-6', name: 'Room 6 / 房間 6', price: 140, facilities: 'Counselling Room / 輔導室', toyAvailable: false, toyPricePerHour: 0 },
+                { id: 'tsuenwan-7', name: 'Room 7 / 房間 7', price: 140, facilities: 'Counselling Room / 輔導室', toyAvailable: false, toyPricePerHour: 0 },
+                { id: 'tsuenwan-8', name: 'Room 8 / 房間 8', price: 160, facilities: 'Large Window Counselling Room / 大窗輔導室', toyAvailable: false, toyPricePerHour: 0 }
             ]
         };
         
-        // ============ 應用初始化 ============
+        // ============ 應用初始化 | Application Initialization ============
         function initApp() {
-            console.log('初始化應用...');
+            console.log('Initializing application... / 初始化應用...');
             
-            // 設置默認日期
+            // 設置默認日期 | Set default date
             const today = new Date();
             document.getElementById('renterDateSelect').value = today.toISOString().split('T')[0];
             document.getElementById('renterDateSelect').min = today.toISOString().split('T')[0];
             
-            // 初始化月份/年份選擇
+            // 初始化月份/年份選擇 | Initialize month/year selects
             initDateSelects();
             
-            // 如果有示例數據，添加一些初始數據
+            // 如果有示例數據，添加一些初始數據 | Add some initial data if there are no sample data
             if (renters.length === 0) {
                 addSampleData();
             }
             
-            // 更新UI
+            // 更新UI | Update UI
             updateUI();
         }
         
         function initDateSelects() {
             const months = [
-                'January 一月', 'February 二月', 'March 三月', 'April 四月',
-                'May 五月', 'June 六月', 'July 七月', 'August 八月',
-                'September 九月', 'October 十月', 'November 十一月', 'December 十二月'
+                'January / 一月', 'February / 二月', 'March / 三月', 'April / 四月',
+                'May / 五月', 'June / 六月', 'July / 七月', 'August / 八月',
+                'September / 九月', 'October / 十月', 'November / 十一月', 'December / 十二月'
             ];
             
             const currentYear = new Date().getFullYear();
             const currentMonth = new Date().getMonth();
             
-            // 租用者統計選擇
+            // 租用者統計選擇 | Renter statistics selects
             const statsMonthSelect = document.getElementById('statsMonthSelect');
             const statsYearSelect = document.getElementById('statsYearSelect');
             
@@ -1026,7 +1186,7 @@
                 statsYearSelect.innerHTML += `<option value="${year}" ${year === currentYear ? 'selected' : ''}>${year}</option>`;
             }
             
-            // 職員報表選擇
+            // 職員報表選擇 | Staff report selects
             const reportMonthSelect = document.getElementById('reportMonthSelect');
             const reportYearSelect = document.getElementById('reportYearSelect');
             
@@ -1042,17 +1202,17 @@
         }
         
         function addSampleData() {
-            // 添加示例租用者
+            // 添加示例租用者 | Add sample renters
             const sampleRenters = [
-                { id: generateId(), name: 'Dr. Smith', password: 'smith123', email: 'smith@example.com', phone: '9123-4567', createdAt: new Date().toISOString() },
-                { id: generateId(), name: '王醫生', password: 'wang123', email: 'wang@example.com', phone: '9876-5432', createdAt: new Date().toISOString() },
-                { id: generateId(), name: 'Dr. Johnson', password: 'johnson123', email: 'johnson@example.com', phone: '9234-5678', createdAt: new Date().toISOString() }
+                { id: generateId(), name: 'Dr. Smith / 史密斯醫生', password: 'smith123', email: 'smith@example.com', phone: '9123-4567', createdAt: new Date().toISOString() },
+                { id: generateId(), name: 'Dr. Wong / 王醫生', password: 'wong123', email: 'wong@example.com', phone: '9876-5432', createdAt: new Date().toISOString() },
+                { id: generateId(), name: 'Dr. Johnson / 約翰遜醫生', password: 'johnson123', email: 'johnson@example.com', phone: '9234-5678', createdAt: new Date().toISOString() }
             ];
             
             renters = [...sampleRenters];
             saveData('renters', renters);
             
-            // 添加示例預約
+            // 添加示例預約 | Add sample bookings
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1063,7 +1223,7 @@
                     renterId: sampleRenters[0].id, 
                     renterName: sampleRenters[0].name,
                     roomId: 'jordan-c', 
-                    roomName: 'Room C', 
+                    roomName: 'Room C / 房間 C', 
                     branch: 'jordan',
                     date: today.toISOString().split('T')[0], 
                     startTime: '10:00', 
@@ -1080,7 +1240,7 @@
                     renterId: sampleRenters[1].id, 
                     renterName: sampleRenters[1].name,
                     roomId: 'wanchai-4', 
-                    roomName: 'Room 4', 
+                    roomName: 'Room 4 / 房間 4', 
                     branch: 'wanchai',
                     date: tomorrow.toISOString().split('T')[0], 
                     startTime: '14:00', 
@@ -1097,14 +1257,14 @@
             bookings = [...sampleBookings];
             saveData('bookings', bookings);
             
-            showToast('示例數據已載入', 'info');
+            showToast('Sample data loaded / 示例數據已載入', 'info');
         }
         
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
         
-        // ============ 數據保存/加載 ============
+        // ============ 數據保存/加載 | Data Save/Load ============
         function saveData(type, data) {
             localStorage.setItem(`roomBooking_${type}`, JSON.stringify(data));
         }
@@ -1113,7 +1273,7 @@
             return JSON.parse(localStorage.getItem(`roomBooking_${type}`)) || [];
         }
         
-        // ============ UI更新函數 ============
+        // ============ UI更新函數 | UI Update Functions ============
         function updateUI() {
             if (isStaff) {
                 updateStaffUI();
@@ -1136,7 +1296,7 @@
             loadTimeSlots();
         }
         
-        // ============ 認證功能 ============
+        // ============ 認證功能 | Authentication Functions ============
         function handleLogin() {
             const name = document.getElementById('loginName').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -1146,14 +1306,19 @@
                 return;
             }
             
-            const renter = renters.find(r => r.name.toLowerCase() === name.toLowerCase() && r.password === password);
+            const renter = renters.find(r => {
+                const names = r.name.split('/').map(n => n.trim());
+                return (names[0].toLowerCase() === name.toLowerCase() || 
+                       (names[1] && names[1].toLowerCase() === name.toLowerCase())) && 
+                       r.password === password;
+            });
             
             if (renter) {
                 currentUser = renter;
                 isStaff = false;
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('renterDashboard').classList.remove('hidden');
-                document.getElementById('renterWelcomeName').textContent = renter.name;
+                document.getElementById('renterWelcomeName').textContent = renter.name.split('/')[0].trim();
                 updateRenterUI();
                 showToast('Login successful / 登入成功', 'success');
             } else {
@@ -1205,7 +1370,7 @@
             document.getElementById('loginError').classList.add('hidden');
         }
         
-        // ============ 租用者頁籤導航 ============
+        // ============ 租用者頁籤導航 | Renter Tab Navigation ============
         function showRenterTab(tab) {
             const tabs = ['booking', 'myBookings', 'statistics'];
             tabs.forEach(t => {
@@ -1225,7 +1390,7 @@
             activeSection.classList.remove('hidden');
         }
         
-        // ============ 職員頁籤導航 ============
+        // ============ 職員頁籤導航 | Staff Tab Navigation ============
         function showStaffTab(tab) {
             const tabs = ['renters', 'rooms', 'allBookings', 'reports'];
             tabs.forEach(t => {
@@ -1245,7 +1410,7 @@
             activeSection.classList.remove('hidden');
         }
         
-        // ============ 房間功能 ============
+        // ============ 房間功能 | Room Functions ============
         function getRoomPrice(roomId) {
             const savedPrice = roomPrices.find(p => p.roomId === roomId);
             if (savedPrice) return savedPrice;
@@ -1260,7 +1425,7 @@
         function loadRoomsForBranch() {
             const branch = document.getElementById('renterBranchSelect').value;
             const roomSelect = document.getElementById('renterRoomSelect');
-            roomSelect.innerHTML = '<option value="">Select Room 選擇房間</option>';
+            roomSelect.innerHTML = '<option value="">Select Room / 選擇房間</option>';
             
             if (branch && defaultRooms[branch]) {
                 defaultRooms[branch].forEach(room => {
@@ -1285,7 +1450,7 @@
                 return;
             }
             
-            // 顯示房間資訊
+            // 顯示房間資訊 | Show room info
             const room = defaultRooms[branch].find(r => r.id === roomId);
             const roomPrice = getRoomPrice(roomId);
             const price = roomPrice ? roomPrice.price : room.price;
@@ -1297,7 +1462,7 @@
             document.getElementById('roomInfoPrice').textContent = `$${pricePerHour}`;
             document.getElementById('selectedRoomInfo').classList.remove('hidden');
             
-            // 如果房間有玩具租用選項，顯示玩具選項
+            // 如果房間有玩具租用選項，顯示玩具選項 | If room has toy rental option, show toy option
             if (room.toyAvailable) {
                 document.getElementById('toyRentalOption').classList.remove('hidden');
                 document.getElementById('toyPriceDisplay').textContent = toyPrice;
@@ -1306,7 +1471,7 @@
                 document.getElementById('toyRentalCheckbox').checked = false;
             }
             
-            // 生成時間段 (9:00 AM 到 10:00 PM)
+            // 生成時間段 (9:00 AM 到 10:00 PM) | Generate time slots (9:00 AM to 10:00 PM)
             const slotsContainer = document.getElementById('timeSlots');
             slotsContainer.innerHTML = '';
             selectedSlots = [];
@@ -1322,7 +1487,7 @@
                     const endMin = min === 30 ? 0 : 30;
                     const endTimeStr = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
                     
-                    // 檢查時段是否已被預約
+                    // 檢查時段是否已被預約 | Check if slot is already booked
                     const isBooked = bookings.some(b => 
                         b.roomId === roomId && 
                         b.date === date && 
@@ -1331,7 +1496,7 @@
                         b.endTime > timeStr
                     );
                     
-                    // 檢查時段是否已過去
+                    // 檢查時段是否已過去 | Check if slot is in the past
                     const slotTime = new Date(date + 'T' + timeStr);
                     const isPast = isToday && slotTime <= now;
                     
@@ -1366,7 +1531,7 @@
                 element.classList.remove('slot-available');
             }
             
-            // 按開始時間排序
+            // 按開始時間排序 | Sort by start time
             selectedSlots.sort((a, b) => a.start.localeCompare(b.start));
             
             updateBookingTotal();
@@ -1393,11 +1558,11 @@
                 total += hours * toyPrice;
             }
             
-            // 獲取連續時間範圍
+            // 獲取連續時間範圍 | Get continuous time range
             const firstSlot = selectedSlots[0];
             const lastSlot = selectedSlots[selectedSlots.length - 1];
             
-            document.getElementById('selectedTimeRange').textContent = `${firstSlot.start} - ${lastSlot.end} (${hours} hrs 小時)`;
+            document.getElementById('selectedTimeRange').textContent = `${firstSlot.start} - ${lastSlot.end} (${hours} hrs / 小時)`;
             document.getElementById('bookingTotal').textContent = `$${total}`;
             document.getElementById('bookingSummary').classList.remove('hidden');
         }
@@ -1440,17 +1605,17 @@
             
             const btn = document.querySelector('#bookingSummary button');
             btn.disabled = true;
-            btn.textContent = 'Processing... 處理中...';
+            btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Processing...</div><div class="chinese chinese-font text-xs">處理中...</div></div>';
             
-            // 模擬API延遲
+            // 模擬API延遲 | Simulate API delay
             setTimeout(() => {
                 bookings.push(booking);
                 saveData('bookings', bookings);
                 
                 btn.disabled = false;
-                btn.textContent = 'Confirm Booking 確認預約';
+                btn.innerHTML = '<span class="english-font">Confirm Booking</span><span class="chinese-font ml-2">確認預約</span>';
                 
-                showToast('Booking confirmed! 預約成功！', 'success');
+                showToast('Booking confirmed! / 預約成功！', 'success');
                 selectedSlots = [];
                 loadTimeSlots();
                 renderMyBookings();
@@ -1458,7 +1623,7 @@
             }, 500);
         }
         
-        // ============ 我的預約 ============
+        // ============ 我的預約 | My Bookings ============
         function renderMyBookings() {
             const container = document.getElementById('myBookingsList');
             const noBookingsMessage = document.getElementById('noBookingsMessage');
@@ -1473,7 +1638,7 @@
             
             noBookingsMessage.classList.add('hidden');
             
-            // 按日期和時間排序
+            // 按日期和時間排序 | Sort by date and time
             myBookings.sort((a, b) => {
                 if (a.date !== b.date) return a.date.localeCompare(b.date);
                 return a.startTime.localeCompare(b.startTime);
@@ -1481,9 +1646,9 @@
             
             container.innerHTML = myBookings.map(booking => {
                 const branchNames = { 
-                    jordan: 'Jordan 佐敦', 
-                    wanchai: 'Wan Chai 灣仔', 
-                    tsuenwan: 'Tsuen Wan 荃灣' 
+                    jordan: 'Jordan / 佐敦', 
+                    wanchai: 'Wan Chai / 灣仔', 
+                    tsuenwan: 'Tsuen Wan / 荃灣' 
                 };
                 const isPast = new Date(booking.date + 'T' + booking.endTime) < new Date();
                 
@@ -1496,7 +1661,7 @@
                             <div>
                                 <p class="font-medium text-gray-800">${booking.roomName} - ${branchNames[booking.branch]}</p>
                                 <p class="text-sm text-gray-500">${booking.date} | ${booking.startTime} - ${booking.endTime}</p>
-                                ${booking.toyRental ? '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded mt-1 inline-block">+ Toy Rental 玩具</span>' : ''}
+                                ${booking.toyRental ? '<div class="bilingual-text mt-1"><span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">+ Toy Rental / 玩具</span></div>' : ''}
                             </div>
                         </div>
                         <div class="text-right">
@@ -1504,9 +1669,9 @@
                             ${!isPast ? `
                                 <button onclick="showCancelBookingModal('${booking.id}', '${booking.roomName}', '${booking.date}', '${booking.startTime}')" 
                                     class="text-sm text-red-500 hover:text-red-700 mt-1">
-                                    Cancel 取消
+                                    Cancel / 取消
                                 </button>
-                            ` : '<span class="text-xs text-gray-400">Completed 已完成</span>'}
+                            ` : '<div class="bilingual-text"><span class="text-xs text-gray-400">Completed / 已完成</span></div>'}
                         </div>
                     </div>
                 `;
@@ -1528,31 +1693,31 @@
             const bookingIndex = bookings.findIndex(b => b.id === bookingId);
             
             if (bookingIndex === -1) {
-                showToast('Booking not found 找不到預約', 'error');
+                showToast('Booking not found / 找不到預約', 'error');
                 closeCancelBookingModal();
                 return;
             }
             
             const btn = document.getElementById('confirmCancelBtn');
             btn.disabled = true;
-            btn.textContent = 'Cancelling... 取消中...';
+            btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Cancelling...</div><div class="chinese chinese-font text-xs">取消中...</div></div>';
             
-            // 模擬API延遲
+            // 模擬API延遲 | Simulate API delay
             setTimeout(() => {
                 bookings[bookingIndex].status = 'cancelled';
                 saveData('bookings', bookings);
                 
                 btn.disabled = false;
-                btn.textContent = 'Cancel Booking 取消預約';
+                btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Cancel Booking</div><div class="chinese chinese-font text-xs">取消預約</div></div>';
                 
-                showToast('Booking cancelled 預約已取消', 'success');
+                showToast('Booking cancelled / 預約已取消', 'success');
                 closeCancelBookingModal();
                 renderMyBookings();
                 updateRenterStatistics();
             }, 500);
         }
         
-        // ============ 統計 ============
+        // ============ 統計 | Statistics ============
         function updateRenterStatistics() {
             const month = parseInt(document.getElementById('statsMonthSelect').value);
             const year = parseInt(document.getElementById('statsYearSelect').value);
@@ -1563,7 +1728,7 @@
                 return bookingDate.getMonth() === month && bookingDate.getFullYear() === year;
             });
             
-            // 計算統計數據
+            // 計算統計數據 | Calculate statistics
             let totalHours = 0;
             let totalAmount = 0;
             
@@ -1579,7 +1744,7 @@
             document.getElementById('statsTotalHours').textContent = totalHours.toFixed(1);
             document.getElementById('statsTotalAmount').textContent = `$${totalAmount}`;
             
-            // 渲染詳細信息
+            // 渲染詳細信息 | Render details
             const detailsContainer = document.getElementById('statsBookingDetails');
             const noStatsMessage = document.getElementById('noStatsMessage');
             
@@ -1592,9 +1757,9 @@
             noStatsMessage.classList.add('hidden');
             
             const branchNames = { 
-                jordan: 'Jordan 佐敦', 
-                wanchai: 'Wan Chai 灣仔', 
-                tsuenwan: 'Tsuen Wan 荃灣' 
+                jordan: 'Jordan / 佐敦', 
+                wanchai: 'Wan Chai / 灣仔', 
+                tsuenwan: 'Tsuen Wan / 荃灣' 
             };
             
             myBookings.sort((a, b) => a.date.localeCompare(b.date));
@@ -1604,14 +1769,14 @@
                     <div>
                         <p class="font-medium text-gray-800">${b.roomName} - ${branchNames[b.branch]}</p>
                         <p class="text-sm text-gray-500">${b.date} | ${b.startTime} - ${b.endTime}</p>
-                        ${b.toyRental ? '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded mt-1 inline-block">+ Toy 玩具</span>' : ''}
+                        ${b.toyRental ? '<div class="bilingual-text mt-1"><span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">+ Toy / 玩具</span></div>' : ''}
                     </div>
                     <p class="font-semibold text-gray-800">$${b.totalPrice}</p>
                 </div>
             `).join('');
         }
         
-        // ============ 職員：租用者管理 ============
+        // ============ 職員：租用者管理 | Staff: Renters Management ============
         function renderRentersList() {
             const container = document.getElementById('rentersList');
             const noRentersMessage = document.getElementById('noRentersMessage');
@@ -1632,15 +1797,15 @@
                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center">
-                                <span class="text-xl font-bold text-slate-600">${renter.name.charAt(0).toUpperCase()}</span>
+                                <span class="text-xl font-bold text-slate-600">${renter.name.split('/')[0].trim().charAt(0).toUpperCase()}</span>
                             </div>
                             <div>
                                 <p class="font-medium text-gray-800">${renter.name}</p>
-                                <p class="text-sm text-gray-500">${renter.email || 'No email'} | ${renter.phone || 'No phone'}</p>
+                                <p class="text-sm text-gray-500">${renter.email || 'No email / 無電郵'} | ${renter.phone || 'No phone / 無電話'}</p>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Password 密碼: ${renter.password}</span>
-                                    <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Bookings 預約: ${renterBookings.length}</span>
-                                    <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">Total 總計: $${totalSpent}</span>
+                                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Password / 密碼: ${renter.password}</span>
+                                    <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Bookings / 預約: ${renterBookings.length}</span>
+                                    <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">Total / 總計: $${totalSpent}</span>
                                 </div>
                             </div>
                         </div>
@@ -1656,9 +1821,9 @@
                 `;
             }).join('');
             
-            // 更新篩選下拉菜單
+            // 更新篩選下拉菜單 | Update filter dropdown
             const filterSelect = document.getElementById('staffBookingFilter');
-            filterSelect.innerHTML = '<option value="all">All Renters 所有租用者</option>';
+            filterSelect.innerHTML = '<option value="all">All Renters / 所有租用者</option>';
             renters.forEach(r => {
                 filterSelect.innerHTML += `<option value="${r.id}">${r.name}</option>`;
             });
@@ -1684,23 +1849,26 @@
             const phone = document.getElementById('newRenterPhone').value.trim();
             
             if (!name || !password) {
-                document.getElementById('addRenterError').textContent = 'Name and password are required 姓名和密碼為必填';
+                document.getElementById('addRenterError').textContent = 'Name and password are required / 姓名和密碼為必填';
                 document.getElementById('addRenterError').classList.remove('hidden');
                 return;
             }
             
-            // 檢查重複姓名
-            if (renters.some(r => r.name.toLowerCase() === name.toLowerCase())) {
-                document.getElementById('addRenterError').textContent = 'Renter name already exists 租用者姓名已存在';
+            // 檢查重複姓名 | Check for duplicate name
+            if (renters.some(r => {
+                const names = r.name.split('/').map(n => n.trim());
+                return names[0].toLowerCase() === name.toLowerCase();
+            })) {
+                document.getElementById('addRenterError').textContent = 'Renter name already exists / 租用者姓名已存在';
                 document.getElementById('addRenterError').classList.remove('hidden');
                 return;
             }
             
             const btn = document.getElementById('addRenterBtn');
             btn.disabled = true;
-            btn.textContent = 'Adding... 新增中...';
+            btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Adding...</div><div class="chinese chinese-font text-xs">新增中...</div></div>';
             
-            // 模擬API延遲
+            // 模擬API延遲 | Simulate API delay
             setTimeout(() => {
                 const newRenter = {
                     id: generateId(),
@@ -1715,9 +1883,9 @@
                 saveData('renters', renters);
                 
                 btn.disabled = false;
-                btn.textContent = 'Add 新增';
+                btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Add</div><div class="chinese chinese-font text-xs">新增</div></div>';
                 
-                showToast('Renter added successfully 租用者已新增', 'success');
+                showToast('Renter added successfully / 租用者已新增', 'success');
                 closeAddRenterModal();
                 renderRentersList();
                 updateReceiptRenterSelect();
@@ -1749,7 +1917,7 @@
             const phone = document.getElementById('editRenterPhone').value.trim();
             
             if (!name || !password) {
-                document.getElementById('editRenterError').textContent = 'Name and password are required 姓名和密碼為必填';
+                document.getElementById('editRenterError').textContent = 'Name and password are required / 姓名和密碼為必填';
                 document.getElementById('editRenterError').classList.remove('hidden');
                 return;
             }
@@ -1759,9 +1927,9 @@
             
             const btn = document.getElementById('saveRenterBtn');
             btn.disabled = true;
-            btn.textContent = 'Saving... 儲存中...';
+            btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Saving...</div><div class="chinese chinese-font text-xs">儲存中...</div></div>';
             
-            // 模擬API延遲
+            // 模擬API延遲 | Simulate API delay
             setTimeout(() => {
                 renters[renterIndex] = {
                     ...renters[renterIndex],
@@ -1774,9 +1942,9 @@
                 saveData('renters', renters);
                 
                 btn.disabled = false;
-                btn.textContent = 'Save 儲存';
+                btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Save</div><div class="chinese chinese-font text-xs">儲存</div></div>';
                 
-                showToast('Renter updated 租用者已更新', 'success');
+                showToast('Renter updated / 租用者已更新', 'success');
                 closeEditRenterModal();
                 renderRentersList();
                 updateReceiptRenterSelect();
@@ -1787,22 +1955,22 @@
             const renter = renters.find(r => r.id === renterId);
             if (!renter) return;
             
-            if (!confirm(`Delete "${renter.name}"? 刪除「${renter.name}」？`)) return;
+            if (!confirm(`Delete "${renter.name}"? / 刪除「${renter.name}」？`)) return;
             
-            // 刪除租用者的所有預約
+            // 刪除租用者的所有預約 | Delete all bookings of the renter
             bookings = bookings.filter(b => b.renterId !== renterId);
             saveData('bookings', bookings);
             
-            // 刪除租用者
+            // 刪除租用者 | Delete renter
             renters = renters.filter(r => r.id !== renterId);
             saveData('renters', renters);
             
-            showToast('Renter deleted 租用者已刪除', 'success');
+            showToast('Renter deleted / 租用者已刪除', 'success');
             renderRentersList();
             updateReceiptRenterSelect();
         }
         
-        // ============ 職員：房間設定 ============
+        // ============ 職員：房間設定 | Staff: Room Settings ============
         function renderRoomSettings() {
             const branches = { 
                 jordan: 'jordanRooms', 
@@ -1825,14 +1993,14 @@
                                 <span class="text-xs text-gray-500">${room.facilities}</span>
                             </div>
                             <div class="flex items-center gap-2 mb-2">
-                                <label class="text-sm text-gray-600 english-font">Price 租金/hr:</label>
+                                <label class="text-sm text-gray-600">Price / 租金/hr:</label>
                                 <input type="number" value="${pricePerHour}" 
                                     onchange="updateRoomPrice('${room.id}', this.value / 2, ${currentToyPrice})"
                                     class="w-24 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             ${room.toyAvailable ? `
                                 <div class="flex items-center gap-2">
-                                    <label class="text-sm text-gray-600 english-font">Toy 玩具/hr:</label>
+                                    <label class="text-sm text-gray-600">Toy / 玩具/hr:</label>
                                     <input type="number" value="${currentToyPrice}" 
                                         onchange="updateRoomPrice('${room.id}', ${currentPrice}, this.value)"
                                         class="w-24 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -1847,7 +2015,7 @@
         async function updateRoomPrice(roomId, price, toyPrice) {
             const existingPriceIndex = roomPrices.findIndex(p => p.roomId === roomId);
             
-            // 獲取房間信息
+            // 獲取房間信息 | Get room information
             let roomBranch = '';
             let roomInfo = null;
             for (const branch in defaultRooms) {
@@ -1879,10 +2047,10 @@
             }
             
             saveData('roomPrices', roomPrices);
-            showToast('Price updated 價格已更新', 'success');
+            showToast('Price updated / 價格已更新', 'success');
         }
         
-        // ============ 職員：所有預約 ============
+        // ============ 職員：所有預約 | Staff: All Bookings ============
         function renderAllBookings() {
             filterStaffBookings();
         }
@@ -1901,7 +2069,7 @@
                 filteredBookings = filteredBookings.filter(b => b.branch === branchFilter);
             }
             
-            // 按日期排序
+            // 按日期排序 | Sort by date
             filteredBookings.sort((a, b) => {
                 if (a.date !== b.date) return b.date.localeCompare(a.date);
                 return b.startTime.localeCompare(a.startTime);
@@ -1910,9 +2078,9 @@
             const container = document.getElementById('allBookingsList');
             const noAllBookingsMessage = document.getElementById('noAllBookingsMessage');
             const branchNames = { 
-                jordan: 'Jordan 佐敦', 
-                wanchai: 'Wan Chai 灣仔', 
-                tsuenwan: 'Tsuen Wan 荃灣' 
+                jordan: 'Jordan / 佐敦', 
+                wanchai: 'Wan Chai / 灣仔', 
+                tsuenwan: 'Tsuen Wan / 荃灣' 
             };
             
             if (filteredBookings.length === 0) {
@@ -1932,19 +2100,19 @@
                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 ${b.branch === 'jordan' ? 'bg-blue-200' : b.branch === 'wanchai' ? 'bg-green-200' : 'bg-purple-200'} rounded-xl flex items-center justify-center">
-                                <span class="text-xl font-bold ${b.branch === 'jordan' ? 'text-blue-600' : b.branch === 'wanchai' ? 'text-green-600' : 'text-purple-600'}">${b.renterName.charAt(0).toUpperCase()}</span>
+                                <span class="text-xl font-bold ${b.branch === 'jordan' ? 'text-blue-600' : b.branch === 'wanchai' ? 'text-green-600' : 'text-purple-600'}">${b.renterName.split('/')[0].trim().charAt(0).toUpperCase()}</span>
                             </div>
                             <div>
                                 <p class="font-medium text-gray-800">${b.renterName}</p>
                                 <p class="text-sm text-gray-600">${b.roomName} - ${branchNames[b.branch]}</p>
                                 <p class="text-sm text-gray-500">${b.date} | ${b.startTime} - ${b.endTime} (${hours.toFixed(1)} hrs)</p>
-                                ${b.toyRental ? '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded mt-1 inline-block">+ Toy 玩具</span>' : ''}
+                                ${b.toyRental ? '<div class="bilingual-text mt-1"><span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">+ Toy / 玩具</span></div>' : ''}
                             </div>
                         </div>
                         <div class="text-right">
                             <p class="font-semibold text-gray-800">$${b.totalPrice}</p>
                             <button onclick="cancelBookingByStaff('${b.id}')" class="text-sm text-red-500 hover:text-red-700 mt-1">
-                                Cancel 取消
+                                Cancel / 取消
                             </button>
                         </div>
                     </div>
@@ -1956,17 +2124,17 @@
             const bookingIndex = bookings.findIndex(b => b.id === bookingId);
             if (bookingIndex === -1) return;
             
-            if (!confirm(`Cancel booking for ${bookings[bookingIndex].renterName}? 取消${bookings[bookingIndex].renterName}的預約？`)) return;
+            if (!confirm(`Cancel booking for ${bookings[bookingIndex].renterName}? / 取消${bookings[bookingIndex].renterName}的預約？`)) return;
             
             bookings[bookingIndex].status = 'cancelled';
             saveData('bookings', bookings);
             
-            showToast('Booking cancelled 預約已取消', 'success');
+            showToast('Booking cancelled / 預約已取消', 'success');
             renderAllBookings();
             generateReport();
         }
         
-        // ============ 職員：報表 ============
+        // ============ 職員：報表 | Staff: Reports ============
         function generateReport() {
             const month = parseInt(document.getElementById('reportMonthSelect').value);
             const year = parseInt(document.getElementById('reportYearSelect').value);
@@ -1976,7 +2144,7 @@
                 return bookingDate.getMonth() === month && bookingDate.getFullYear() === year && b.status === 'active';
             });
             
-            // 計算總數
+            // 計算總數 | Calculate totals
             let totalHours = 0;
             let totalRevenue = 0;
             const activeRenterIds = new Set();
@@ -1995,12 +2163,13 @@
             document.getElementById('reportTotalRevenue').textContent = `$${totalRevenue.toFixed(2)}`;
             document.getElementById('reportActiveRenters').textContent = activeRenterIds.size;
             
-            // 設置列印信息
+            // 設置列印信息 | Set print information
             const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            document.getElementById('printReportPeriod').textContent = `${months[month]} ${year}`;
-            document.getElementById('printGeneratedDate').textContent = new Date().toLocaleDateString();
+            const chineseMonths = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+            document.getElementById('printReportPeriod').textContent = `${months[month]} ${year} / ${chineseMonths[month]} ${year}`;
+            document.getElementById('printGeneratedDate').textContent = `${new Date().toLocaleDateString('en-US')} / ${new Date().toLocaleDateString('zh-HK')}`;
             
-            // 按租用者分類
+            // 按租用者分類 | Breakdown by renter
             const renterBreakdown = {};
             monthBookings.forEach(b => {
                 if (!renterBreakdown[b.renterId]) {
@@ -2022,9 +2191,9 @@
             });
             
             const branchNames = { 
-                jordan: 'Jordan 佐敦', 
-                wanchai: 'Wan Chai 灣仔', 
-                tsuenwan: 'Tsuen Wan 荃灣' 
+                jordan: 'Jordan / 佐敦', 
+                wanchai: 'Wan Chai / 灣仔', 
+                tsuenwan: 'Tsuen Wan / 荃灣' 
             };
             const container = document.getElementById('reportByRenter');
             const noReportMessage = document.getElementById('noReportMessage');
@@ -2042,11 +2211,11 @@
                     <div class="bg-slate-50 px-4 py-3 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-slate-200 rounded-lg flex items-center justify-center">
-                                <span class="font-bold text-slate-600">${renter.name.charAt(0).toUpperCase()}</span>
+                                <span class="font-bold text-slate-600">${renter.name.split('/')[0].trim().charAt(0).toUpperCase()}</span>
                             </div>
                             <div>
                                 <p class="font-medium text-gray-800">${renter.name}</p>
-                                <p class="text-sm text-gray-500">${renter.bookings.length} bookings | ${renter.totalHours.toFixed(1)} hrs</p>
+                                <p class="text-sm text-gray-500">${renter.bookings.length} bookings / 預約 | ${renter.totalHours.toFixed(1)} hrs / 小時</p>
                             </div>
                         </div>
                         <p class="text-xl font-bold text-slate-800">$${renter.totalAmount.toFixed(2)}</p>
@@ -2060,7 +2229,7 @@
                                     <span class="text-gray-600">${b.startTime}-${b.endTime}</span>
                                 </div>
                                 <div class="text-right">
-                                    <span class="text-gray-600">${b.roomName} (${branchNames[b.branch].split(' ')[0]})</span>
+                                    <span class="text-gray-600">${b.roomName} (${branchNames[b.branch].split('/')[0].trim()})</span>
                                     <span class="text-gray-800 font-medium ml-2">$${b.totalPrice.toFixed(2)}</span>
                                 </div>
                             </div>
@@ -2071,19 +2240,19 @@
         }
         
         function printReport() {
-            // 顯示列印元素
+            // 顯示列印元素 | Show print elements
             document.querySelectorAll('.print-header, .print-footer').forEach(el => {
                 el.classList.remove('hidden');
             });
             
-            // 設置頁碼
+            // 設置頁碼 | Set page numbers
             document.querySelectorAll('.page-number').forEach((el, index) => {
                 el.textContent = index + 1;
             });
             
             window.print();
             
-            // 隱藏列印元素
+            // 隱藏列印元素 | Hide print elements
             setTimeout(() => {
                 document.querySelectorAll('.print-header, .print-footer').forEach(el => {
                     el.classList.add('hidden');
@@ -2091,10 +2260,10 @@
             }, 100);
         }
         
-        // ============ 職員：收據 ============
+        // ============ 職員：收據 | Staff: Receipts ============
         function updateReceiptRenterSelect() {
             const select = document.getElementById('receiptRenterSelect');
-            select.innerHTML = '<option value="">Select Renter 選擇租用者</option>';
+            select.innerHTML = '<option value="">Select Renter / 選擇租用者</option>';
             renters.forEach(r => {
                 select.innerHTML += `<option value="${r.id}">${r.name}</option>`;
             });
@@ -2106,7 +2275,7 @@
             const year = parseInt(document.getElementById('reportYearSelect').value);
             
             if (!renterId) {
-                showToast('Please select a renter 請選擇租用者', 'error');
+                showToast('Please select a renter / 請選擇租用者', 'error');
                 return;
             }
             
@@ -2130,45 +2299,50 @@
             });
             
             const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const chineseMonths = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
             const branchNames = { 
-                jordan: 'Jordan 佐敦', 
-                wanchai: 'Wan Chai 灣仔', 
-                tsuenwan: 'Tsuen Wan 荃灣' 
+                jordan: 'Jordan / 佐敦', 
+                wanchai: 'Wan Chai / 灣仔', 
+                tsuenwan: 'Tsuen Wan / 荃灣' 
             };
             
             const preview = document.getElementById('receiptPreview');
             preview.classList.remove('hidden');
             preview.innerHTML = `
                 <div class="max-w-md mx-auto">
-                    <!-- 收據表頭 -->
+                    <!-- 收據表頭 | Receipt Header -->
                     <div class="text-center mb-6">
                         <h2 class="text-xl font-bold text-gray-800 english-font">Counselling Room Rental Receipt</h2>
                         <h3 class="text-lg text-gray-600 chinese-font">心理輔導室租用收據</h3>
-                        <p class="text-gray-500 mt-2">${months[month]} ${year}</p>
+                        <p class="text-gray-500 mt-2">${months[month]} ${year} / ${chineseMonths[month]} ${year}</p>
                     </div>
                     
-                    <!-- 租用者信息 -->
+                    <!-- 租用者信息 | Renter Information -->
                     <div class="mb-6 pb-4 border-b border-gray-200">
-                        <p class="text-gray-600 english-font">Renter:</p>
-                        <p class="text-gray-600 chinese-font">租用者:</p>
+                        <div class="bilingual-text">
+                            <div class="english english-font text-gray-600">Renter:</div>
+                            <div class="chinese chinese-font text-gray-600">租用者:</div>
+                        </div>
                         <p class="font-semibold text-gray-800 text-lg">${renter.name}</p>
                         ${renter.email ? `<p class="text-sm text-gray-500">${renter.email}</p>` : ''}
                         ${renter.phone ? `<p class="text-sm text-gray-500">${renter.phone}</p>` : ''}
                     </div>
                     
-                    <!-- 預約詳情 -->
+                    <!-- 預約詳情 | Booking Details -->
                     <div class="mb-6">
-                        <h3 class="font-semibold text-gray-800 mb-3 english-font">Booking Details</h3>
-                        <h3 class="font-semibold text-gray-800 mb-3 chinese-font">預約詳情</h3>
+                        <div class="bilingual-text mb-3">
+                            <div class="english english-font font-semibold text-gray-800">Booking Details</div>
+                            <div class="chinese chinese-font font-semibold text-gray-800">預約詳情</div>
+                        </div>
                         
                         ${renterBookings.length === 0 ? 
-                            '<p class="text-gray-500 text-center py-4 english-font">No bookings this month</p><p class="text-gray-500 text-center chinese-font">本月無預約記錄</p>' :
+                            '<div class="text-center py-4"><p class="text-gray-500 english-font">No bookings this month</p><p class="text-gray-500 chinese-font">本月無預約記錄</p></div>' :
                             renterBookings.sort((a, b) => a.date.localeCompare(b.date)).map(b => `
                                 <div class="flex justify-between py-2 border-b border-gray-100 text-sm">
                                     <div>
                                         <p class="text-gray-800">${b.date}</p>
-                                        <p class="text-gray-500">${b.roomName} (${branchNames[b.branch].split(' ')[0]}) ${b.startTime}-${b.endTime}</p>
-                                        ${b.toyRental ? '<p class="text-xs text-yellow-600 english-font">+ Toy Rental</p><p class="text-xs text-yellow-600 chinese-font">+ 玩具租用</p>' : ''}
+                                        <p class="text-gray-500">${b.roomName} (${branchNames[b.branch].split('/')[0].trim()}) ${b.startTime}-${b.endTime}</p>
+                                        ${b.toyRental ? '<div class="bilingual-text"><p class="text-xs text-yellow-600 english-font">+ Toy Rental</p><p class="text-xs text-yellow-600 chinese-font">+ 玩具租用</p></div>' : ''}
                                     </div>
                                     <p class="font-medium text-gray-800">$${b.totalPrice.toFixed(2)}</p>
                                 </div>
@@ -2176,29 +2350,37 @@
                         }
                     </div>
                     
-                    <!-- 總結 -->
+                    <!-- 總結 | Summary -->
                     <div class="bg-slate-50 rounded-lg p-4 mt-4">
                         <div class="flex justify-between mb-2">
-                            <span class="text-gray-600 english-font">Total Hours:</span>
-                            <span class="text-gray-600 chinese-font">總時數:</span>
+                            <div class="bilingual-text">
+                                <div class="english english-font text-gray-600">Total Hours:</div>
+                                <div class="chinese chinese-font text-gray-600">總時數:</div>
+                            </div>
                             <span class="font-medium text-gray-800">${totalHours.toFixed(1)} hrs</span>
                         </div>
                         <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
-                            <span class="text-slate-800 english-font">Total Amount:</span>
-                            <span class="text-slate-800 chinese-font">總金額:</span>
+                            <div class="bilingual-text">
+                                <div class="english english-font text-slate-800">Total Amount:</div>
+                                <div class="chinese chinese-font text-slate-800">總金額:</div>
+                            </div>
                             <span class="text-slate-800">$${totalAmount.toFixed(2)}</span>
                         </div>
                     </div>
                     
-                    <!-- 收據表尾 -->
+                    <!-- 收據表尾 | Receipt Footer -->
                     <div class="mt-8 pt-4 border-t border-gray-200 text-xs text-gray-500">
-                        <p class="english-font">Receipt generated on ${new Date().toLocaleDateString()}</p>
-                        <p class="chinese-font">收據生成日期: ${new Date().toLocaleDateString()}</p>
-                        <p class="mt-2 english-font">This is an official receipt for room rental services.</p>
-                        <p class="chinese-font">此為房間租用服務正式收據。</p>
+                        <div class="bilingual-text">
+                            <div class="english english-font">Receipt generated on ${new Date().toLocaleDateString('en-US')}</div>
+                            <div class="chinese chinese-font">收據生成日期: ${new Date().toLocaleDateString('zh-HK')}</div>
+                        </div>
+                        <div class="bilingual-text mt-2">
+                            <div class="english english-font">This is an official receipt for room rental services.</div>
+                            <div class="chinese chinese-font">此為房間租用服務正式收據。</div>
+                        </div>
                     </div>
                     
-                    <!-- 列印按鈕 -->
+                    <!-- 列印按鈕 | Print Button -->
                     <div class="mt-6 text-center no-print">
                         <button onclick="printReceipt()" class="px-6 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition">
                             <i class="fas fa-print mr-2"></i>
@@ -2218,7 +2400,7 @@
             window.print();
             document.body.innerHTML = originalContent;
             
-            // 重新初始化應用
+            // 重新初始化應用 | Reinitialize application
             initApp();
             if (isStaff) {
                 document.getElementById('staffDashboard').classList.remove('hidden');
@@ -2229,7 +2411,7 @@
             }
         }
         
-        // ============ 工具函數 ============
+        // ============ 工具函數 | Utility Functions ============
         function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -2241,7 +2423,7 @@
             }, 3000);
         }
         
-        // ============ 應用初始化 ============
+        // ============ 應用初始化 | Application Initialization ============
         window.onload = function() {
             initApp();
         };
