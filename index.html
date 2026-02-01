@@ -1,1467 +1,1838 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" class="h-full">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>心理輔導室預約系統 | Counselling Room Booking System</title>
-    
-    <!-- GitHub API 不需要額外引入 -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>心理學家房間預約系統 | Psychologist Room Booking System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+        }
+        
         :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #1e40af;
-            --accent-color: #8b5cf6;
-            --light-bg: #f8fafc;
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #ff7e5f;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
         }
         
         body {
-            font-family: 'Inter', 'Noto Sans TC', sans-serif;
-            background-color: var(--light-bg);
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
         }
         
-        .chinese-font {
-            font-family: 'Noto Sans TC', sans-serif;
-        }
-        
-        .english-font {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .bilingual-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        
-        .bilingual-text .english {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.95em;
-        }
-        
-        .bilingual-text .chinese {
-            font-family: 'Noto Sans TC', sans-serif;
-            font-size: 0.85em;
-            color: #666;
-        }
-        
-        .bilingual-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-        
-        .bilingual-label .english {
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-        }
-        
-        .bilingual-label .chinese {
-            font-family: 'Noto Sans TC', sans-serif;
-            color: #666;
-            font-size: 0.9em;
-        }
-        
-        .print-header, .print-footer {
-            display: none;
-        }
-        
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            
-            .print-only {
-                display: block !important;
-            }
-            
-            .print-header, .print-footer {
-                display: block;
-            }
-            
-            body {
-                background: white !important;
-                font-size: 12pt;
-            }
-            
-            .print-page-break {
-                page-break-before: always;
-            }
-            
-            .print-border {
-                border: 1px solid #ddd !important;
-            }
-        }
-        
-        .slot-booked {
-            background-color: #f3f4f6 !important;
-            color: #9ca3af !important;
-            cursor: not-allowed !important;
-            text-decoration: line-through;
-        }
-        
-        .slot-selected {
-            background-color: #3b82f6 !important;
-            color: white !important;
-            font-weight: 600;
-        }
-        
-        .slot-available {
-            background-color: #dbeafe !important;
-            color: #1e40af !important;
-            cursor: pointer;
-        }
-        
-        .slot-available:hover {
-            background-color: #bfdbfe !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        .slot-past {
-            background-color: #f9fafb !important;
-            color: #d1d5db !important;
-            cursor: not-allowed !important;
-        }
-        
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-        }
-        
-        .modal-content {
-            background-color: white;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            z-index: 999;
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .tab-active {
-            background-color: var(--primary-color) !important;
-            color: white !important;
-            font-weight: 600;
-        }
-        
-        .tab-inactive {
-            background-color: #f1f5f9 !important;
-            color: #64748b !important;
-        }
-        
-        .tab-inactive:hover {
-            background-color: #e2e8f0 !important;
-        }
-        
-        .branch-jordan {
-            border-left: 4px solid #3b82f6;
-        }
-        
-        .branch-wanchai {
-            border-left: 4px solid #10b981;
-        }
-        
-        .branch-tsuenwan {
-            border-left: 4px solid #8b5cf6;
-        }
-        
-        .room-card {
-            transition: all 0.2s ease;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .room-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-color: var(--primary-color);
-        }
-        
-        .stats-card {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border-radius: 12px;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
         }
         
-        .receipt-template {
+        /* 語言切換 */
+        .lang-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .lang-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* 標題樣式 */
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        /* 登入區域 */
+        .login-section, .main-section {
+            display: none;
+        }
+        
+        .active-section {
+            display: block;
+        }
+        
+        .login-container {
             background: white;
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 800px;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
             margin: 0 auto;
         }
         
-        .loading-spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary);
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .form-group {
+            margin-bottom: 20px;
         }
         
-        .github-config {
-            background: #f6f8fa;
-            border: 1px solid #e1e4e8;
-            border-radius: 8px;
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-block {
+            width: 100%;
+        }
+        
+        .btn-logout {
+            background: var(--danger);
+            margin-top: 20px;
+        }
+        
+        .btn-logout:hover {
+            background: #c82333;
+        }
+        
+        /* 分頁樣式 */
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+        
+        .tab-btn {
+            flex: 1;
             padding: 15px;
-            margin: 20px 0;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
         }
         
-        .github-config input {
-            border: 1px solid #d1d5da;
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-family: monospace;
-            font-size: 14px;
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+        
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        /* 房間選擇 */
+        .branch-selector {
+            margin-bottom: 30px;
+        }
+        
+        .branch-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .branch-btn {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .room-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .room-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .room-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+        }
+        
+        .room-title {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .room-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffd166;
+        }
+        
+        .room-body {
+            padding: 20px;
+        }
+        
+        .room-facility {
+            margin-bottom: 15px;
+            color: var(--gray);
+        }
+        
+        .room-facility i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+        
+        /* 日曆樣式 */
+        .calendar-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-month {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .calendar-nav button {
+            background: var(--light-gray);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+        
+        .calendar-nav button:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--gray);
+        }
+        
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        
+        .calendar-day {
+            height: 100px;
+            background: var(--light);
+            border-radius: 5px;
+            padding: 10px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+        }
+        
+        .calendar-day.other-month {
+            background: #f8f9fa;
+            color: #ccc;
+        }
+        
+        .calendar-day.today {
+            background: #e8f4fd;
+            border-color: var(--primary);
+        }
+        
+        .day-number {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .time-slot {
+            font-size: 12px;
+            background: var(--success);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-bottom: 3px;
+            display: inline-block;
+        }
+        
+        /* 時間選擇 */
+        .time-slots-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .time-slot-btn {
+            background: var(--light);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 12px 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        
+        .time-slot-btn:hover {
+            background: #e2e6ea;
+        }
+        
+        .time-slot-btn.booked {
+            background: #f8d7da;
+            color: #721c24;
+            cursor: not-allowed;
+            border-color: #f5c6cb;
+        }
+        
+        .time-slot-btn.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* 統計區域 */
+        .stats-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+        
+        /* 預約列表 */
+        .bookings-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .booking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .booking-item:last-child {
+            border-bottom: none;
+        }
+        
+        .booking-details h4 {
+            margin-bottom: 5px;
+        }
+        
+        .booking-actions button {
+            margin-left: 10px;
+        }
+        
+        /* 工作人員區域 */
+        .admin-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .admin-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .user-list, .booking-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .user-item, .booking-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        
+        .user-header, .booking-header {
+            font-weight: 700;
+            background: var(--light);
+        }
+        
+        /* 列印樣式 */
+        @media print {
+            .no-print, .lang-switcher, .tabs, .btn {
+                display: none !important;
+            }
+            
+            .container {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .admin-panel, .stats-container, .calendar-container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .room-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .branch-buttons {
+                flex-direction: column;
+            }
+            
+            .calendar-day {
+                height: 80px;
+            }
+            
+            .admin-controls {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
-<body class="h-full">
-    <!-- GitHub 配置設定 -->
-    <div id="githubConfigModal" class="hidden modal-overlay">
-        <div class="modal-content">
-            <div class="p-6">
-                <div class="bilingual-text mb-4">
-                    <div class="english english-font text-xl font-semibold text-gray-800">GitHub Configuration</div>
-                    <div class="chinese chinese-font text-gray-600">GitHub 配置設定</div>
+<body>
+    <!-- 語言切換 -->
+    <div class="lang-switcher">
+        <button class="lang-btn" id="langToggle">
+            <i class="fas fa-language"></i>
+            <span id="currentLang">EN</span>
+        </button>
+    </div>
+    
+    <div class="container">
+        <!-- 標題 -->
+        <header>
+            <h1 id="mainTitle">心理學家房間預約系統</h1>
+            <p class="subtitle" id="subTitle">Psychologist Room Booking System</p>
+        </header>
+        
+        <!-- 登入區域 -->
+        <section id="loginSection" class="login-section active-section">
+            <div class="login-container">
+                <h2 class="login-title" id="loginTitle">租用者登入</h2>
+                <div class="form-group">
+                    <label for="username" id="usernameLabel">姓名 / Name:</label>
+                    <input type="text" id="username" placeholder="請輸入您的姓名 / Enter your name">
                 </div>
-                
-                <div class="github-config mb-4">
-                    <div class="bilingual-text mb-4">
-                        <div class="english english-font text-sm text-gray-700">
-                            <strong>Setup Instructions:</strong><br>
-                            1. Create a new GitHub repository<br>
-                            2. Enable GitHub Pages (Settings > Pages)<br>
-                            3. Upload this HTML file<br>
-                            4. Create a GitHub Personal Access Token
-                        </div>
-                        <div class="chinese chinese-font text-sm text-gray-700 mt-2">
-                            <strong>設置步驟:</strong><br>
-                            1. 創建新的 GitHub 倉庫<br>
-                            2. 啟用 GitHub Pages (設定 > Pages)<br>
-                            3. 上傳此 HTML 文件<br>
-                            4. 創建 GitHub Personal Access Token
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                                <span class="english">Repository Owner</span>
-                                <span class="chinese">倉庫擁有者</span>
-                            </label>
-                            <input type="text" id="repoOwner" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Your GitHub username">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                                <span class="english">Repository Name</span>
-                                <span class="chinese">倉庫名稱</span>
-                            </label>
-                            <input type="text" id="repoName" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="room-booking-system">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                                <span class="english">GitHub Token</span>
-                                <span class="chinese">GitHub 令牌</span>
-                            </label>
-                            <input type="password" id="githubToken" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                            <div class="bilingual-text mt-1">
-                                <div class="english english-font text-xs text-gray-500">
-                                    Create token at: Settings > Developer settings > Personal access tokens > Tokens (classic)<br>
-                                    Required scopes: repo, write:discussion
-                                </div>
-                                <div class="chinese chinese-font text-xs text-gray-500">
-                                    創建令牌: 設定 > Developer settings > Personal access tokens > Tokens (classic)<br>
-                                    所需權限: repo, write:discussion
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label for="password" id="passwordLabel">密碼 / Password:</label>
+                    <input type="password" id="password" placeholder="請輸入您的密碼 / Enter your password">
                 </div>
-                
-                <div id="githubConfigError" class="hidden text-red-500 text-sm mb-4"></div>
-                
-                <div class="flex gap-3">
-                    <button onclick="saveGitHubConfig()" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Save Configuration</div>
-                            <div class="chinese chinese-font text-xs">儲存配置</div>
-                        </div>
-                    </button>
-                    <button onclick="closeGitHubConfig()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Cancel</div>
-                            <div class="chinese chinese-font text-xs">取消</div>
-                        </div>
-                    </button>
+                <button class="btn btn-block" id="loginBtn">登入 / Login</button>
+                <div style="text-align: center; margin-top: 20px;">
+                    <p id="staffLoginPrompt">工作人員請使用管理員帳號登入 / Staff please use admin account</p>
+                    <button class="btn" id="staffLoginBtn" style="margin-top: 10px;">工作人員登入 / Staff Login</button>
                 </div>
             </div>
-        </div>
+        </section>
+        
+        <!-- 租用者主區域 -->
+        <section id="userSection" class="main-section">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="booking" id="tabBooking">預約房間 / Book Room</button>
+                <button class="tab-btn" data-tab="stats" id="tabStats">租用統計 / Booking Stats</button>
+                <button class="tab-btn" data-tab="mybookings" id="tabMyBookings">我的預約 / My Bookings</button>
+            </div>
+            
+            <!-- 預約房間分頁 -->
+            <div id="bookingTab" class="tab-content active-section">
+                <!-- 分店選擇 -->
+                <div class="branch-selector">
+                    <h3 id="branchTitle">選擇分店 / Select Branch</h3>
+                    <div class="branch-buttons">
+                        <button class="btn branch-btn" data-branch="Jordan">佐敦 / Jordan</button>
+                        <button class="btn branch-btn" data-branch="WanChai">灣仔 / Wan Chai</button>
+                        <button class="btn branch-btn" data-branch="TsuenWan">荃灣 / Tsuen Wan</button>
+                    </div>
+                </div>
+                
+                <!-- 房間選擇 -->
+                <div id="roomsContainer">
+                    <!-- 房間卡片將由JavaScript動態生成 -->
+                </div>
+                
+                <!-- 日曆 -->
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button class="btn" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                        <h2 class="calendar-month" id="currentMonth">2023年11月</h2>
+                        <button class="btn" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div>日 / Sun</div>
+                        <div>一 / Mon</div>
+                        <div>二 / Tue</div>
+                        <div>三 / Wed</div>
+                        <div>四 / Thu</div>
+                        <div>五 / Fri</div>
+                        <div>六 / Sat</div>
+                    </div>
+                    <div class="calendar-days" id="calendarDays">
+                        <!-- 日曆天數將由JavaScript動態生成 -->
+                    </div>
+                </div>
+                
+                <!-- 時間選擇 -->
+                <div class="time-slots-container">
+                    <h3 id="timeTitle">選擇時間 / Select Time</h3>
+                    <p id="selectedDateInfo">請選擇一個日期 / Please select a date</p>
+                    <div class="time-slots" id="timeSlots">
+                        <!-- 時間段將由JavaScript動態生成 -->
+                    </div>
+                    <div id="toyOption" style="display: none; margin-top: 20px;">
+                        <label>
+                            <input type="checkbox" id="toyRental">
+                            <span id="toyLabel">租用玩具 / Rent Toys (+$<span id="toyPrice">50</span>/小時 per hour)</span>
+                        </label>
+                    </div>
+                    <button class="btn btn-block" id="confirmBooking" style="margin-top: 20px;" disabled>確認預約 / Confirm Booking</button>
+                </div>
+            </div>
+            
+            <!-- 租用統計分頁 -->
+            <div id="statsTab" class="tab-content">
+                <div class="stats-container">
+                    <h3 id="statsTitle">租用統計 / Booking Statistics</h3>
+                    <div class="month-selector">
+                        <label for="statsMonth" id="statsMonthLabel">選擇月份 / Select Month:</label>
+                        <input type="month" id="statsMonth" value="2023-11">
+                        <button class="btn" id="viewStats">查看 / View</button>
+                    </div>
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- 統計數據將由JavaScript動態生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 我的預約分頁 -->
+            <div id="mybookingsTab" class="tab-content">
+                <div class="bookings-container">
+                    <h3 id="myBookingsTitle">我的預約 / My Bookings</h3>
+                    <div id="userBookingsList">
+                        <!-- 用戶預約列表將由JavaScript動態生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn btn-logout btn-block" id="logoutBtn">登出 / Logout</button>
+        </section>
+        
+        <!-- 工作人員主區域 -->
+        <section id="adminSection" class="main-section">
+            <h2 id="adminTitle">工作人員管理系統 / Staff Management System</h2>
+            
+            <!-- 控制按鈕 -->
+            <div class="admin-controls">
+                <button class="btn" id="manageUsersBtn" data-tab="users">管理租用者 / Manage Users</button>
+                <button class="btn" id="manageRoomsBtn" data-tab="rooms">管理房間 / Manage Rooms</button>
+                <button class="btn" id="viewAllBookingsBtn" data-tab="allbookings">所有預約 / All Bookings</button>
+                <button class="btn" id="printReportBtn">列印報告 / Print Report</button>
+            </div>
+            
+            <!-- 管理租用者 -->
+            <div id="usersTab" class="admin-panel tab-content active-section">
+                <h3 id="manageUsersTitle">管理租用者 / Manage Users</h3>
+                <button class="btn" id="addUserBtn" style="margin-bottom: 15px;">新增租用者 / Add User</button>
+                <div class="user-list">
+                    <div class="user-item user-header">
+                        <div>姓名 / Name</div>
+                        <div>聯絡電話 / Phone</div>
+                        <div>電子郵件 / Email</div>
+                        <div>密碼 / Password</div>
+                        <div>操作 / Actions</div>
+                    </div>
+                    <div id="usersList">
+                        <!-- 用戶列表將由JavaScript動態生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 管理房間 -->
+            <div id="roomsTab" class="admin-panel tab-content">
+                <h3 id="manageRoomsTitle">管理房間 / Manage Rooms</h3>
+                <div class="room-grid">
+                    <!-- 房間卡片將由JavaScript動態生成 -->
+                </div>
+            </div>
+            
+            <!-- 所有預約 -->
+            <div id="allbookingsTab" class="admin-panel tab-content">
+                <h3 id="allBookingsTitle">所有預約 / All Bookings</h3>
+                <div class="month-selector">
+                    <label for="adminMonth" id="adminMonthLabel">選擇月份 / Select Month:</label>
+                    <input type="month" id="adminMonth" value="2023-11">
+                    <button class="btn" id="viewAdminBookings">查看 / View</button>
+                </div>
+                <div class="booking-list">
+                    <div class="booking-row booking-header">
+                        <div>租用者 / User</div>
+                        <div>房間 / Room</div>
+                        <div>日期 / Date</div>
+                        <div>時間 / Time</div>
+                        <div>租金 / Fee</div>
+                        <div>操作 / Actions</div>
+                    </div>
+                    <div id="adminBookingsList">
+                        <!-- 所有預約列表將由JavaScript動態生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn btn-logout btn-block" id="adminLogoutBtn">登出 / Logout</button>
+        </section>
     </div>
 
-    <!-- 登入畫面 | Login Screen -->
-    <div id="loginScreen" class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                    <i class="fas fa-door-open text-white text-3xl"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-gray-800 english-font">Counselling Room Booking System</h1>
-                <p class="text-gray-600 chinese-font">心理輔導室預約系統</p>
-                
-                <div class="mt-4">
-                    <button onclick="showGitHubConfig()" class="text-sm text-gray-500 hover:text-gray-700">
-                        <i class="fab fa-github mr-1"></i>
-                        <span class="english-font">GitHub Config</span>
-                        <span class="chinese-font ml-1">GitHub 設定</span>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                        <span class="english">Name</span>
-                        <span class="chinese">姓名</span>
-                    </label>
-                    <input type="text" id="loginName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition english-font" placeholder="Enter your name / 輸入姓名">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                        <span class="english">Password</span>
-                        <span class="chinese">密碼</span>
-                    </label>
-                    <input type="password" id="loginPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Enter password / 輸入密碼">
-                </div>
-                
-                <div id="loginError" class="hidden text-red-500 text-sm text-center"></div>
-                
-                <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md">
-                    <span class="english-font">Login</span>
-                    <span class="chinese-font ml-2">登入</span>
-                </button>
-            </div>
-            
-            <div class="mt-6 pt-6 border-t border-gray-200">
-                <button onclick="showStaffLogin()" class="w-full text-gray-600 hover:text-gray-800 text-sm flex items-center justify-center gap-2">
-                    <i class="fas fa-user-cog"></i>
-                    <span class="english-font">Staff Login</span>
-                    <span class="chinese-font ml-2">職員登入</span>
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 租用者儀表板 | Renter Dashboard -->
-    <div id="renterDashboard" class="hidden h-full flex flex-col">
-        <!-- 頂部導航欄 | Header -->
-        <header class="bg-white shadow-sm sticky top-0 z-40 no-print">
-            <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-door-open text-white"></i>
-                    </div>
-                    <div class="bilingual-text">
-                        <div class="english english-font font-semibold text-gray-800">Room Booking</div>
-                        <div class="chinese chinese-font text-sm text-gray-500">歡迎, <span id="renterWelcomeName" class="font-medium"></span></div>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <button onclick="refreshData()" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition" title="Refresh Data / 刷新數據">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button onclick="logout()" class="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition flex items-center gap-2">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="english-font">Logout</span>
-                        <span class="chinese-font ml-1">登出</span>
-                    </button>
-                </div>
-            </div>
-        </header>
-        
-        <!-- 主要內容區 | Main Content -->
-        <main class="flex-1 overflow-auto">
-            <div class="max-w-7xl mx-auto px-4 py-6">
-                <!-- 頁籤導航 | Tab Navigation -->
-                <div class="flex gap-2 mb-6 no-print">
-                    <button onclick="showRenterTab('booking')" id="renterTabBooking" class="tab-active px-4 py-2 rounded-lg font-medium transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Book Room</div>
-                            <div class="chinese chinese-font text-xs">預約房間</div>
-                        </div>
-                    </button>
-                    <button onclick="showRenterTab('myBookings')" id="renterTabMyBookings" class="tab-inactive px-4 py-2 rounded-lg font-medium transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">My Bookings</div>
-                            <div class="chinese chinese-font text-xs">我的預約</div>
-                        </div>
-                    </button>
-                    <button onclick="showRenterTab('statistics')" id="renterTabStatistics" class="tab-inactive px-4 py-2 rounded-lg font-medium transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Statistics</div>
-                            <div class="chinese chinese-font text-xs">統計</div>
-                        </div>
-                    </button>
-                </div>
-                
-                <!-- 預約房間區 | Booking Section -->
-                <div id="renterBookingSection" class="fade-in">
-                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                        <div class="bilingual-text mb-4">
-                            <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
-                                <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
-                                Select Branch & Date
-                            </div>
-                            <div class="chinese chinese-font text-gray-600">選擇分店及日期</div>
-                        </div>
-                        
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                                    <span class="english">Branch</span>
-                                    <span class="chinese">分店</span>
-                                </label>
-                                <select id="renterBranchSelect" onchange="loadRoomsForBranch()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">Select Branch / 選擇分店</option>
-                                    <option value="jordan">Jordan / 佐敦</option>
-                                    <option value="wanchai">Wan Chai / 灣仔</option>
-                                    <option value="tsuenwan">Tsuen Wan / 荃灣</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                                    <span class="english">Date</span>
-                                    <span class="chinese">日期</span>
-                                </label>
-                                <input type="date" id="renterDateSelect" onchange="loadTimeSlots()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                                    <span class="english">Room</span>
-                                    <span class="chinese">房間</span>
-                                </label>
-                                <select id="renterRoomSelect" onchange="loadTimeSlots()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">Select Room / 選擇房間</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 房間資訊 | Room Info -->
-                    <div id="selectedRoomInfo" class="hidden bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 mb-6">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <h3 id="roomInfoName" class="text-xl font-semibold text-gray-800 english-font"></h3>
-                                <p id="roomInfoFacilities" class="text-gray-600 mt-1 chinese-font"></p>
-                            </div>
-                            <div class="text-right">
-                                <div class="bilingual-text">
-                                    <div class="english english-font text-sm text-gray-500">Price</div>
-                                    <div class="chinese chinese-font text-sm text-gray-500">租金</div>
-                                </div>
-                                <p id="roomInfoPrice" class="text-2xl font-bold text-blue-600"></p>
-                                <div class="bilingual-text">
-                                    <div class="english english-font text-xs text-gray-400">per hour</div>
-                                    <div class="chinese chinese-font text-xs text-gray-400">每小時</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 時間段選擇 | Time Slots -->
-                    <div id="timeSlotsContainer" class="hidden bg-white rounded-2xl shadow-lg p-6">
-                        <div class="bilingual-text mb-4">
-                            <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
-                                <i class="far fa-clock text-blue-500 mr-2"></i>
-                                Available Time Slots
-                            </div>
-                            <div class="chinese chinese-font text-gray-600">可預約時段</div>
-                        </div>
-                        
-                        <div class="bilingual-text mb-4">
-                            <div class="english english-font text-sm text-gray-500">Click to select time slots (each slot = 30 mins)</div>
-                            <div class="chinese chinese-font text-sm text-gray-500">點擊選擇時段（每格=30分鐘）</div>
-                        </div>
-                        
-                        <div id="timeSlots" class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2"></div>
-                        
-                        <!-- 玩具租用選項 | Toy Rental Option -->
-                        <div id="toyRentalOption" class="hidden mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" id="toyRentalCheckbox" onchange="updateBookingTotal()" class="w-5 h-5 text-yellow-600 rounded focus:ring-yellow-500">
-                                <div>
-                                    <div class="bilingual-text">
-                                        <div class="english english-font text-gray-700 font-medium">Add Toy Rental</div>
-                                        <div class="chinese chinese-font text-gray-700 font-medium">租用玩具</div>
-                                    </div>
-                                    <div class="bilingual-text mt-1">
-                                        <div class="english english-font text-sm text-gray-500">Additional <span id="toyPriceDisplay"></span>/hr</div>
-                                        <div class="chinese chinese-font text-sm text-gray-500">每小時另加顯示金額</div>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                        
-                        <!-- 預約摘要 | Booking Summary -->
-                        <div id="bookingSummary" class="hidden mt-6 p-6 bg-blue-50 rounded-xl border border-blue-200">
-                            <div class="flex items-center justify-between mb-6">
-                                <div>
-                                    <div class="bilingual-text">
-                                        <div class="english english-font text-sm text-gray-600">Selected Time</div>
-                                        <div class="chinese chinese-font text-sm text-gray-600">已選時段</div>
-                                    </div>
-                                    <p id="selectedTimeRange" class="font-semibold text-gray-800 text-lg mt-1"></p>
-                                </div>
-                                <div class="text-right">
-                                    <div class="bilingual-text">
-                                        <div class="english english-font text-sm text-gray-600">Total</div>
-                                        <div class="chinese chinese-font text-sm text-gray-600">總計</div>
-                                    </div>
-                                    <p id="bookingTotal" class="text-2xl font-bold text-blue-600 mt-1"></p>
-                                </div>
-                            </div>
-                            
-                            <button onclick="confirmBooking()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 transition shadow-md">
-                                <span class="english-font">Confirm Booking</span>
-                                <span class="chinese-font ml-2">確認預約</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 我的預約區 | My Bookings Section -->
-                <div id="renterMyBookingsSection" class="hidden fade-in">
-                    <div class="bg-white rounded-2xl shadow-lg p-6">
-                        <div class="bilingual-text mb-4">
-                            <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
-                                <i class="far fa-calendar-check text-blue-500 mr-2"></i>
-                                My Bookings
-                            </div>
-                            <div class="chinese chinese-font text-gray-600">我的預約</div>
-                        </div>
-                        
-                        <div id="myBookingsList" class="space-y-4"></div>
-                        
-                        <div id="noBookingsMessage" class="hidden text-center py-12 text-gray-500">
-                            <i class="far fa-calendar-times text-5xl text-gray-300 mb-4"></i>
-                            <div class="bilingual-text">
-                                <div class="english english-font">No bookings yet</div>
-                                <div class="chinese chinese-font mt-1">暫無預約</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 統計區 | Statistics Section -->
-                <div id="renterStatisticsSection" class="hidden fade-in">
-                    <div class="bg-white rounded-2xl shadow-lg p-6">
-                        <div class="flex items-center justify-between mb-6">
-                            <div class="bilingual-text">
-                                <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
-                                    <i class="fas fa-chart-bar text-blue-500 mr-2"></i>
-                                    Monthly Statistics
-                                </div>
-                                <div class="chinese chinese-font text-gray-600">月度統計</div>
-                            </div>
-                            
-                            <div class="flex items-center gap-2">
-                                <select id="statsMonthSelect" onchange="updateRenterStatistics()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
-                                <select id="statsYearSelect" onchange="updateRenterStatistics()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
-                            </div>
-                        </div>
-                        
-                        <!-- 統計卡片 | Stats Cards -->
-                        <div class="grid md:grid-cols-3 gap-4 mb-8">
-                            <div class="stats-card">
-                                <div class="bilingual-text">
-                                    <div class="english english-font text-sm text-blue-600 font-medium">Total Bookings</div>
-                                    <div class="chinese chinese-font text-sm text-blue-600 font-medium">總預約次數</div>
-                                </div>
-                                <p id="statsBookingCount" class="text-3xl font-bold text-blue-700 mt-2">0</p>
-                            </div>
-                            
-                            <div class="stats-card" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
-                                <div class="bilingual-text">
-                                    <div class="english english-font text-sm text-green-600 font-medium">Total Hours</div>
-                                    <div class="chinese chinese-font text-sm text-green-600 font-medium">總時數</div>
-                                </div>
-                                <p id="statsTotalHours" class="text-3xl font-bold text-green-700 mt-2">0</p>
-                            </div>
-                            
-                            <div class="stats-card" style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);">
-                                <div class="bilingual-text">
-                                    <div class="english english-font text-sm text-purple-600 font-medium">Total Amount</div>
-                                    <div class="chinese chinese-font text-sm text-purple-600 font-medium">總金額</div>
-                                </div>
-                                <p id="statsTotalAmount" class="text-3xl font-bold text-purple-700 mt-2">$0</p>
-                            </div>
-                        </div>
-                        
-                        <div class="bilingual-text mb-3">
-                            <div class="english english-font font-semibold text-gray-800">Booking Details</div>
-                            <div class="chinese chinese-font text-gray-600">預約詳情</div>
-                        </div>
-                        
-                        <div id="statsBookingDetails" class="space-y-3"></div>
-                        
-                        <div id="noStatsMessage" class="hidden text-center py-8 text-gray-500">
-                            <i class="far fa-chart-bar text-4xl text-gray-300 mb-4"></i>
-                            <div class="bilingual-text">
-                                <div class="english english-font">No bookings this month</div>
-                                <div class="chinese chinese-font mt-1">本月暫無預約</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-    
-    <!-- 職員儀表板 | Staff Dashboard -->
-    <div id="staffDashboard" class="hidden h-full flex flex-col">
-        <!-- 職員頂部導航欄 | Staff Header -->
-        <header class="bg-gradient-to-r from-slate-800 to-slate-900 shadow-lg sticky top-0 z-40 no-print">
-            <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-user-cog text-white"></i>
-                    </div>
-                    <div class="bilingual-text">
-                        <div class="english english-font font-semibold text-white">Staff Portal</div>
-                        <div class="chinese chinese-font text-sm text-slate-300">管理後台</div>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <button onclick="refreshData()" class="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition" title="Refresh Data / 刷新數據">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button onclick="logout()" class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition flex items-center gap-2">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="english-font">Logout</span>
-                        <span class="chinese-font ml-1">登出</span>
-                    </button>
-                </div>
-            </div>
-        </header>
-        
-        <!-- 職員主要內容區 | Staff Main Content -->
-        <main class="flex-1 overflow-auto">
-            <div class="max-w-7xl mx-auto px-4 py-6">
-                <!-- 職員頁籤導航 | Staff Tab Navigation -->
-                <div class="flex flex-wrap gap-2 mb-6 no-print">
-                    <button onclick="showStaffTab('renters')" id="staffTabRenters" class="px-4 py-2 rounded-lg font-medium transition bg-slate-800 text-white">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Manage Renters</div>
-                            <div class="chinese chinese-font text-xs">管理租用者</div>
-                        </div>
-                    </button>
-                    <button onclick="showStaffTab('rooms')" id="staffTabRooms" class="tab-inactive px-4 py-2 rounded-lg font-medium transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Room Settings</div>
-                            <div class="chinese chinese-font text-xs">房間設定</div>
-                        </div>
-                    </button>
-                    <button onclick="showStaffTab('allBookings')" id="staffTabAllBookings" class="tab-inactive px-4 py-2 rounded-lg font-medium transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">All Bookings</div>
-                            <div class="chinese chinese-font text-xs">所有預約</div>
-                        </div>
-                    </button>
-                    <button onclick="showStaffTab('reports')" id="staffTabReports" class="tab-inactive px-4 py-2 rounded-lg font-medium transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Reports</div>
-                            <div class="chinese chinese-font text-xs">報表</div>
-                        </div>
-                    </button>
-                </div>
-                
-                <!-- 管理租用者區 | Manage Renters Section -->
-                <div id="staffRentersSection" class="fade-in">
-                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="bilingual-text">
-                                <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
-                                    <i class="fas fa-users text-slate-700 mr-2"></i>
-                                    Renters
-                                </div>
-                                <div class="chinese chinese-font text-gray-600">租用者</div>
-                            </div>
-                            
-                            <button onclick="showAddRenterModal()" class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition flex items-center gap-2">
-                                <i class="fas fa-user-plus"></i>
-                                <span class="english-font">Add Renter</span>
-                                <span class="chinese-font ml-1">新增租用者</span>
-                            </button>
-                        </div>
-                        
-                        <div id="rentersList" class="space-y-3"></div>
-                        
-                        <div id="noRentersMessage" class="hidden text-center py-8 text-gray-500">
-                            <i class="fas fa-users-slash text-4xl text-gray-300 mb-4"></i>
-                            <div class="bilingual-text">
-                                <div class="english english-font">No renters registered</div>
-                                <div class="chinese chinese-font mt-1">暫無租用者</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 房間設定區 | Room Settings Section -->
-                <div id="staffRoomsSection" class="hidden fade-in">
-                    <div class="bg-white rounded-2xl shadow-lg p-6">
-                        <div class="bilingual-text mb-4">
-                            <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
-                                <i class="fas fa-cog text-slate-700 mr-2"></i>
-                                Room Price Settings
-                            </div>
-                            <div class="chinese chinese-font text-gray-600">房間價格設定</div>
-                        </div>
-                        
-                        <div class="bilingual-text mb-6">
-                            <div class="english english-font text-sm text-gray-500">Changes will only affect new bookings</div>
-                            <div class="chinese chinese-font text-sm text-gray-500">更改只會影響新預約</div>
-                        </div>
-                        
-                        <div class="space-y-8">
-                            <!-- 佐敦分店 | Jordan Branch -->
-                            <div>
-                                <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                                    <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
-                                    <div class="bilingual-text">
-                                        <div class="english english-font">Jordan</div>
-                                        <div class="chinese chinese-font text-gray-600">佐敦</div>
-                                    </div>
-                                </h3>
-                                <div id="jordanRooms" class="grid md:grid-cols-2 gap-3"></div>
-                            </div>
-                            
-                            <!-- 灣仔分店 | Wan Chai Branch -->
-                            <div>
-                                <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                                    <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                                    <div class="bilingual-text">
-                                        <div class="english english-font">Wan Chai</div>
-                                        <div class="chinese chinese-font text-gray-600">灣仔</div>
-                                    </div>
-                                </h3>
-                                <div id="wanchaiRooms" class="grid md:grid-cols-2 gap-3"></div>
-                            </div>
-                            
-                            <!-- 荃灣分店 | Tsuen Wan Branch -->
-                            <div>
-                                <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                                    <span class="w-3 h-3 bg-purple-500 rounded-full"></span>
-                                    <div class="bilingual-text">
-                                        <div class="english english-font">Tsuen Wan</div>
-                                        <div class="chinese chinese-font text-gray-600">荃灣</div>
-                                    </div>
-                                </h3>
-                                <div id="tsuenwanRooms" class="grid md:grid-cols-2 gap-3"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 所有預約區 | All Bookings Section -->
-                <div id="staffAllBookingsSection" class="hidden fade-in">
-                    <div class="bg-white rounded-2xl shadow-lg p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="bilingual-text">
-                                <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
-                                    <i class="fas fa-calendar-alt text-slate-700 mr-2"></i>
-                                    All Bookings
-                                </div>
-                                <div class="chinese chinese-font text-gray-600">所有預約</div>
-                            </div>
-                            
-                            <div class="flex items-center gap-2">
-                                <select id="staffBookingFilter" onchange="filterStaffBookings()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="all">All Renters / 所有租用者</option>
-                                </select>
-                                
-                                <select id="staffBranchFilter" onchange="filterStaffBookings()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="all">All Branches / 所有分店</option>
-                                    <option value="jordan">Jordan / 佐敦</option>
-                                    <option value="wanchai">Wan Chai / 灣仔</option>
-                                    <option value="tsuenwan">Tsuen Wan / 荃灣</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div id="allBookingsList" class="space-y-3"></div>
-                        
-                        <div id="noAllBookingsMessage" class="hidden text-center py-8 text-gray-500">
-                            <i class="far fa-calendar-times text-4xl text-gray-300 mb-4"></i>
-                            <div class="bilingual-text">
-                                <div class="english english-font">No bookings found</div>
-                                <div class="chinese chinese-font mt-1">找不到預約</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 報表區 | Reports Section -->
-                <div id="staffReportsSection" class="hidden fade-in">
-                    <!-- 月度報表 | Monthly Report -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="bilingual-text">
-                                <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
-                                    <i class="fas fa-chart-pie text-slate-700 mr-2"></i>
-                                    Monthly Report
-                                </div>
-                                <div class="chinese chinese-font text-gray-600">月度報表</div>
-                            </div>
-                            
-                            <div class="flex items-center gap-2">
-                                <select id="reportMonthSelect" onchange="generateReport()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
-                                
-                                <select id="reportYearSelect" onchange="generateReport()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
-                                
-                                <button onclick="printReport()" class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition flex items-center gap-2">
-                                    <i class="fas fa-print"></i>
-                                    <span class="english-font">Print</span>
-                                    <span class="chinese-font ml-1">列印</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- 列印表頭 | Print Header -->
-                        <div class="print-header hidden print-only mb-6">
-                            <div class="text-center">
-                                <h1 class="text-2xl font-bold text-gray-800 english-font">Monthly Booking Report</h1>
-                                <h2 class="text-xl text-gray-600 chinese-font">月度預約報表</h2>
-                            </div>
-                            <div class="flex justify-between mt-4 text-sm">
-                                <div>
-                                    <p id="printReportPeriod" class="font-medium"></p>
-                                </div>
-                                <div>
-                                    <p id="printGeneratedDate" class="text-gray-500"></p>
-                                </div>
-                            </div>
-                            <hr class="my-4 border-gray-300">
-                        </div>
-                        
-                        <div id="reportContent">
-                            <!-- 統計摘要 | Statistics Summary -->
-                            <div class="grid md:grid-cols-4 gap-4 mb-6">
-                                <div class="bg-slate-50 rounded-xl p-4 print-border">
-                                    <div class="bilingual-text">
-                                        <div class="english english-font text-sm text-slate-600">Total Bookings</div>
-                                        <div class="chinese chinese-font text-sm text-slate-600">總預約</div>
-                                    </div>
-                                    <p id="reportTotalBookings" class="text-2xl font-bold text-slate-800 mt-1">0</p>
-                                </div>
-                                
-                                <div class="bg-slate-50 rounded-xl p-4 print-border">
-                                    <div class="bilingual-text">
-                                        <div class="english english-font text-sm text-slate-600">Total Hours</div>
-                                        <div class="chinese chinese-font text-sm text-slate-600">總時數</div>
-                                    </div>
-                                    <p id="reportTotalHours" class="text-2xl font-bold text-slate-800 mt-1">0</p>
-                                </div>
-                                
-                                <div class="bg-slate-50 rounded-xl p-4 print-border">
-                                    <div class="bilingual-text">
-                                        <div class="english english-font text-sm text-slate-600">Total Revenue</div>
-                                        <div class="chinese chinese-font text-sm text-slate-600">總收入</div>
-                                    </div>
-                                    <p id="reportTotalRevenue" class="text-2xl font-bold text-slate-800 mt-1">$0</p>
-                                </div>
-                                
-                                <div class="bg-slate-50 rounded-xl p-4 print-border">
-                                    <div class="bilingual-text">
-                                        <div class="english english-font text-sm text-slate-600">Active Renters</div>
-                                        <div class="chinese chinese-font text-sm text-slate-600">活躍租用者</div>
-                                    </div>
-                                    <p id="reportActiveRenters" class="text-2xl font-bold text-slate-800 mt-1">0</p>
-                                </div>
-                            </div>
-                            
-                            <div class="bilingual-text mb-3">
-                                <div class="english english-font font-semibold text-gray-800">Breakdown by Renter</div>
-                                <div class="chinese chinese-font text-gray-600">按租用者分類</div>
-                            </div>
-                            
-                            <div id="reportByRenter" class="space-y-4"></div>
-                            
-                            <div id="noReportMessage" class="hidden text-center py-8 text-gray-500">
-                                <i class="fas fa-chart-line text-4xl text-gray-300 mb-4"></i>
-                                <div class="bilingual-text">
-                                    <div class="english english-font">No bookings this month</div>
-                                    <div class="chinese chinese-font mt-1">本月暫無預約</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 列印表尾 | Print Footer -->
-                        <div class="print-footer hidden print-only mt-8 pt-4 border-t border-gray-300">
-                            <div class="flex justify-between text-xs text-gray-500">
-                                <div>
-                                    <p class="english-font">Generated by Counselling Room Booking System</p>
-                                    <p class="chinese-font">心理輔導室預約系統生成</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="english-font">Page <span class="page-number"></span></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 生成收據 | Generate Receipt -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="bilingual-text">
-                                <div class="english english-font text-lg font-semibold text-gray-800 flex items-center">
-                                    <i class="fas fa-receipt text-slate-700 mr-2"></i>
-                                    Generate Receipt
-                                </div>
-                                <div class="chinese chinese-font text-gray-600">生成收據</div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center gap-4 mb-6">
-                            <select id="receiptRenterSelect" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Select Renter / 選擇租用者</option>
-                            </select>
-                            
-                            <button onclick="generateReceipt()" class="px-6 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition">
-                                <span class="english-font">Generate</span>
-                                <span class="chinese-font ml-2">生成</span>
-                            </button>
-                        </div>
-                        
-                        <div id="receiptPreview" class="hidden receipt-template"></div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-    
-    <!-- 模態框 | Modals -->
-    
-    <!-- 新增租用者模態框 | Add Renter Modal -->
-    <div id="addRenterModal" class="hidden modal-overlay">
-        <div class="modal-content">
-            <div class="p-6">
-                <div class="bilingual-text mb-4">
-                    <div class="english english-font text-xl font-semibold text-gray-800">Add New Renter</div>
-                    <div class="chinese chinese-font text-gray-600">新增租用者</div>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                            <span class="english">Name <span class="text-red-500">*</span></span>
-                            <span class="chinese">姓名</span>
-                        </label>
-                        <input type="text" id="newRenterName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 english-font" placeholder="Enter renter name / 輸入租用者姓名">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                            <span class="english">Password <span class="text-red-500">*</span></span>
-                            <span class="chinese">密碼</span>
-                        </label>
-                        <input type="text" id="newRenterPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Set password for renter / 為租用者設定密碼">
-                        <div class="bilingual-text mt-1">
-                            <div class="english english-font text-xs text-gray-500">Password is visible for recovery</div>
-                            <div class="chinese chinese-font text-xs text-gray-500">密碼可見以便找回</div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                            <span class="english">Email</span>
-                            <span class="chinese">電郵</span>
-                        </label>
-                        <input type="email" id="newRenterEmail" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address / 輸入電郵地址">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                            <span class="english">Phone</span>
-                            <span class="chinese">電話</span>
-                        </label>
-                        <input type="tel" id="newRenterPhone" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter phone number / 輸入電話號碼">
-                    </div>
-                </div>
-                
-                <div id="addRenterError" class="hidden mt-4 text-red-500 text-sm"></div>
-                
-                <div class="flex gap-3 mt-6">
-                    <button onclick="closeAddRenterModal()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Cancel</div>
-                            <div class="chinese chinese-font text-xs">取消</div>
-                        </div>
-                    </button>
-                    <button onclick="addRenter()" id="addRenterBtn" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Add</div>
-                            <div class="chinese chinese-font text-xs">新增</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 編輯租用者模態框 | Edit Renter Modal -->
-    <div id="editRenterModal" class="hidden modal-overlay">
-        <div class="modal-content">
-            <div class="p-6">
-                <div class="bilingual-text mb-4">
-                    <div class="english english-font text-xl font-semibold text-gray-800">Edit Renter</div>
-                    <div class="chinese chinese-font text-gray-600">編輯租用者</div>
-                </div>
-                
-                <input type="hidden" id="editRenterId">
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                            <span class="english">Name <span class="text-red-500">*</span></span>
-                            <span class="chinese">姓名</span>
-                        </label>
-                        <input type="text" id="editRenterName" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 english-font">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                            <span class="english">Password <span class="text-red-500">*</span></span>
-                            <span class="chinese">密碼</span>
-                        </label>
-                        <input type="text" id="editRenterPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <div class="bilingual-text mt-1">
-                            <div class="english english-font text-xs text-gray-500">Password is visible for recovery</div>
-                            <div class="chinese chinese-font text-xs text-gray-500">密碼可見以便找回</div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                            <span class="english">Email</span>
-                            <span class="chinese">電郵</span>
-                        </label>
-                        <input type="email" id="editRenterEmail" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                            <span class="english">Phone</span>
-                            <span class="chinese">電話</span>
-                        </label>
-                        <input type="tel" id="editRenterPhone" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                </div>
-                
-                <div id="editRenterError" class="hidden mt-4 text-red-500 text-sm"></div>
-                
-                <div class="flex gap-3 mt-6">
-                    <button onclick="closeEditRenterModal()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Cancel</div>
-                            <div class="chinese chinese-font text-xs">取消</div>
-                        </div>
-                    </button>
-                    <button onclick="saveRenterEdit()" id="saveRenterBtn" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Save</div>
-                            <div class="chinese chinese-font text-xs">儲存</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 職員登入模態框 | Staff Login Modal -->
-    <div id="staffLoginModal" class="hidden modal-overlay">
-        <div class="modal-content">
-            <div class="p-6">
-                <div class="bilingual-text mb-4">
-                    <div class="english english-font text-xl font-semibold text-gray-800">Staff Login</div>
-                    <div class="chinese chinese-font text-gray-600">職員登入</div>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                            <span class="english">Password</span>
-                            <span class="chinese">密碼</span>
-                        </label>
-                        <input type="password" id="staffPassword" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter staff password / 輸入職員密碼">
-                    </div>
-                </div>
-                
-                <div id="staffLoginError" class="hidden mt-4 text-red-500 text-sm"></div>
-                
-                <div class="flex gap-3 mt-6">
-                    <button onclick="closeStaffLogin()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Cancel</div>
-                            <div class="chinese chinese-font text-xs">取消</div>
-                        </div>
-                    </button>
-                    <button onclick="handleStaffLogin()" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Login</div>
-                            <div class="chinese chinese-font text-xs">登入</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 取消預約確認模態框 | Cancel Booking Confirmation Modal -->
-    <div id="cancelBookingModal" class="hidden modal-overlay">
-        <div class="modal-content">
-            <div class="p-6 text-center">
-                <div class="w-16 h-16 bg-red-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
-                </div>
-                
-                <div class="bilingual-text mb-2">
-                    <div class="english english-font text-xl font-semibold text-gray-800">Cancel Booking?</div>
-                    <div class="chinese chinese-font text-gray-600">取消預約？</div>
-                </div>
-                
-                <p id="cancelBookingDetails" class="text-gray-600 mb-6"></p>
-                
-                <input type="hidden" id="cancelBookingId">
-                
-                <div class="flex gap-3">
-                    <button onclick="closeCancelBookingModal()" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Keep</div>
-                            <div class="chinese chinese-font text-xs">保留</div>
-                        </div>
-                    </button>
-                    <button onclick="confirmCancelBooking()" id="confirmCancelBtn" class="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Cancel Booking</div>
-                            <div class="chinese chinese-font text-xs">取消預約</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 通知訊息 | Toast Notification -->
-    <div id="toast" class="hidden toast"></div>
-    
     <script>
-        // ============ GitHub 配置 ============
-        let githubConfig = JSON.parse(localStorage.getItem('githubConfig')) || {
-            repoOwner: '',
-            repoName: 'room-booking-system',
-            githubToken: ''
+        // 語言設置 (繁體中文/英文)
+        let currentLang = 'zh';
+        const translations = {
+            zh: {
+                // 標題
+                mainTitle: "心理學家房間預約系統",
+                subTitle: "Psychologist Room Booking System",
+                // 登入區域
+                loginTitle: "租用者登入",
+                usernameLabel: "姓名 / Name:",
+                passwordLabel: "密碼 / Password:",
+                loginBtn: "登入 / Login",
+                staffLoginPrompt: "工作人員請使用管理員帳號登入 / Staff please use admin account",
+                staffLoginBtn: "工作人員登入 / Staff Login",
+                // 分頁
+                tabBooking: "預約房間 / Book Room",
+                tabStats: "租用統計 / Booking Stats",
+                tabMyBookings: "我的預約 / My Bookings",
+                // 預約區域
+                branchTitle: "選擇分店 / Select Branch",
+                timeTitle: "選擇時間 / Select Time",
+                selectedDateInfo: "請選擇一個日期 / Please select a date",
+                toyLabel: "租用玩具 / Rent Toys (+$",
+                confirmBooking: "確認預約 / Confirm Booking",
+                // 統計區域
+                statsTitle: "租用統計 / Booking Statistics",
+                statsMonthLabel: "選擇月份 / Select Month:",
+                viewStats: "查看 / View",
+                myBookingsTitle: "我的預約 / My Bookings",
+                // 管理員區域
+                adminTitle: "工作人員管理系統 / Staff Management System",
+                manageUsersBtn: "管理租用者 / Manage Users",
+                manageRoomsBtn: "管理房間 / Manage Rooms",
+                viewAllBookingsBtn: "所有預約 / All Bookings",
+                printReportBtn: "列印報告 / Print Report",
+                manageUsersTitle: "管理租用者 / Manage Users",
+                addUserBtn: "新增租用者 / Add User",
+                manageRoomsTitle: "管理房間 / Manage Rooms",
+                allBookingsTitle: "所有預約 / All Bookings",
+                adminMonthLabel: "選擇月份 / Select Month:",
+                viewAdminBookings: "查看 / View",
+                // 其他
+                logoutBtn: "登出 / Logout",
+                // 房間狀態
+                booked: "已預約",
+                available: "可預約",
+                select: "選擇",
+                cancel: "取消",
+                edit: "編輯",
+                delete: "刪除",
+                // 統計卡片
+                totalHours: "總時數",
+                totalSessions: "總次數",
+                totalAmount: "總金額",
+                averagePerSession: "平均每次"
+            },
+            en: {
+                // Titles
+                mainTitle: "Psychologist Room Booking System",
+                subTitle: "心理學家房間預約系統",
+                // Login area
+                loginTitle: "User Login",
+                usernameLabel: "Name / 姓名:",
+                passwordLabel: "Password / 密碼:",
+                loginBtn: "Login / 登入",
+                staffLoginPrompt: "Staff please use admin account / 工作人員請使用管理員帳號登入",
+                staffLoginBtn: "Staff Login / 工作人員登入",
+                // Tabs
+                tabBooking: "Book Room / 預約房間",
+                tabStats: "Booking Stats / 租用統計",
+                tabMyBookings: "My Bookings / 我的預約",
+                // Booking area
+                branchTitle: "Select Branch / 選擇分店",
+                timeTitle: "Select Time / 選擇時間",
+                selectedDateInfo: "Please select a date / 請選擇一個日期",
+                toyLabel: "Rent Toys / 租用玩具 (+$",
+                confirmBooking: "Confirm Booking / 確認預約",
+                // Stats area
+                statsTitle: "Booking Statistics / 租用統計",
+                statsMonthLabel: "Select Month / 選擇月份:",
+                viewStats: "View / 查看",
+                myBookingsTitle: "My Bookings / 我的預約",
+                // Admin area
+                adminTitle: "Staff Management System / 工作人員管理系統",
+                manageUsersBtn: "Manage Users / 管理租用者",
+                manageRoomsBtn: "Manage Rooms / 管理房間",
+                viewAllBookingsBtn: "All Bookings / 所有預約",
+                printReportBtn: "Print Report / 列印報告",
+                manageUsersTitle: "Manage Users / 管理租用者",
+                addUserBtn: "Add User / 新增租用者",
+                manageRoomsTitle: "Manage Rooms / 管理房間",
+                allBookingsTitle: "All Bookings / 所有預約",
+                adminMonthLabel: "Select Month / 選擇月份:",
+                viewAdminBookings: "View / 查看",
+                // Other
+                logoutBtn: "Logout / 登出",
+                // Room status
+                booked: "Booked",
+                available: "Available",
+                select: "Select",
+                cancel: "Cancel",
+                edit: "Edit",
+                delete: "Delete",
+                // Stats cards
+                totalHours: "Total Hours",
+                totalSessions: "Total Sessions",
+                totalAmount: "Total Amount",
+                averagePerSession: "Average Per Session"
+            }
         };
-        
-        let renters = [];
-        let bookings = [];
-        let roomPrices = [];
+
+        // 初始化系統數據
         let currentUser = null;
-        let isStaff = false;
-        let selectedSlots = [];
-        const staffPassword = '123'; // 職員密碼
+        let currentAdmin = false;
+        let selectedBranch = null;
+        let selectedRoom = null;
+        let selectedDate = null;
+        let selectedTime = null;
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
         
-        // 默認房間配置
-        const defaultRooms = {
-            jordan: [
-                { id: 'jordan-c', name: 'Room C / 房間 C', price: 140, facilities: 'Hypnotic Chair / 催眠椅', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'jordan-d', name: 'Room D / 房間 D', price: 190, facilities: 'Group Therapy, Sandplay Therapy / 小組、沙盤遊戲治療', toyAvailable: true, toyPricePerHour: 50 },
-                { id: 'jordan-e', name: 'Room E / 房間 E', price: 170, facilities: 'Large Room for Family Therapy / 大房 家庭治療', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'jordan-f', name: 'Room F / 房間 F', price: 150, facilities: 'Floor-to-ceiling Window Counselling Room / 落地窗輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'jordan-g', name: 'Room G / 房間 G', price: 150, facilities: 'Floor-to-ceiling Window Counselling Room / 落地窗輔導室', toyAvailable: false, toyPricePerHour: 0 }
+        // 房間數據 (可從GitHub同步)
+        const roomsData = {
+            Jordan: [
+                { id: "RoomC", name: "Room C", price: 140, facilities: ["催眠椅 / Hypnosis Chair"], hasToys: false },
+                { id: "RoomD", name: "Room D", price: 190, facilities: ["小組 / Group", "沙盤遊戲治療 / Sandplay Therapy"], hasToys: true, toyPrice: 50 },
+                { id: "RoomE", name: "Room E", price: 170, facilities: ["大房 / Large Room", "家庭治療 / Family Therapy"] },
+                { id: "RoomF", name: "Room F", price: 150, facilities: ["落地窗輔導室 / Floor-to-Ceiling Window Counseling Room"] },
+                { id: "RoomG", name: "Room G", price: 150, facilities: ["落地窗輔導室 / Floor-to-Ceiling Window Counseling Room"] }
             ],
-            wanchai: [
-                { id: 'wanchai-1', name: 'Room 1 / 房間 1', price: 160, facilities: 'Large Window Room, Long Sofa / 窗口大房、長梳化', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'wanchai-2', name: 'Room 2 / 房間 2', price: 140, facilities: 'Comfortable Counselling Room / 舒適輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'wanchai-3', name: 'Room 3 / 房間 3', price: 140, facilities: 'Comfortable Counselling Room / 舒適輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'wanchai-4', name: 'Room 4 / 房間 4', price: 180, facilities: 'Group Therapy, Sandplay Therapy / 小組、沙盤遊戲治療', toyAvailable: true, toyPricePerHour: 40 }
+            WanChai: [
+                { id: "Room1", name: "Room 1", price: 160, facilities: ["窗口大房 / Large Window Room", "長梳化 / Long Sofa"] },
+                { id: "Room2", name: "Room 2", price: 140, facilities: ["舒適輔導室 / Comfortable Counseling Room"] },
+                { id: "Room3", name: "Room 3", price: 140, facilities: ["舒適輔導室 / Comfortable Counseling Room"] },
+                { id: "Room4", name: "Room 4", price: 180, facilities: ["小組 / Group", "沙盤遊戲治療 / Sandplay Therapy"], hasToys: true, toyPrice: 40 }
             ],
-            tsuenwan: [
-                { id: 'tsuenwan-5', name: 'Room 5 / 房間 5', price: 130, facilities: 'Counselling Room / 輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'tsuenwan-6', name: 'Room 6 / 房間 6', price: 140, facilities: 'Counselling Room / 輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'tsuenwan-7', name: 'Room 7 / 房間 7', price: 140, facilities: 'Counselling Room / 輔導室', toyAvailable: false, toyPricePerHour: 0 },
-                { id: 'tsuenwan-8', name: 'Room 8 / 房間 8', price: 160, facilities: 'Large Window Counselling Room / 大窗輔導室', toyAvailable: false, toyPricePerHour: 0 }
+            TsuenWan: [
+                { id: "Room5", name: "Room 5", price: 130, facilities: [] },
+                { id: "Room6", name: "Room 6", price: 140, facilities: [] },
+                { id: "Room7", name: "Room 7", price: 140, facilities: [] },
+                { id: "Room8", name: "Room 8", price: 160, facilities: ["大窗輔導室 / Large Window Counseling Room"] }
             ]
         };
         
-        // ============ GitHub API 函數 ============
+        // 預約數據 (模擬數據庫)
+        let bookingsData = [];
+        let usersData = [
+            { id: 1, name: "張醫生 / Dr. Zhang", phone: "9123-4567", email: "drzhang@example.com", password: "pass123" },
+            { id: 2, name: "Dr. Smith", phone: "6234-5678", email: "drsmith@example.com", password: "pass456" },
+            { id: 3, name: "陳輔導員 / Counselor Chen", phone: "9345-6789", email: "counselorchen@example.com", password: "pass789" }
+        ];
         
-        async function githubRequest(endpoint, method = 'GET', data = null) {
-            try {
-                const url = `https://api.github.com/repos/${githubConfig.repoOwner}/${githubConfig.repoName}/${endpoint}`;
-                
-                const headers = {
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Authorization': `token ${githubConfig.githubToken}`
-                };
-                
-                const options = {
-                    method: method,
-                    headers: headers
-                };
-                
-                if (data) {
-                    options.body = JSON.stringify(data);
-                    headers['Content-Type'] = 'application/json';
+        // 初始化一些預約數據
+        function initSampleBookings() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            bookingsData = [
+                { id: 1, userId: 1, userName: "張醫生 / Dr. Zhang", roomId: "RoomC", branch: "Jordan", date: formatDate(today), time: "09:00-09:30", duration: 0.5, price: 140, toyRental: false, total: 140 },
+                { id: 2, userId: 1, userName: "張醫生 / Dr. Zhang", roomId: "RoomD", branch: "Jordan", date: formatDate(today), time: "10:00-11:00", duration: 1, price: 190, toyRental: true, total: 240 },
+                { id: 3, userId: 2, userName: "Dr. Smith", roomId: "Room1", branch: "WanChai", date: formatDate(today), time: "14:00-15:00", duration: 1, price: 160, toyRental: false, total: 160 },
+                { id: 4, userId: 3, userName: "陳輔導員 / Counselor Chen", roomId: "Room8", branch: "TsuenWan", date: formatDate(tomorrow), time: "11:00-12:00", duration: 1, price: 160, toyRental: false, total: 160 },
+                { id: 5, userId: 1, userName: "張醫生 / Dr. Zhang", roomId: "RoomF", branch: "Jordan", date: formatDate(tomorrow), time: "15:00-16:00", duration: 1, price: 150, toyRental: false, total: 150 }
+            ];
+        }
+        
+        // 頁面加載時初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initSampleBookings();
+            updateLanguage();
+            setupEventListeners();
+            
+            // 初始化日曆
+            renderCalendar();
+            
+            // 模擬從GitHub加載數據
+            loadFromGitHub();
+        });
+        
+        // 設置事件監聽器
+        function setupEventListeners() {
+            // 語言切換
+            document.getElementById('langToggle').addEventListener('click', toggleLanguage);
+            
+            // 登入相關
+            document.getElementById('loginBtn').addEventListener('click', userLogin);
+            document.getElementById('staffLoginBtn').addEventListener('click', staffLogin);
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('adminLogoutBtn').addEventListener('click', logout);
+            
+            // 分頁切換
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.getAttribute('data-tab');
+                    switchTab(tab);
+                });
+            });
+            
+            // 管理員分頁切換
+            document.querySelectorAll('.admin-controls .btn').forEach(btn => {
+                if (btn.id !== 'printReportBtn') {
+                    btn.addEventListener('click', function() {
+                        const tab = this.getAttribute('data-tab');
+                        switchAdminTab(tab);
+                    });
                 }
-                
-                const response = await fetch(url, options);
-                
-                if (!response.ok) {
-                    throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
+            });
+            
+            // 分店選擇
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    selectedBranch = this.getAttribute('data-branch');
+                    renderRooms(selectedBranch);
+                    // 高亮選中的分店按鈕
+                    document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+            
+            // 日曆導航
+            document.getElementById('prevMonth').addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
                 }
-                
-                if (method !== 'DELETE') {
-                    return await response.json();
+                renderCalendar();
+            });
+            
+            document.getElementById('nextMonth').addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
                 }
-                
-                return { success: true };
-            } catch (error) {
-                console.error('GitHub request error:', error);
-                throw error;
+                renderCalendar();
+            });
+            
+            // 預約確認
+            document.getElementById('confirmBooking').addEventListener('click', confirmBooking);
+            
+            // 統計查看
+            document.getElementById('viewStats').addEventListener('click', renderUserStats);
+            
+            // 管理員查看預約
+            document.getElementById('viewAdminBookings').addEventListener('click', renderAdminBookings);
+            
+            // 新增用戶
+            document.getElementById('addUserBtn').addEventListener('click', addNewUser);
+            
+            // 列印報告
+            document.getElementById('printReportBtn').addEventListener('click', printReport);
+            
+            // 玩具租用選擇
+            document.getElementById('toyRental').addEventListener('change', updateBookingPrice);
+        }
+        
+        // 切換語言
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateLanguage();
+        }
+        
+        // 更新頁面語言
+        function updateLanguage() {
+            // 更新語言按鈕文本
+            document.getElementById('currentLang').textContent = currentLang === 'zh' ? 'EN' : '中';
+            
+            // 更新所有翻譯文本
+            for (const key in translations[currentLang]) {
+                const elements = document.querySelectorAll(`[id="${key}"]`);
+                elements.forEach(element => {
+                    if (element.tagName === 'INPUT' && element.type !== 'button') {
+                        element.placeholder = translations[currentLang][key];
+                    } else {
+                        element.textContent = translations[currentLang][key];
+                    }
+                });
+            }
+            
+            // 更新房間設施文本
+            renderRooms(selectedBranch);
+            
+            // 更新用戶統計
+            if (document.getElementById('statsTab').classList.contains('active-section')) {
+                renderUserStats();
+            }
+            
+            // 更新用戶預約
+            if (document.getElementById('mybookingsTab').classList.contains('active-section')) {
+                renderUserBookings();
+            }
+            
+            // 更新管理員預約
+            if (document.getElementById('allbookingsTab').classList.contains('active-section')) {
+                renderAdminBookings();
             }
         }
         
-        // 使用 GitHub Issues 作為數據庫
-        async function createIssue(title, body, labels = []) {
-            return await githubRequest('issues', 'POST', {
-                title: title,
-                body: body,
-                labels: labels
+        // 租用者登入
+        function userLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                alert(currentLang === 'zh' ? "請輸入姓名和密碼 / Please enter name and password" : "Please enter name and password / 請輸入姓名和密碼");
+                return;
+            }
+            
+            // 在用戶數據中查找
+            const user = usersData.find(u => 
+                u.name.includes(username) || username.includes(u.name.split(' / ')[0]) || username.includes(u.name.split(' / ')[1])
+            );
+            
+            if (user && user.password === password) {
+                currentUser = user;
+                currentAdmin = false;
+                showSection('userSection');
+                renderUserBookings();
+                renderUserStats();
+            } else {
+                alert(currentLang === 'zh' ? "登入失敗，請檢查姓名和密碼 / Login failed, please check name and password" : "Login failed, please check name and password / 登入失敗，請檢查姓名和密碼");
+            }
+        }
+        
+        // 工作人員登入
+        function staffLogin() {
+            const password = prompt(currentLang === 'zh' ? "請輸入管理員密碼 / Please enter admin password:" : "Please enter admin password / 請輸入管理員密碼:");
+            
+            if (password === "admin123") {
+                currentAdmin = true;
+                currentUser = { id: 0, name: "管理員 / Admin" };
+                showSection('adminSection');
+                renderUsersList();
+                renderAdminRooms();
+                renderAdminBookings();
+            } else {
+                alert(currentLang === 'zh' ? "管理員密碼錯誤 / Incorrect admin password" : "Incorrect admin password / 管理員密碼錯誤");
+            }
+        }
+        
+        // 登出
+        function logout() {
+            currentUser = null;
+            currentAdmin = false;
+            selectedBranch = null;
+            selectedRoom = null;
+            selectedDate = null;
+            selectedTime = null;
+            showSection('loginSection');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+        
+        // 顯示指定區域
+        function showSection(sectionId) {
+            document.querySelectorAll('.main-section, .login-section').forEach(section => {
+                section.classList.remove('active-section');
+            });
+            document.getElementById(sectionId).classList.add('active-section');
+            
+            // 重置分頁
+            if (sectionId === 'userSection') {
+                switchTab('booking');
+            } else if (sectionId === 'adminSection') {
+                switchAdminTab('users');
+            }
+        }
+        
+        // 切換租用者分頁
+        function switchTab(tab) {
+            // 更新分頁按鈕狀態
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            
+            // 顯示對應內容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active-section');
+            });
+            document.getElementById(`${tab}Tab`).classList.add('active-section');
+            
+            // 如果需要，更新內容
+            if (tab === 'mybookings') {
+                renderUserBookings();
+            } else if (tab === 'stats') {
+                renderUserStats();
+            }
+        }
+        
+        // 切換管理員分頁
+        function switchAdminTab(tab) {
+            // 更新按鈕狀態
+            document.querySelectorAll('.admin-controls .btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('selected');
+            
+            // 顯示對應內容
+            document.querySelectorAll('.admin-panel.tab-content').forEach(content => {
+                content.classList.remove('active-section');
+            });
+            document.getElementById(`${tab}Tab`).classList.add('active-section');
+        }
+        
+        // 渲染房間列表
+        function renderRooms(branch) {
+            if (!branch) return;
+            
+            const roomsContainer = document.getElementById('roomsContainer');
+            const rooms = roomsData[branch];
+            
+            roomsContainer.innerHTML = '';
+            
+            rooms.forEach(room => {
+                const roomCard = document.createElement('div');
+                roomCard.className = 'room-card';
+                roomCard.setAttribute('data-room', room.id);
+                
+                // 房間設施文本
+                let facilitiesHTML = '';
+                room.facilities.forEach(facility => {
+                    facilitiesHTML += `<div class="room-facility"><i class="fas fa-check-circle"></i> ${facility}</div>`;
+                });
+                
+                if (room.hasToys) {
+                    facilitiesHTML += `<div class="room-facility"><i class="fas fa-plus-circle"></i> ${currentLang === 'zh' ? '可租用玩具 / Toys for rent' : 'Toys for rent / 可租用玩具'} (+$${room.toyPrice}/${currentLang === 'zh' ? '小時' : 'hour'})</div>`;
+                }
+                
+                roomCard.innerHTML = `
+                    <div class="room-header">
+                        <div class="room-title">${room.name}</div>
+                        <div class="room-price">$${room.price}/${currentLang === 'zh' ? '小時' : 'hour'}</div>
+                    </div>
+                    <div class="room-body">
+                        ${facilitiesHTML}
+                        <button class="btn btn-block select-room-btn" style="margin-top: 15px;">${currentLang === 'zh' ? '選擇房間 / Select Room' : 'Select Room / 選擇房間'}</button>
+                    </div>
+                `;
+                
+                roomsContainer.appendChild(roomCard);
+            });
+            
+            // 添加房間選擇事件
+            document.querySelectorAll('.select-room-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const roomCard = this.closest('.room-card');
+                    selectedRoom = roomCard.getAttribute('data-room');
+                    
+                    // 高亮選中的房間
+                    document.querySelectorAll('.room-card').forEach(card => {
+                        card.style.border = 'none';
+                    });
+                    roomCard.style.border = `3px solid ${getComputedStyle(document.documentElement).getPropertyValue('--primary')}`;
+                    
+                    // 顯示玩具選項（如果適用）
+                    const room = rooms.find(r => r.id === selectedRoom);
+                    const toyOption = document.getElementById('toyOption');
+                    if (room.hasToys) {
+                        toyOption.style.display = 'block';
+                        document.getElementById('toyPrice').textContent = room.toyPrice;
+                    } else {
+                        toyOption.style.display = 'none';
+                    }
+                    
+                    // 更新預約按鈕狀態
+                    updateConfirmButton();
+                });
             });
         }
         
-        async function updateIssue(issueNumber, updates) {
-            return await githubRequest(`issues/${issueNumber}`, 'PATCH', updates);
-        }
-        
-        async function getIssues() {
-            return await githubRequest('issues?state=all&per_page=100');
-        }
-        
-        // 使用 GitHub Gists 作為小型數據庫（替代方案）
-        async function createOrUpdateGist(filename, content) {
-            // 先檢查是否已存在
-            const gists = await githubRequest('gists');
+        // 渲染日曆
+        function renderCalendar() {
+            const monthNames = currentLang === 'zh' 
+                ? ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"]
+                : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             
-            // 查找名為 "booking-data" 的 gist
-            const existingGist = gists.find(g => 
-                Object.keys(g.files).includes('booking-data.json')
-            );
+            document.getElementById('currentMonth').textContent = `${currentYear} ${monthNames[currentMonth]}`;
             
-            const data = {
-                files: {
-                    'booking-data.json': {
-                        content: JSON.stringify(content, null, 2)
-                    }
-                },
-                description: 'Room Booking System Data',
-                public: false
+            // 計算該月的第一天和最後一天
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const startingDay = firstDay.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            
+            // 清空日曆
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+            
+            // 添加上個月的日期
+            const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
+            for (let i = startingDay - 1; i >= 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.innerHTML = `<div class="day-number">${prevMonthLastDay - i}</div>`;
+                calendarDays.appendChild(day);
+            }
+            
+            // 添加當月的日期
+            const today = new Date();
+            const isToday = (day) => {
+                return day === today.getDate() && 
+                       currentMonth === today.getMonth() && 
+                       currentYear === today.getFullYear();
             };
             
-            if (existingGist) {
-                return await githubRequest(`gists/${existingGist.id}`, 'PATCH', data);
-            } else {
-                return await githubRequest('gists', 'POST', data);
-            }
-        }
-        
-        async function getGistData() {
-            try {
-                const gists = await githubRequest('gists');
-                const bookingGist = gists.find(g => 
-                    Object.keys(g.files).includes('booking-data.json')
-                );
-                
-                if (bookingGist) {
-                    const response = await fetch(bookingGist.files['booking-data.json'].raw_url);
-                    return await response.json();
-                }
-                return null;
-            } catch (error) {
-                console.error('Error getting gist data:', error);
-                return null;
-            }
-        }
-        
-        // ============ 數據操作函數 ============
-        
-        async function loadAllData() {
-            try {
-                const data = await getGistData();
-                
-                if (data) {
-                    renters = data.renters || [];
-                    bookings = data.bookings || [];
-                    roomPrices = data.roomPrices || [];
-                } else {
-                    // 初始化空數據
-                    renters = [];
-                    bookings = [];
-                    roomPrices = [];
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                if (isToday(day)) {
+                    dayElement.classList.add('today');
                 }
                 
-                console.log('Data loaded from GitHub:', { 
-                    renters: renters.length, 
-                    bookings: bookings.length,
-                    roomPrices: roomPrices.length 
+                dayElement.innerHTML = `<div class="day-number">${day}</div>`;
+                
+                // 添加點擊事件
+                dayElement.addEventListener('click', function() {
+                    selectDate(day);
                 });
                 
-                return true;
-            } catch (error) {
-                console.error('Error loading data:', error);
-                showToast('Error loading data / 載入數據錯誤', 'error');
-                return false;
+                calendarDays.appendChild(dayElement);
             }
-        }
-        
-        async function saveAllData() {
-            try {
-                const data = {
-                    renters: renters,
-                    bookings: bookings,
-                    roomPrices: roomPrices,
-                    lastUpdated: new Date().toISOString()
-                };
-                
-                await createOrUpdateGist('booking-data.json', data);
-                console.log('Data saved to GitHub');
-                return true;
-            } catch (error) {
-                console.error('Error saving data:', error);
-                showToast('Error saving data / 儲存數據錯誤', 'error');
-                return false;
-            }
-        }
-        
-        async function addRenterToGitHub(renterData) {
-            const newId = generateId();
-            const newRenter = {
-                id: newId,
-                ...renterData,
-                createdAt: new Date().toISOString()
-            };
             
-            renters.push(newRenter);
-            await saveAllData();
-            return newId;
-        }
-        
-        async function updateRenterInGitHub(renterId, renterData) {
-            const index = renters.findIndex(r => r.id === renterId);
-            if (index !== -1) {
-                renters[index] = { ...renters[index], ...renterData };
-                await saveAllData();
+            // 添加下個月的日期
+            const totalCells = 42; // 6 rows x 7 days
+            const nextMonthDays = totalCells - (startingDay + lastDay.getDate());
+            for (let day = 1; day <= nextMonthDays; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day other-month';
+                dayElement.innerHTML = `<div class="day-number">${day}</div>`;
+                calendarDays.appendChild(dayElement);
+            }
+            
+            // 渲染時間段（如果已選擇房間）
+            if (selectedRoom) {
+                renderTimeSlots();
             }
         }
         
-        async function deleteRenterFromGitHub(renterId) {
-            renters = renters.filter(r => r.id !== renterId);
-            bookings = bookings.filter(b => b.renterId !== renterId);
-            await saveAllData();
+        // 選擇日期
+        function selectDate(day) {
+            selectedDate = new Date(currentYear, currentMonth, day);
+            const formattedDate = formatDate(selectedDate);
+            
+            // 更新顯示
+            const dateInfo = document.getElementById('selectedDateInfo');
+            dateInfo.textContent = currentLang === 'zh' 
+                ? `已選擇: ${formattedDate} / Selected: ${formattedDate}` 
+                : `Selected: ${formattedDate} / 已選擇: ${formattedDate}`;
+            
+            // 渲染時間段
+            renderTimeSlots();
+            
+            // 更新預約按鈕狀態
+            updateConfirmButton();
         }
         
-        async function addBookingToGitHub(bookingData) {
-            const newId = generateId();
+        // 渲染時間段
+        function renderTimeSlots() {
+            if (!selectedDate || !selectedRoom) return;
+            
+            const timeSlotsContainer = document.getElementById('timeSlots');
+            timeSlotsContainer.innerHTML = '';
+            
+            // 創建時間段 (9:00 AM 到 6:00 PM，每半小時)
+            const startHour = 9;
+            const endHour = 18;
+            const formattedDate = formatDate(selectedDate);
+            
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let minute of ['00', '30']) {
+                    const time = `${hour.toString().padStart(2, '0')}:${minute}`;
+                    const nextHour = minute === '30' ? hour + 1 : hour;
+                    const nextMinute = minute === '30' ? '00' : '30';
+                    const nextTime = `${nextHour.toString().padStart(2, '0')}:${nextMinute}`;
+                    const timeSlot = `${time}-${nextTime}`;
+                    
+                    // 檢查該時間段是否已被預約
+                    const isBooked = bookingsData.some(booking => 
+                        booking.roomId === selectedRoom && 
+                        booking.date === formattedDate && 
+                        booking.time === timeSlot
+                    );
+                    
+                    // 檢查是否是用戶自己的預約
+                    const isMyBooking = currentUser && bookingsData.some(booking => 
+                        booking.userId === currentUser.id && 
+                        booking.roomId === selectedRoom && 
+                        booking.date === formattedDate && 
+                        booking.time === timeSlot
+                    );
+                    
+                    const timeSlotBtn = document.createElement('button');
+                    timeSlotBtn.className = 'time-slot-btn';
+                    timeSlotBtn.textContent = timeSlot;
+                    
+                    if (isBooked && !isMyBooking) {
+                        timeSlotBtn.classList.add('booked');
+                        timeSlotBtn.disabled = true;
+                        timeSlotBtn.title = currentLang === 'zh' ? '已預約 / Booked' : 'Booked / 已預約';
+                    } else {
+                        timeSlotBtn.addEventListener('click', function() {
+                            // 取消選擇其他時間段
+                            document.querySelectorAll('.time-slot-btn').forEach(btn => {
+                                btn.classList.remove('selected');
+                            });
+                            
+                            this.classList.add('selected');
+                            selectedTime = timeSlot;
+                            
+                            // 更新預約按鈕狀態
+                            updateConfirmButton();
+                        });
+                    }
+                    
+                    timeSlotsContainer.appendChild(timeSlotBtn);
+                }
+            }
+        }
+        
+        // 更新確認預約按鈕狀態
+        function updateConfirmButton() {
+            const confirmBtn = document.getElementById('confirmBooking');
+            const isEnabled = selectedBranch && selectedRoom && selectedDate && selectedTime;
+            confirmBtn.disabled = !isEnabled;
+            
+            if (isEnabled) {
+                updateBookingPrice();
+            }
+        }
+        
+        // 更新預約價格
+        function updateBookingPrice() {
+            if (!selectedRoom || !selectedBranch) return;
+            
+            const room = roomsData[selectedBranch].find(r => r.id === selectedRoom);
+            if (!room) return;
+            
+            const toyRental = document.getElementById('toyRental').checked;
+            const duration = 0.5; // 預設半小時，可以擴展為可選擇時長
+            
+            let total = room.price * duration;
+            if (toyRental && room.hasToys) {
+                total += room.toyPrice * duration;
+            }
+            
+            const confirmBtn = document.getElementById('confirmBooking');
+            confirmBtn.textContent = currentLang === 'zh' 
+                ? `確認預約 / Confirm Booking ($${total.toFixed(2)})` 
+                : `Confirm Booking / 確認預約 ($${total.toFixed(2)})`;
+        }
+        
+        // 確認預約
+        function confirmBooking() {
+            if (!selectedBranch || !selectedRoom || !selectedDate || !selectedTime || !currentUser) return;
+            
+            const room = roomsData[selectedBranch].find(r => r.id === selectedRoom);
+            const toyRental = document.getElementById('toyRental').checked;
+            const duration = 0.5; // 半小時
+            
+            let total = room.price * duration;
+            if (toyRental && room.hasToys) {
+                total += room.toyPrice * duration;
+            }
+            
+            // 創建新的預約
             const newBooking = {
-                id: newId,
-                ...bookingData,
-                createdAt: new Date().toISOString()
+                id: bookingsData.length > 0 ? Math.max(...bookingsData.map(b => b.id)) + 1 : 1,
+                userId: currentUser.id,
+                userName: currentUser.name,
+                roomId: selectedRoom,
+                branch: selectedBranch,
+                date: formatDate(selectedDate),
+                time: selectedTime,
+                duration: duration,
+                price: room.price,
+                toyRental: toyRental,
+                total: total
             };
             
-            bookings.push(newBooking);
-            await saveAllData();
-            return newId;
+            bookingsData.push(newBooking);
+            
+            // 保存到GitHub (模擬)
+            saveToGitHub();
+            
+            // 顯示成功消息
+            alert(currentLang === 'zh' 
+                ? `預約成功! / Booking successful!\n房間: ${room.name}\n日期: ${formatDate(selectedDate)}\n時間: ${selectedTime}\n總金額: $${total.toFixed(2)}`
+                : `Booking successful! / 預約成功!\nRoom: ${room.name}\nDate: ${formatDate(selectedDate)}\nTime: ${selectedTime}\nTotal: $${total.toFixed(2)}`);
+            
+            // 重置選擇
+            selectedRoom = null;
+            selectedDate = null;
+            selectedTime = null;
+            document.getElementById('selectedDateInfo').textContent = currentLang === 'zh' 
+                ? "請選擇一個日期 / Please select a date" 
+                : "Please select a date / 請選擇一個日期";
+            document.getElementById('toyOption').style.display = 'none';
+            document.getElementById('confirmBooking').disabled = true;
+            document.getElementById('confirmBooking').textContent = currentLang === 'zh' 
+                ? "確認預約 / Confirm Booking" 
+                : "Confirm Booking / 確認預約";
+            
+            // 重新渲染時間段和用戶預約
+            renderTimeSlots();
+            renderUserBookings();
         }
         
-        async function cancelBookingInGitHub(bookingId) {
-            const index = bookings.findIndex(b => b.id === bookingId);
-            if (index !== -1) {
-                bookings[index].status = 'cancelled';
-                bookings[index].cancelledAt = new Date().toISOString();
-                await saveAllData();
+        // 渲染用戶預約
+        function renderUserBookings() {
+            if (!currentUser) return;
+            
+            const userBookingsList = document.getElementById('userBookingsList');
+            userBookingsList.innerHTML = '';
+            
+            const userBookings = bookingsData.filter(booking => booking.userId === currentUser.id);
+            
+            if (userBookings.length === 0) {
+                userBookingsList.innerHTML = `<p>${currentLang === 'zh' ? '暫無預約 / No bookings yet' : 'No bookings yet / 暫無預約'}</p>`;
+                return;
+            }
+            
+            // 按日期排序（最近的在前）
+            userBookings.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            userBookings.forEach(booking => {
+                const bookingItem = document.createElement('div');
+                bookingItem.className = 'booking-item';
+                
+                // 查找房間名稱
+                const room = roomsData[booking.branch].find(r => r.id === booking.roomId);
+                const roomName = room ? room.name : booking.roomId;
+                
+                bookingItem.innerHTML = `
+                    <div class="booking-details">
+                        <h4>${roomName} (${booking.branch === 'Jordan' ? '佐敦' : booking.branch === 'WanChai' ? '灣仔' : '荃灣'} / ${booking.branch})</h4>
+                        <p>${booking.date} | ${booking.time} | ${booking.duration} ${currentLang === 'zh' ? '小時' : 'hour'}</p>
+                        <p>${booking.toyRental ? (currentLang === 'zh' ? '包含玩具租用 / Includes toy rental' : 'Includes toy rental / 包含玩具租用') + ' | ' : ''}總金額: $${booking.total.toFixed(2)}</p>
+                    </div>
+                    <div class="booking-actions">
+                        <button class="btn cancel-booking-btn" data-id="${booking.id}">${currentLang === 'zh' ? '取消 / Cancel' : 'Cancel / 取消'}</button>
+                    </div>
+                `;
+                
+                userBookingsList.appendChild(bookingItem);
+            });
+            
+            // 添加取消預約事件
+            document.querySelectorAll('.cancel-booking-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const bookingId = parseInt(this.getAttribute('data-id'));
+                    cancelBooking(bookingId);
+                });
+            });
+        }
+        
+        // 取消預約
+        function cancelBooking(bookingId) {
+            if (confirm(currentLang === 'zh' ? '確定要取消此預約嗎？/ Are you sure you want to cancel this booking?' : 'Are you sure you want to cancel this booking? / 確定要取消此預約嗎？')) {
+                const index = bookingsData.findIndex(booking => booking.id === bookingId);
+                if (index !== -1) {
+                    bookingsData.splice(index, 1);
+                    
+                    // 保存到GitHub (模擬)
+                    saveToGitHub();
+                    
+                    // 重新渲染相關內容
+                    renderUserBookings();
+                    renderAdminBookings();
+                    
+                    // 如果正在預約頁面，重新渲染時間段
+                    if (selectedDate && selectedRoom) {
+                        renderTimeSlots();
+                    }
+                    
+                    alert(currentLang === 'zh' ? '預約已取消 / Booking cancelled' : 'Booking cancelled / 預約已取消');
+                }
             }
         }
         
-        async function updateRoomPriceInGitHub(roomId, priceData) {
-            const index = roomPrices.findIndex(p => p.roomId === roomId);
+        // 渲染用戶統計
+        function renderUserStats() {
+            if (!currentUser) return;
             
-            if (index !== -1) {
-                roomPrices[index] = { ...roomPrices[index], ...priceData };
-            } else {
-               
+            const monthInput = document.getElementById('statsMonth').value;
+            const [year, month] = monthInput.split('-').map(Number);
+            
+            // 過濾該月的預約
+            const userBookings = bookingsData.filter(booking => {
+                if (booking.userId !== currentUser.id) return false;
+                
+                const bookingDate = new Date(booking.date);
+                return bookingDate.getFullYear() === year && bookingDate.getMonth() + 1 === month;
+            });
+            
+            // 計算統計數據
+            const totalHours = userBookings.reduce((sum, booking) => sum + booking.duration, 0);
+            const totalSessions = userBookings.length;
+            const totalAmount = userBookings.reduce((sum, booking) => sum + booking.total, 0);
+            const averagePerSession = totalSessions > 0 ? totalAmount / totalSessions : 0;
+            
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = '';
+            
+            const stats = [
+                { title: currentLang === 'zh' ? '總時數 / Total Hours' : 'Total Hours / 總時數', value: totalHours.toFixed(1) },
+                { title: currentLang === 'zh' ? '總次數 / Total Sessions' : 'Total Sessions / 總次數', value: totalSessions },
+                { title: currentLang === 'zh' ? '總金額 / Total Amount' : 'Total Amount / 總金額', value: `$${totalAmount.toFixed(2)}` },
+                { title: currentLang === 'zh' ? '平均每次 / Average Per Session' : 'Average Per Session / 平均每次', value: `$${averagePerSession.toFixed(2)}` }
+            ];
+            
+            stats.forEach(stat => {
+                const statCard = document.createElement('div');
+                statCard.className = 'stat-card';
+                statCard.innerHTML = `
+                    <h4>${stat.title}</h4>
+                    <div class="stat-value">${stat.value}</div>
+                `;
+                statsGrid.appendChild(statCard);
+            });
+        }
+        
+        // 渲染用戶列表 (管理員)
+        function renderUsersList() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            
+            usersData.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.innerHTML = `
+                    <div>${user.name}</div>
+                    <div>${user.phone}</div>
+                    <div>${user.email}</div>
+                    <div>${user.password}</div>
+                    <div>
+                        <button class="btn edit-user-btn" data-id="${user.id}">${currentLang === 'zh' ? '編輯 / Edit' : 'Edit / 編輯'}</button>
+                        <button class="btn delete-user-btn" data-id="${user.id}">${currentLang === 'zh' ? '刪除 / Delete' : 'Delete / 刪除'}</button>
+                    </div>
+                `;
+                usersList.appendChild(userItem);
+            });
+            
+            // 添加事件監聽器
+            document.querySelectorAll('.edit-user-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = parseInt(this.getAttribute('data-id'));
+                    editUser(userId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = parseInt(this.getAttribute('data-id'));
+                    deleteUser(userId);
+                });
+            });
+        }
+        
+        // 渲染管理員房間管理
+        function renderAdminRooms() {
+            const roomsContainer = document.querySelector('#roomsTab .room-grid');
+            roomsContainer.innerHTML = '';
+            
+            // 合併所有房間
+            let allRooms = [];
+            for (const branch in roomsData) {
+                roomsData[branch].forEach(room => {
+                    allRooms.push({ ...room, branch });
+                });
+            }
+            
+            allRooms.forEach(room => {
+                const roomCard = document.createElement('div');
+                roomCard.className = 'room-card';
+                
+                // 房間設施文本
+                let facilitiesHTML = '';
+                room.facilities.forEach(facility => {
+                    facilitiesHTML += `<div class="room-facility"><i class="fas fa-check-circle"></i> ${facility}</div>`;
+                });
+                
+                if (room.hasToys) {
+                    facilitiesHTML += `<div class="room-facility"><i class="fas fa-plus-circle"></i> ${currentLang === 'zh' ? '可租用玩具 / Toys for rent' : 'Toys for rent / 可租用玩具'} (+$${room.toyPrice}/${currentLang === 'zh' ? '小時' : 'hour'})</div>`;
+                }
+                
+                roomCard.innerHTML = `
+                    <div class="room-header">
+                        <div class="room-title">${room.name} (${room.branch === 'Jordan' ? '佐敦' : room.branch === 'WanChai' ? '灣仔' : '荃灣'})</div>
+                        <div class="room-price">$${room.price}/${currentLang === 'zh' ? '小時' : 'hour'}</div>
+                    </div>
+                    <div class="room-body">
+                        ${facilitiesHTML}
+                        <button class="btn btn-block edit-room-btn" style="margin-top: 15px;" data-id="${room.id}" data-branch="${room.branch}">${currentLang === 'zh' ? '編輯價格 / Edit Price' : 'Edit Price / 編輯價格'}</button>
+                    </div>
+                `;
+                
+                roomsContainer.appendChild(roomCard);
+            });
+            
+            // 添加編輯房間事件
+            document.querySelectorAll('.edit-room-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const roomId = this.getAttribute('data-id');
+                    const branch = this.getAttribute('data-branch');
+                    editRoomPrice(roomId, branch);
+                });
+            });
+        }
+        
+        // 渲染所有預約 (管理員)
+        function renderAdminBookings() {
+            const adminBookingsList = document.getElementById('adminBookingsList');
+            adminBookingsList.innerHTML = '';
+            
+            const monthInput = document.getElementById('adminMonth').value;
+            const [year, month] = monthInput.split('-').map(Number);
+            
+            // 過濾該月的預約
+            const monthBookings = bookingsData.filter(booking => {
+                const bookingDate = new Date(booking.date);
+                return bookingDate.getFullYear() === year && bookingDate.getMonth() + 1 === month;
+            });
+            
+            if (monthBookings.length === 0) {
+                adminBookingsList.innerHTML = `<div class="booking-row">${currentLang === 'zh' ? '本月暫無預約 / No bookings this month' : 'No bookings this month / 本月暫無預約'}</div>`;
+                return;
+            }
+            
+            // 按日期排序
+            monthBookings.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            monthBookings.forEach(booking => {
+                const bookingRow = document.createElement('div');
+                bookingRow.className = 'booking-row';
+                
+                // 查找房間名稱
+                const room = roomsData[booking.branch].find(r => r.id === booking.roomId);
+                const roomName = room ? room.name : booking.roomId;
+                
+                bookingRow.innerHTML = `
+                    <div>${booking.userName}</div>
+                    <div>${roomName} (${booking.branch === 'Jordan' ? '佐敦' : booking.branch === 'WanChai' ? '灣仔' : '荃灣'})</div>
+                    <div>${booking.date}</div>
+                    <div>${booking.time}</div>
+                    <div>$${booking.total.toFixed(2)}</div>
+                    <div>
+                        <button class="btn admin-cancel-booking-btn" data-id="${booking.id}">${currentLang === 'zh' ? '取消 / Cancel' : 'Cancel / 取消'}</button>
+                    </div>
+                `;
+                
+                adminBookingsList.appendChild(bookingRow);
+            });
+            
+            // 添加取消預約事件 (管理員)
+            document.querySelectorAll('.admin-cancel-booking-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const bookingId = parseInt(this.getAttribute('data-id'));
+                    cancelBooking(bookingId);
+                });
+            });
+        }
+        
+        // 新增用戶
+        function addNewUser() {
+            const name = prompt(currentLang === 'zh' ? '請輸入租用者姓名 (中英文) / Enter user name (Chinese/English):' : 'Enter user name (Chinese/English) / 請輸入租用者姓名 (中英文):');
+            if (!name) return;
+            
+            const phone = prompt(currentLang === 'zh' ? '請輸入聯絡電話 / Enter phone number:' : 'Enter phone number / 請輸入聯絡電話:');
+            const email = prompt(currentLang === 'zh' ? '請輸入電子郵件 / Enter email:' : 'Enter email / 請輸入電子郵件:');
+            
+            // 生成預設密碼
+            const defaultPassword = "123";
+            
+            const newUser = {
+                id: usersData.length > 0 ? Math.max(...usersData.map(u => u.id)) + 1 : 1,
+                name: name,
+                phone: phone || '',
+                email: email || '',
+                password: defaultPassword
+            };
+            
+            usersData.push(newUser);
+            
+            // 保存到GitHub (模擬)
+            saveToGitHub();
+            
+            // 重新渲染用戶列表
+            renderUsersList();
+            
+            alert(currentLang === 'zh' 
+                ? `用戶新增成功! / User added successfully!\n密碼: ${defaultPassword} (可稍後更改)`
+                : `User added successfully! / 用戶新增成功!\nPassword: ${defaultPassword} (can be changed later)`);
+        }
+        
+        // 編輯用戶
+        function editUser(userId) {
+            const user = usersData.find(u => u.id === userId);
+            if (!user) return;
+            
+            const newName = prompt(currentLang === 'zh' ? '請輸入新姓名 / Enter new name:' : 'Enter new name / 請輸入新姓名:', user.name);
+            if (!newName) return;
+            
+            const newPhone = prompt(currentLang === 'zh' ? '請輸入新聯絡電話 / Enter new phone number:' : 'Enter new phone number / 請輸入新聯絡電話:', user.phone);
+            const newEmail = prompt(currentLang === 'zh' ? '請輸入新電子郵件 / Enter new email:' : 'Enter new email / 請輸入新電子郵件:', user.email);
+            const newPassword = prompt(currentLang === 'zh' ? '請輸入新密碼 / Enter new password:' : 'Enter new password / 請輸入新密碼:', user.password);
+            
+            user.name = newName;
+            user.phone = newPhone || '';
+            user.email = newEmail || '';
+            user.password = newPassword || user.password;
+            
+            // 保存到GitHub (模擬)
+            saveToGitHub();
+            
+            // 重新渲染用戶列表
+            renderUsersList();
+            
+            alert(currentLang === 'zh' ? '用戶資料已更新 / User updated successfully' : 'User updated successfully / 用戶資料已更新');
+        }
+        
+        // 刪除用戶
+        function deleteUser(userId) {
+            if (confirm(currentLang === 'zh' ? '確定要刪除此用戶嗎？/ Are you sure you want to delete this user?' : 'Are you sure you want to delete this user? / 確定要刪除此用戶嗎？')) {
+                const index = usersData.findIndex(u => u.id === userId);
+                if (index !== -1) {
+                    // 檢查用戶是否有預約
+                    const userBookings = bookingsData.filter(b => b.userId === userId);
+                    if (userBookings.length > 0) {
+                        if (!confirm(currentLang === 'zh' 
+                            ? `此用戶有 ${userBookings.length} 個預約，確定要刪除嗎？/ This user has ${userBookings.length} bookings, are you sure you want to delete?` 
+                            : `This user has ${userBookings.length} bookings, are you sure you want to delete? / 此用戶有 ${userBookings.length} 個預約，確定要刪除嗎？`)) {
+                            return;
+                        }
+                    }
+                    
+                    usersData.splice(index, 1);
+                    
+                    // 保存到GitHub (模擬)
+                    saveToGitHub();
+                    
+                    // 重新渲染用戶列表
+                    renderUsersList();
+                    
+                    alert(currentLang === 'zh' ? '用戶已刪除 / User deleted' : 'User deleted / 用戶已刪除');
+                }
+            }
+        }
+        
+        // 編輯房間價格
+        function editRoomPrice(roomId, branch) {
+            const room = roomsData[branch].find(r => r.id === roomId);
+            if (!room) return;
+            
+            const newPrice = prompt(currentLang === 'zh' 
+                ? `請輸入 ${room.name} 的新租金 (每小時) / Enter new price for ${room.name} (per hour):` 
+                : `Enter new price for ${room.name} (per hour) / 請輸入 ${room.name} 的新租金 (每小時):`, room.price);
+            
+            if (!newPrice || isNaN(newPrice)) return;
+            
+            room.price = parseFloat(newPrice);
+            
+            // 保存到GitHub (模擬)
+            saveToGitHub();
+            
+            // 重新渲染房間
+            renderAdminRooms();
+            
+            alert(currentLang === 'zh' 
+                ? `房間租金已更新 / Room price updated\n新租金: $${room.price}/${currentLang === 'zh' ? '小時' : 'hour'}`
+                : `Room price updated / 房間租金已更新\nNew price: $${room.price}/${currentLang === 'zh' ? '小時' : 'hour'}`);
+        }
+        
+        // 列印報告
+        function printReport() {
+            window.print();
+        }
+        
+        // 從GitHub加載數據 (模擬)
+        function loadFromGitHub() {
+            // 在實際應用中，這裡會從GitHub API加載數據
+            console.log("從GitHub加載數據... / Loading data from GitHub...");
+            
+            // 模擬從本地存儲加載
+            const savedBookings = localStorage.getItem('psychologistBookings');
+            const savedUsers = localStorage.getItem('psychologistUsers');
+            
+            if (savedBookings) {
+                bookingsData = JSON.parse(savedBookings);
+            }
+            
+            if (savedUsers) {
+                usersData = JSON.parse(savedUsers);
+            }
+        }
+        
+        // 保存到GitHub (模擬)
+        function saveToGitHub() {
+            // 在實際應用中，這裡會通過GitHub API保存數據
+            console.log("保存數據到GitHub... / Saving data to GitHub...");
+            
+            // 模擬保存到本地存儲
+            localStorage.setItem('psychologistBookings', JSON.stringify(bookingsData));
+            localStorage.setItem('psychologistUsers', JSON.stringify(usersData));
+        }
+        
+        // 輔助函數：格式化日期為YYYY-MM-DD
+        function formatDate(date) {
+            if (!date) return '';
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+    </script>
+</body>
+</html>
