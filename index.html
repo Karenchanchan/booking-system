@@ -100,7 +100,7 @@
          <p id="roomInfoFacilities" class="text-gray-600 mt-1"></p>
         </div>
         <div class="text-right">
-         <p class="text-sm text-gray-500">Price ���金</p>
+         <p class="text-sm text-gray-500">Price 租金</p>
          <p id="roomInfoPrice" class="text-2xl font-bold text-blue-600"></p>
          <p class="text-xs text-gray-400">per hour 每小時</p>
         </div>
@@ -390,16 +390,28 @@
     // ============ SDK Initialization ============
     const dataHandler = {
       onDataChanged(data) {
+        console.log('🔄 Data changed:', data.length, 'items');
         allData = data;
         renters = data.filter(d => d.type === 'renter');
         bookings = data.filter(d => d.type === 'booking' && d.status === 'active');
         roomPrices = data.filter(d => d.type === 'room_price');
         
-        updateUI();
+        console.log('📋 Renters after update:', renters);
+        console.log('📋 Bookings after update:', bookings.length);
+        console.log('📋 Room prices after update:', roomPrices.length);
+        
+        // Force UI update
+        if (isStaff) {
+          updateStaffUI();
+        } else if (currentUser) {
+          updateRenterUI();
+        }
       }
     };
 
     async function initApp() {
+      console.log('🚀 Initializing app...');
+      
       // Set default date
       const today = new Date();
       document.getElementById('renterDateSelect').value = today.toISOString().split('T')[0];
@@ -409,9 +421,24 @@
       initDateSelects();
       
       // Initialize Data SDK
-      const result = await window.dataSdk.init(dataHandler);
-      if (!result.isOk) {
-        showToast('Failed to initialize system 系統初始化失敗', 'error');
+      try {
+        const result = await window.dataSdk.init(dataHandler);
+        console.log('SDK init result:', result);
+        
+        if (result.isOk) {
+          console.log('✅ SDK initialized successfully');
+          // Force initial data load
+          const dataResult = await window.dataSdk.getAll();
+          if (dataResult.isOk) {
+            dataHandler.onDataChanged(dataResult.value);
+          }
+        } else {
+          showToast('Failed to initialize system 系統初始化失敗', 'error');
+          console.error('SDK init error:', result.error);
+        }
+      } catch (error) {
+        console.error('SDK init exception:', error);
+        showToast('System error 系統錯誤', 'error');
       }
     }
 
@@ -452,6 +479,7 @@
 
     // ============ UI Update Functions ============
     function updateUI() {
+      console.log('🔄 Updating UI...');
       if (isStaff) {
         updateStaffUI();
       } else if (currentUser) {
@@ -460,6 +488,7 @@
     }
 
     function updateStaffUI() {
+      console.log('🔄 Updating Staff UI...');
       renderRentersList();
       renderRoomSettings();
       renderAllBookings();
@@ -468,6 +497,7 @@
     }
 
     function updateRenterUI() {
+      console.log('🔄 Updating Renter UI...');
       renderMyBookings();
       updateRenterStatistics();
       loadTimeSlots();
@@ -478,14 +508,21 @@
       const name = document.getElementById('loginName').value.trim();
       const password = document.getElementById('loginPassword').value;
       
+      console.log('🔑 Login attempt:', { name, password });
+      console.log('📋 Available renters:', renters);
+      
       if (!name || !password) {
         showLoginError('Please enter name and password 請輸入姓名和密碼');
         return;
       }
       
-      const renter = renters.find(r => r.name.toLowerCase() === name.toLowerCase() && r.password === password);
+      const renter = renters.find(r => {
+        console.log('Checking renter:', r.name, 'password:', r.password);
+        return r.name.toLowerCase() === name.toLowerCase() && r.password === password;
+      });
       
       if (renter) {
+        console.log('✅ Login successful for:', renter.name);
         currentUser = renter;
         isStaff = false;
         document.getElementById('loginScreen').classList.add('hidden');
@@ -494,7 +531,14 @@
         updateRenterUI();
         showToast('Login successful 登入成功', 'success');
       } else {
+        console.log('❌ Login failed');
         showLoginError('Invalid name or password 姓名或密碼錯誤');
+        // Display available users for debugging
+        console.log('Available users:', renters.map(r => ({ 
+          name: r.name, 
+          password: r.password,
+          id: r.__backendId 
+        })));
       }
     }
 
@@ -532,6 +576,7 @@
     }
 
     function logout() {
+      console.log('👋 Logging out...');
       currentUser = null;
       isStaff = false;
       document.getElementById('loginScreen').classList.remove('hidden');
@@ -793,17 +838,24 @@
       btn.disabled = true;
       btn.textContent = 'Processing... 處理中...';
       
-      const result = await window.dataSdk.create(booking);
-      
-      btn.disabled = false;
-      btn.textContent = 'Confirm Booking 確認預約';
-      
-      if (result.isOk) {
-        showToast('Booking confirmed! 預約成功！', 'success');
-        selectedSlots = [];
-        loadTimeSlots();
-      } else {
-        showToast('Booking failed 預約失敗', 'error');
+      try {
+        console.log('Creating booking:', booking);
+        const result = await window.dataSdk.create(booking);
+        console.log('Booking result:', result);
+        
+        if (result.isOk) {
+          showToast('Booking confirmed! 預約成功！', 'success');
+          selectedSlots = [];
+          loadTimeSlots();
+        } else {
+          showToast('Booking failed 預約失敗: ' + (result.error || ''), 'error');
+        }
+      } catch (error) {
+        console.error('Booking error:', error);
+        showToast('Booking error 預約錯誤', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirm Booking 確認預約';
       }
     }
 
@@ -884,16 +936,23 @@
       btn.disabled = true;
       btn.textContent = 'Cancelling... 取消中...';
       
-      const result = await window.dataSdk.delete(booking);
-      
-      btn.disabled = false;
-      btn.textContent = 'Cancel Booking 取消預約';
-      
-      if (result.isOk) {
-        showToast('Booking cancelled 預約已取消', 'success');
-        closeCancelBookingModal();
-      } else {
-        showToast('Failed to cancel 取消失敗', 'error');
+      try {
+        console.log('Deleting booking:', bookingId);
+        const result = await window.dataSdk.delete(booking);
+        console.log('Delete result:', result);
+        
+        if (result.isOk) {
+          showToast('Booking cancelled 預約已取消', 'success');
+          closeCancelBookingModal();
+        } else {
+          showToast('Failed to cancel 取消失敗: ' + (result.error || ''), 'error');
+        }
+      } catch (error) {
+        console.error('Cancel error:', error);
+        showToast('Cancel error 取消錯誤', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Cancel Booking 取消預約';
       }
     }
 
@@ -951,6 +1010,8 @@
     function renderRentersList() {
       const container = document.getElementById('rentersList');
       const noRentersMessage = document.getElementById('noRentersMessage');
+      
+      console.log('🔄 Rendering renters list:', renters);
       
       if (renters.length === 0) {
         container.innerHTML = '';
@@ -1014,6 +1075,8 @@
       const email = document.getElementById('newRenterEmail').value.trim();
       const phone = document.getElementById('newRenterPhone').value.trim();
       
+      console.log('➕ Adding renter:', { name, password, email, phone });
+      
       if (!name || !password) {
         document.getElementById('addRenterError').textContent = 'Name and password are required 姓名和密碼為必填';
         document.getElementById('addRenterError').classList.remove('hidden');
@@ -1021,7 +1084,9 @@
       }
       
       // Check for duplicate name
-      if (renters.some(r => r.name.toLowerCase() === name.toLowerCase())) {
+      const existing = renters.find(r => r.name.toLowerCase() === name.toLowerCase());
+      if (existing) {
+        console.log('❌ Duplicate renter found:', existing);
         document.getElementById('addRenterError').textContent = 'Renter name already exists 租用者姓名已存在';
         document.getElementById('addRenterError').classList.remove('hidden');
         return;
@@ -1037,30 +1102,53 @@
       btn.disabled = true;
       btn.textContent = 'Adding... 新增中...';
       
-      const result = await window.dataSdk.create({
+      const newRenter = {
         type: 'renter',
         name: name,
         password: password,
         email: email,
         phone: phone,
         createdAt: new Date().toISOString()
-      });
+      };
       
-      btn.disabled = false;
-      btn.textContent = 'Add 新增';
+      console.log('📤 Creating renter:', newRenter);
       
-      if (result.isOk) {
-        showToast('Renter added successfully 租用���已新增', 'success');
-        closeAddRenterModal();
-      } else {
-        document.getElementById('addRenterError').textContent = 'Failed to add renter 新增失敗';
+      try {
+        const result = await window.dataSdk.create(newRenter);
+        console.log('📥 Create result:', result);
+        
+        if (result.isOk) {
+          console.log('✅ Renter created successfully');
+          
+          // Manually refresh data
+          const dataResult = await window.dataSdk.getAll();
+          if (dataResult.isOk) {
+            console.log('🔄 Refreshing data after create');
+            dataHandler.onDataChanged(dataResult.value);
+          }
+          
+          showToast('Renter added successfully 租用者已新增', 'success');
+          closeAddRenterModal();
+        } else {
+          console.error('❌ Create failed:', result.error);
+          document.getElementById('addRenterError').textContent = 'Failed to add renter 新增失敗: ' + (result.error || 'Unknown error');
+          document.getElementById('addRenterError').classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('❌ Exception:', error);
+        document.getElementById('addRenterError').textContent = 'Error: ' + error.message;
         document.getElementById('addRenterError').classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Add 新增';
       }
     }
 
     function editRenter(renterId) {
       const renter = renters.find(r => r.__backendId === renterId);
       if (!renter) return;
+      
+      console.log('✏️ Editing renter:', renter);
       
       document.getElementById('editRenterId').value = renterId;
       document.getElementById('editRenterName').value = renter.name;
@@ -1082,6 +1170,8 @@
       const email = document.getElementById('editRenterEmail').value.trim();
       const phone = document.getElementById('editRenterPhone').value.trim();
       
+      console.log('💾 Saving renter edit:', { renterId, name, password, email, phone });
+      
       if (!name || !password) {
         document.getElementById('editRenterError').textContent = 'Name and password are required 姓名和密碼為必填';
         document.getElementById('editRenterError').classList.remove('hidden');
@@ -1095,23 +1185,40 @@
       btn.disabled = true;
       btn.textContent = 'Saving... 儲存中...';
       
-      const result = await window.dataSdk.update({
-        ...renter,
-        name: name,
-        password: password,
-        email: email,
-        phone: phone
-      });
-      
-      btn.disabled = false;
-      btn.textContent = 'Save 儲存';
-      
-      if (result.isOk) {
-        showToast('Renter updated 租用者已更新', 'success');
-        closeEditRenterModal();
-      } else {
-        document.getElementById('editRenterError').textContent = 'Failed to update 更新失敗';
+      try {
+        const result = await window.dataSdk.update({
+          ...renter,
+          name: name,
+          password: password,
+          email: email,
+          phone: phone
+        });
+        
+        console.log('💾 Update result:', result);
+        
+        if (result.isOk) {
+          console.log('✅ Renter updated');
+          
+          // Manually refresh data
+          const dataResult = await window.dataSdk.getAll();
+          if (dataResult.isOk) {
+            dataHandler.onDataChanged(dataResult.value);
+          }
+          
+          showToast('Renter updated 租用者已更新', 'success');
+          closeEditRenterModal();
+        } else {
+          console.error('❌ Update failed:', result.error);
+          document.getElementById('editRenterError').textContent = 'Failed to update 更新失敗: ' + (result.error || '');
+          document.getElementById('editRenterError').classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('❌ Exception:', error);
+        document.getElementById('editRenterError').textContent = 'Error: ' + error.message;
         document.getElementById('editRenterError').classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save 儲存';
       }
     }
 
@@ -1119,21 +1226,38 @@
       const renter = renters.find(r => r.__backendId === renterId);
       if (!renter) return;
       
-      // Use inline confirmation instead of confirm()
+      console.log('🗑️ Deleting renter:', renter);
+      
       const confirmed = await showInlineConfirm(`Delete "${renter.name}"? 刪除「${renter.name}」？`);
       if (!confirmed) return;
       
-      const result = await window.dataSdk.delete(renter);
-      
-      if (result.isOk) {
-        showToast('Renter deleted 租用者已刪除', 'success');
-      } else {
-        showToast('Failed to delete 刪除失敗', 'error');
+      try {
+        const result = await window.dataSdk.delete(renter);
+        console.log('🗑️ Delete result:', result);
+        
+        if (result.isOk) {
+          console.log('✅ Renter deleted');
+          showToast('Renter deleted 租用者已刪除', 'success');
+          
+          // Manually refresh data
+          const dataResult = await window.dataSdk.getAll();
+          if (dataResult.isOk) {
+            dataHandler.onDataChanged(dataResult.value);
+          }
+        } else {
+          console.error('❌ Delete failed:', result.error);
+          showToast('Failed to delete 刪除失敗: ' + (result.error || ''), 'error');
+        }
+      } catch (error) {
+        console.error('❌ Exception:', error);
+        showToast('Delete error 刪除錯誤', 'error');
       }
     }
 
     // ============ Staff: Room Settings ============
     function renderRoomSettings() {
+      console.log('🔄 Rendering room settings');
+      
       const branches = { jordan: 'jordanRooms', wanchai: 'wanchaiRooms', tsuenwan: 'tsuenwanRooms' };
       
       for (const branch in branches) {
@@ -1171,6 +1295,8 @@
     }
 
     async function updateRoomPrice(roomId, price, toyPrice) {
+      console.log('💰 Updating room price:', { roomId, price, toyPrice });
+      
       const existingPrice = roomPrices.find(p => p.roomId === roomId);
       
       // Get room info for branch
@@ -1185,41 +1311,63 @@
         }
       }
       
-      if (existingPrice) {
-        const result = await window.dataSdk.update({
-          ...existingPrice,
-          price: parseInt(price),
-          toyPricePerHour: parseInt(toyPrice)
-        });
-        
-        if (result.isOk) {
-          showToast('Price updated 價格已更新', 'success');
+      try {
+        if (existingPrice) {
+          const result = await window.dataSdk.update({
+            ...existingPrice,
+            price: parseInt(price),
+            toyPricePerHour: parseInt(toyPrice)
+          });
+          
+          console.log('💰 Update result:', result);
+          
+          if (result.isOk) {
+            showToast('Price updated 價格已更新', 'success');
+            
+            // Manually refresh data
+            const dataResult = await window.dataSdk.getAll();
+            if (dataResult.isOk) {
+              dataHandler.onDataChanged(dataResult.value);
+            }
+          }
+        } else {
+          if (allData.length >= 999) {
+            showToast('Maximum data limit reached 已達資料上限', 'error');
+            return;
+          }
+          
+          const result = await window.dataSdk.create({
+            type: 'room_price',
+            roomId: roomId,
+            roomName: roomInfo.name,
+            branch: roomBranch,
+            price: parseInt(price),
+            facilities: roomInfo.facilities,
+            toyAvailable: roomInfo.toyAvailable,
+            toyPricePerHour: parseInt(toyPrice)
+          });
+          
+          console.log('💰 Create result:', result);
+          
+          if (result.isOk) {
+            showToast('Price saved 價格已儲存', 'success');
+            
+            // Manually refresh data
+            const dataResult = await window.dataSdk.getAll();
+            if (dataResult.isOk) {
+              dataHandler.onDataChanged(dataResult.value);
+            }
+          }
         }
-      } else {
-        if (allData.length >= 999) {
-          showToast('Maximum data limit reached 已達資料上限', 'error');
-          return;
-        }
-        
-        const result = await window.dataSdk.create({
-          type: 'room_price',
-          roomId: roomId,
-          roomName: roomInfo.name,
-          branch: roomBranch,
-          price: parseInt(price),
-          facilities: roomInfo.facilities,
-          toyAvailable: roomInfo.toyAvailable,
-          toyPricePerHour: parseInt(toyPrice)
-        });
-        
-        if (result.isOk) {
-          showToast('Price saved 價格已儲存', 'success');
-        }
+      } catch (error) {
+        console.error('❌ Update price error:', error);
+        showToast('Price update error 價格更新錯誤', 'error');
       }
     }
 
     // ============ Staff: All Bookings ============
     function renderAllBookings() {
+      console.log('🔄 Rendering all bookings');
       filterStaffBookings();
     }
 
@@ -1281,12 +1429,23 @@
       const confirmed = await showInlineConfirm(`Cancel booking for ${booking.renterName}? 取消${booking.renterName}的預約？`);
       if (!confirmed) return;
       
-      const result = await window.dataSdk.delete(booking);
-      
-      if (result.isOk) {
-        showToast('Booking cancelled 預約已取消', 'success');
-      } else {
-        showToast('Failed to cancel 取消失敗', 'error');
+      try {
+        const result = await window.dataSdk.delete(booking);
+        
+        if (result.isOk) {
+          showToast('Booking cancelled 預約已取消', 'success');
+          
+          // Manually refresh data
+          const dataResult = await window.dataSdk.getAll();
+          if (dataResult.isOk) {
+            dataHandler.onDataChanged(dataResult.value);
+          }
+        } else {
+          showToast('Failed to cancel 取消失敗: ' + (result.error || ''), 'error');
+        }
+      } catch (error) {
+        console.error('❌ Cancel error:', error);
+        showToast('Cancel error 取消錯誤', 'error');
       }
     }
 
@@ -1550,7 +1709,8 @@
     }
 
     // Initialize app
+    console.log('👋 App starting...');
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7131ae44ea04ea',t:'MTc2OTk0NjIzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ </body>
 </html>
