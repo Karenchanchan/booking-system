@@ -1,23 +1,650 @@
-# Therapy Room Booking System
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from datetime import datetime, timedelta, date
+import json
+from functools import wraps
+from config import Config
+from database import db, init_db
+from models import User, Room, Booking, RoomPrice
 
-A bilingual (English/Chinese) booking system for therapy rooms.
+app = Flask(__name__)
+app.config.from_object(Config)
 
-## Features
-- Client booking interface
-- Admin management panel
-- Room rate management
-- Monthly statistics and reporting
-- Bilingual support
+# Initialize extensions
+init_db(app)
 
-## Setup
-1. Clone repository
-2. Install requirements: `pip install -r requirements.txt`
-3. Run: `python app.py`
-4. Access: http://localhost:5000
+# Flask-Login setup
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'client_login'
 
-## Default Accounts
-- Admin: admin / admin123
-- Clients: Created by admin
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
-## GitHub Sync
-To sync data across devices, ensure the database file is properly versioned or use a cloud database.
+# Language handling middleware
+@app.before_request
+def before_request():
+    lang = request.args.get('lang', 'en')
+    if lang in ['en', 'zh']:
+        session['lang'] = lang
+
+def get_lang():
+    return session.get('lang', 'en')
+
+# Translations
+TRANSLATIONS = {
+    'en': {
+        'dashboard': 'Dashboard',
+        'book_room': 'Book Room',
+        'my_bookings': 'My Bookings',
+        'statistics': 'Statistics',
+        'logout': 'Logout',
+        'welcome': 'Welcome',
+        'current_month': 'Current Month',
+        'total_hours': 'Total Hours',
+        'total_cost': 'Total Cost',
+        'upcoming_bookings': 'Upcoming Bookings',
+        'no_bookings': 'No upcoming bookings',
+        'date': 'Date',
+        'time': 'Time',
+        'room': 'Room',
+        'cost': 'Cost',
+        'actions': 'Actions',
+        'cancel': 'Cancel',
+        'select_location': 'Select Location',
+        'select_date': 'Select Date',
+        'select_room': 'Select Room',
+        'select_time': 'Select Time',
+        'available': 'Available',
+        'booked': 'Booked',
+        'book_now': 'Book Now',
+        'confirm_booking': 'Confirm Booking',
+        'duration': 'Duration',
+        'hours': 'hours',
+        'use_toys': 'Use Toys',
+        'toy_fee': 'Toy Fee',
+        'total': 'Total',
+        'booking_success': 'Booking Successful!',
+        'booking_cancelled': 'Booking Cancelled!',
+        'monthly_stats': 'Monthly Statistics',
+        'select_month': 'Select Month',
+        'bookings_count': 'Number of Bookings',
+        'login': 'Login',
+        'username': 'Username',
+        'password': 'Password',
+        'login_button': 'Login',
+        'invalid_credentials': 'Invalid credentials',
+        'admin_dashboard': 'Admin Dashboard',
+        'manage_clients': 'Manage Clients',
+        'manage_rooms': 'Manage Rooms',
+        'manage_bookings': 'Manage Bookings',
+        'reports': 'Reports'
+    },
+    'zh': {
+        'dashboard': '主面板',
+        'book_room': '預約房間',
+        'my_bookings': '我的預約',
+        'statistics': '統計數據',
+        'logout': '登出',
+        'welcome': '歡迎',
+        'current_month': '本月',
+        'total_hours': '總時數',
+        'total_cost': '總金額',
+        'upcoming_bookings': '即將到來的預約',
+        'no_bookings': '沒有預約',
+        'date': '日期',
+        'time': '時間',
+        'room': '房間',
+        'cost': '費用',
+        'actions': '操作',
+        'cancel': '取消',
+        'select_location': '選擇分店',
+        'select_date': '選擇日期',
+        'select_room': '選擇房間',
+        'select_time': '選擇時間',
+        'available': '可預約',
+        'booked': '已預約',
+        'book_now': '立即預約',
+        'confirm_booking': '確認預約',
+        'duration': '時長',
+        'hours': '小時',
+        'use_toys': '租用玩具',
+        'toy_fee': '玩具費用',
+        'total': '總計',
+        'booking_success': '預約成功！',
+        'booking_cancelled': '預約已取消！',
+        'monthly_stats': '月度統計',
+        'select_month': '選擇月份',
+        'bookings_count': '預約次數',
+        'login': '登入',
+        'username': '用戶名',
+        'password': '密碼',
+        'login_button': '登入',
+        'invalid_credentials': '無效的登入資料',
+        'admin_dashboard': '管理員面板',
+        'manage_clients': '管理客戶',
+        'manage_rooms': '管理房間',
+        'manage_bookings': '管理預約',
+        'reports': '報告'
+    }
+}
+
+def t(key):
+    """Translation helper"""
+    lang = get_lang()
+    return TRANSLATIONS[lang].get(key, key)
+
+# Client routes
+@app.route('/')
+def index():
+    if current_user.is_authenticated:
+        if current_user.is_admin:
+            return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('client_dashboard'))
+    return redirect(url_for('client_login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def client_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        user = User.query.filter_by(username=username).first()
+        
+        if user and user.check_password(password) and not user.is_admin:
+            login_user(user)
+            return redirect(url_for('client_dashboard'))
+        flash(t('invalid_credentials'), 'error')
+    
+    return render_template('login.html', t=t, lang=get_lang())
+
+@app.route('/dashboard')
+@login_required
+def client_dashboard():
+    if current_user.is_admin:
+        return redirect(url_for('admin_dashboard'))
+    
+    # Get current month stats
+    today = date.today()
+    first_day = today.replace(day=1)
+    last_day = (today.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+    
+    bookings = Booking.query.filter(
+        Booking.user_id == current_user.id,
+        Booking.booking_date.between(first_day, last_day),
+        Booking.status == 'confirmed'
+    ).all()
+    
+    total_hours = sum(b.duration for b in bookings)
+    total_cost = sum(b.total_cost for b in bookings)
+    
+    # Upcoming bookings
+    upcoming = Booking.query.filter(
+        Booking.user_id == current_user.id,
+        Booking.booking_date >= today,
+        Booking.status == 'confirmed'
+    ).order_by(Booking.booking_date, Booking.start_time).limit(5).all()
+    
+    return render_template('client_dashboard.html', 
+                         user=current_user,
+                         bookings=bookings,
+                         total_hours=total_hours,
+                         total_cost=total_cost,
+                         upcoming=upcoming,
+                         t=t,
+                         lang=get_lang())
+
+@app.route('/book', methods=['GET', 'POST'])
+@login_required
+def book_room():
+    if current_user.is_admin:
+        return redirect(url_for('admin_dashboard'))
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        room_id = data.get('room_id')
+        booking_date = datetime.strptime(data.get('date'), '%Y-%m-%d').date()
+        start_time = data.get('start_time')
+        duration = float(data.get('duration', 0.5))
+        use_toys = data.get('use_toys', False)
+        
+        # Check if slot is available
+        existing = Booking.query.filter_by(
+            room_id=room_id,
+            booking_date=booking_date,
+            start_time=start_time,
+            status='confirmed'
+        ).first()
+        
+        if existing:
+            return jsonify({'success': False, 'message': 'Time slot already booked'})
+        
+        # Calculate end time
+        start_dt = datetime.strptime(start_time, '%H:%M')
+        end_dt = start_dt + timedelta(hours=duration)
+        end_time = end_dt.strftime('%H:%M')
+        
+        # Get room and calculate cost
+        room = Room.query.get(room_id)
+        room_rate = room.get_current_rate(booking_date)
+        toy_cost = room.toy_rate if use_toys else 0
+        
+        # Create booking
+        booking = Booking(
+            user_id=current_user.id,
+            room_id=room_id,
+            booking_date=booking_date,
+            start_time=start_time,
+            end_time=end_time,
+            duration=duration,
+            rate_used=room_rate,
+            use_toys=use_toys,
+            toy_cost=toy_cost,
+            status='confirmed'
+        )
+        booking.calculate_total()
+        
+        db.session.add(booking)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': t('booking_success')})
+    
+    return render_template('client_booking.html', 
+                         user=current_user,
+                         t=t,
+                         lang=get_lang())
+
+@app.route('/api/available_slots')
+@login_required
+def get_available_slots():
+    location = request.args.get('location')
+    date_str = request.args.get('date')
+    
+    if not location or not date_str:
+        return jsonify({'error': 'Missing parameters'}), 400
+    
+    booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    
+    # Get rooms for location
+    rooms = Room.query.filter_by(location=location, active=True).all()
+    
+    # Get booked slots for date
+    bookings = Booking.query.filter_by(
+        booking_date=booking_date,
+        status='confirmed'
+    ).all()
+    
+    # Create booked slots map
+    booked_slots = {}
+    for b in bookings:
+        key = f"{b.room_id}_{b.start_time}"
+        booked_slots[key] = True
+    
+    # Prepare response
+    slots = {}
+    for room in rooms:
+        for time_slot in Config.TIME_SLOTS:
+            slot_key = f"{room.id}_{time_slot}"
+            slots[slot_key] = {
+                'room_id': room.id,
+                'room_number': room.room_number,
+                'time': time_slot,
+                'available': slot_key not in booked_slots,
+                'rate': room.get_current_rate(booking_date),
+                'has_toys': room.has_toys,
+                'toy_rate': room.toy_rate
+            }
+    
+    return jsonify(slots)
+
+@app.route('/my-bookings')
+@login_required
+def my_bookings():
+    if current_user.is_admin:
+        return redirect(url_for('admin_dashboard'))
+    
+    page = request.args.get('page', 1, type=int)
+    status = request.args.get('status', 'upcoming')
+    
+    query = Booking.query.filter_by(user_id=current_user.id)
+    
+    if status == 'upcoming':
+        query = query.filter(Booking.booking_date >= date.today())
+    elif status == 'past':
+        query = query.filter(Booking.booking_date < date.today())
+    
+    bookings = query.order_by(Booking.booking_date.desc(), Booking.start_time.desc())\
+                   .paginate(page=page, per_page=10)
+    
+    return render_template('client_bookings.html',
+                         user=current_user,
+                         bookings=bookings,
+                         status=status,
+                         t=t,
+                         lang=get_lang())
+
+@app.route('/cancel-booking/<int:booking_id>', methods=['POST'])
+@login_required
+def cancel_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    
+    # Check if user owns the booking or is admin
+    if booking.user_id != current_user.id and not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+    
+    booking.status = 'cancelled'
+    booking.cancelled_at = datetime.utcnow()
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': t('booking_cancelled')})
+
+@app.route('/statistics')
+@login_required
+def statistics():
+    if current_user.is_admin:
+        return redirect(url_for('admin_dashboard'))
+    
+    year = request.args.get('year', date.today().year, type=int)
+    month = request.args.get('month', date.today().month, type=int)
+    
+    # Get statistics for selected month
+    first_day = date(year, month, 1)
+    last_day = (first_day.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+    
+    bookings = Booking.query.filter(
+        Booking.user_id == current_user.id,
+        Booking.booking_date.between(first_day, last_day),
+        Booking.status == 'confirmed'
+    ).all()
+    
+    # Calculate statistics
+    total_hours = sum(b.duration for b in bookings)
+    total_cost = sum(b.total_cost for b in bookings)
+    bookings_count = len(bookings)
+    
+    # Group by room
+    room_stats = {}
+    for b in bookings:
+        room_name = b.room.get_display_name(get_lang())
+        if room_name not in room_stats:
+            room_stats[room_name] = {'hours': 0, 'cost': 0, 'count': 0}
+        room_stats[room_name]['hours'] += b.duration
+        room_stats[room_name]['cost'] += b.total_cost
+        room_stats[room_name]['count'] += 1
+    
+    return render_template('client_statistics.html',
+                         user=current_user,
+                         year=year,
+                         month=month,
+                         total_hours=total_hours,
+                         total_cost=total_cost,
+                         bookings_count=bookings_count,
+                         room_stats=room_stats,
+                         t=t,
+                         lang=get_lang())
+
+# Admin routes
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        user = User.query.filter_by(username=username).first()
+        
+        if user and user.check_password(password) and user.is_admin:
+            login_user(user)
+            return redirect(url_for('admin_dashboard'))
+        flash(t('invalid_credentials'), 'error')
+    
+    return render_template('admin_login.html', t=t, lang=get_lang())
+
+@app.route('/admin/dashboard')
+@admin_required
+def admin_dashboard():
+    # Get overall statistics
+    today = date.today()
+    first_day = today.replace(day=1)
+    last_day = (today.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+    
+    # Monthly stats
+    monthly_bookings = Booking.query.filter(
+        Booking.booking_date.between(first_day, last_day),
+        Booking.status == 'confirmed'
+    ).all()
+    
+    total_revenue = sum(b.total_cost for b in monthly_bookings)
+    total_bookings = len(monthly_bookings)
+    active_clients = len(set(b.user_id for b in monthly_bookings))
+    
+    # Recent bookings
+    recent_bookings = Booking.query.filter(
+        Booking.booking_date >= today
+    ).order_by(Booking.booking_date, Booking.start_time)\
+     .limit(10).all()
+    
+    return render_template('admin_dashboard.html',
+                         user=current_user,
+                         total_revenue=total_revenue,
+                         total_bookings=total_bookings,
+                         active_clients=active_clients,
+                         recent_bookings=recent_bookings,
+                         t=t,
+                         lang=get_lang())
+
+@app.route('/admin/clients', methods=['GET', 'POST'])
+@admin_required
+def admin_clients():
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'add':
+            username = request.form.get('username')
+            password = request.form.get('password', '123')  # Default password
+            full_name_en = request.form.get('full_name_en')
+            full_name_zh = request.form.get('full_name_zh')
+            email = request.form.get('email')
+            phone = request.form.get('phone')
+            
+            user = User(
+                username=username,
+                full_name_en=full_name_en,
+                full_name_zh=full_name_zh,
+                email=email,
+                phone=phone,
+                is_admin=False
+            )
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            flash(f'Client {username} added successfully', 'success')
+        
+        elif action == 'update':
+            user_id = request.form.get('user_id')
+            user = User.query.get(user_id)
+            if user and not user.is_admin:
+                user.full_name_en = request.form.get('full_name_en')
+                user.full_name_zh = request.form.get('full_name_zh')
+                user.email = request.form.get('email')
+                user.phone = request.form.get('phone')
+                
+                new_password = request.form.get('password')
+                if new_password:
+                    user.set_password(new_password)
+                
+                db.session.commit()
+                flash('Client updated successfully', 'success')
+        
+        elif action == 'delete':
+            user_id = request.form.get('user_id')
+            user = User.query.get(user_id)
+            if user and not user.is_admin:
+                db.session.delete(user)
+                db.session.commit()
+                flash('Client deleted successfully', 'success')
+    
+    clients = User.query.filter_by(is_admin=False).all()
+    return render_template('admin_clients.html',
+                         clients=clients,
+                         t=t,
+                         lang=get_lang())
+
+@app.route('/admin/rooms', methods=['GET', 'POST'])
+@admin_required
+def admin_rooms():
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'add':
+            room = Room(
+                location=request.form.get('location'),
+                room_number=request.form.get('room_number'),
+                base_rate=float(request.form.get('base_rate')),
+                description_en=request.form.get('description_en'),
+                description_zh=request.form.get('description_zh'),
+                facilities_en=request.form.get('facilities_en'),
+                facilities_zh=request.form.get('facilities_zh'),
+                has_toys=request.form.get('has_toys') == 'on',
+                toy_rate=float(request.form.get('toy_rate', 0))
+            )
+            db.session.add(room)
+            db.session.commit()
+            
+            # Add initial price to history
+            price = RoomPrice(
+                room_id=room.id,
+                rate=room.base_rate,
+                effective_date=date.today()
+            )
+            db.session.add(price)
+            db.session.commit()
+            
+            flash('Room added successfully', 'success')
+        
+        elif action == 'update_rate':
+            room_id = request.form.get('room_id')
+            new_rate = float(request.form.get('new_rate'))
+            effective_date = datetime.strptime(
+                request.form.get('effective_date'), '%Y-%m-%d'
+            ).date()
+            
+            room = Room.query.get(room_id)
+            if room:
+                # Update current rate
+                room.base_rate = new_rate
+                
+                # Add to price history
+                price = RoomPrice(
+                    room_id=room_id,
+                    rate=new_rate,
+                    effective_date=effective_date
+                )
+                db.session.add(price)
+                db.session.commit()
+                flash('Room rate updated successfully', 'success')
+    
+    rooms = Room.query.filter_by(active=True).all()
+    return render_template('admin_rooms.html',
+                         rooms=rooms,
+                         locations=Config.LOCATIONS,
+                         t=t,
+                         lang=get_lang())
+
+@app.route('/admin/bookings')
+@admin_required
+def admin_bookings():
+    page = request.args.get('page', 1, type=int)
+    status = request.args.get('status', 'all')
+    client_id = request.args.get('client_id', type=int)
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    
+    query = Booking.query.join(User).filter(User.is_admin == False)
+    
+    if status != 'all':
+        query = query.filter(Booking.status == status)
+    
+    if client_id:
+        query = query.filter(Booking.user_id == client_id)
+    
+    if date_from:
+        query = query.filter(Booking.booking_date >= datetime.strptime(date_from, '%Y-%m-%d').date())
+    
+    if date_to:
+        query = query.filter(Booking.booking_date <= datetime.strptime(date_to, '%Y-%m-%d').date())
+    
+    bookings = query.order_by(Booking.booking_date.desc(), Booking.start_time.desc())\
+                   .paginate(page=page, per_page=20)
+    
+    clients = User.query.filter_by(is_admin=False).all()
+    
+    return render_template('admin_bookings.html',
+                         bookings=bookings,
+                         clients=clients,
+                         status=status,
+                         t=t,
+                         lang=get_lang())
+
+@app.route('/admin/reports')
+@admin_required
+def admin_reports():
+    year = request.args.get('year', date.today().year, type=int)
+    month = request.args.get('month', date.today().month, type=int)
+    
+    first_day = date(year, month, 1)
+    last_day = (first_day.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+    
+    # Get all bookings for the month
+    bookings = Booking.query.filter(
+        Booking.booking_date.between(first_day, last_day),
+        Booking.status == 'confirmed'
+    ).order_by(Booking.booking_date, Booking.start_time).all()
+    
+    # Group by client
+    client_stats = {}
+    for b in bookings:
+        if b.user_id not in client_stats:
+            client_stats[b.user_id] = {
+                'client': b.user,
+                'bookings': [],
+                'total_hours': 0,
+                'total_cost': 0
+            }
+        client_stats[b.user_id]['bookings'].append(b)
+        client_stats[b.user_id]['total_hours'] += b.duration
+        client_stats[b.user_id]['total_cost'] += b.total_cost
+    
+    return render_template('admin_reports.html',
+                         year=year,
+                         month=month,
+                         client_stats=client_stats,
+                         bookings=bookings,
+                         t=t,
+                         lang=get_lang())
+
+@app.route('/admin/export_report')
+@admin_required
+def export_report():
+    year = request.args.get('year', date.today().year, type=int)
+    month = request.args.get('month', date.today().month, type=int)
+    
+    # Generate report data (simplified)
+    # In production, use a library like pandas to create Excel/PDF
+    
+    return jsonify({'message': 'Export functionality to be implemented'})
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('client_login'))
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
