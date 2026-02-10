@@ -158,7 +158,7 @@
        </div><button onclick="addNewRenter()" class="mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition"> Add Renter 新增租用者 </button>
       </div>
       <div class="bg-white rounded-2xl card-shadow p-6">
-       <h2 class="text-xl font-bold text-gray-800 mb-4">Renter List 租用者列��</h2>
+       <h2 class="text-xl font-bold text-gray-800 mb-4">Renter List 租用者列表</h2>
        <div id="renterList" class="space-y-3"></div>
       </div>
      </div><!-- Rooms Management -->
@@ -271,7 +271,7 @@
         { id: 'room-c', name: 'Room C', pricePerHour: 140, facilities: '催眠椅 Hypnosis Chair', hasToyOption: false, toyRentalPrice: 0 },
         { id: 'room-d', name: 'Room D', pricePerHour: 190, facilities: '小組、沙盤遊戲治療 Group/Sandplay', hasToyOption: true, toyRentalPrice: 50 },
         { id: 'room-e', name: 'Room E', pricePerHour: 170, facilities: '大房 家庭治療 Family Therapy', hasToyOption: false, toyRentalPrice: 0 },
-        { id: 'room-f', name: 'Room F', pricePerHour: 150, facilities: '落地窗輔導��� Floor Window', hasToyOption: false, toyRentalPrice: 0 },
+        { id: 'room-f', name: 'Room F', pricePerHour: 150, facilities: '落地窗輔導室 Floor Window', hasToyOption: false, toyRentalPrice: 0 },
         { id: 'room-g', name: 'Room G', pricePerHour: 150, facilities: '落地窗輔導室 Floor Window', hasToyOption: false, toyRentalPrice: 0 }
       ],
       wanchai: [
@@ -892,7 +892,7 @@
       
       const existing = allData.find(d => d.type === 'renter' && d.name === name);
       if (existing) {
-        showToast('Renter name already exists 租用者名稱已存���', 'error');
+        showToast('Renter name already exists 租用者名稱已存在', 'error');
         return;
       }
       
@@ -1120,10 +1120,10 @@
           </div>
           <div class="text-right">
             <div class="font-bold text-indigo-600">$${b.totalPrice}</div>
-            ${b.toyRental ? '<div class="text-xs text-amber-600">🧸 Toy 玩具</div>' : ''}
+            ${b.toyRental ? '<div class="text-xs text-amber-600">🧸 Toy</div>' : ''}
           </div>
-          <button onclick="deleteBookingStaff('${b.__backendId}', '${b.renterName.replace(/'/g, "\\'")}', '${b.roomName}', '${b.date}', '${b.startTime}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm transition">
-            ✕ Delete 刪除
+          <button onclick="deleteBookingStaff('${b.__backendId}', '${b.renterName}', '${b.roomName}', '${formatDate(b.date)}', '${b.startTime}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm transition">
+            ✕
           </button>
         </div>
       `).join('');
@@ -1449,7 +1449,7 @@
       const names = {
         jordan: '佐敦 Jordan',
         wanchai: '灣仔 Wan Chai',
-        tsuenwan: '���灣 Tsuen Wan'
+        tsuenwan: '荃灣 Tsuen Wan'
       };
       return names[branch] || branch;
     }
@@ -1480,5 +1480,5 @@
     
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cbc2387012784ff',t:'MTc3MDczMjA4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cbc2386d020cb25',t:'MTc3MDczMjA5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
