@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>心理輔導室預約系統 | Counselling Room Booking System</title>
-    
-    <!-- GitHub API 不需要額外引入 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -244,122 +241,23 @@
             margin: 0 auto;
         }
         
-        .loading-spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .github-config {
-            background: #f6f8fa;
-            border: 1px solid #e1e4e8;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
-        }
-        
-        .github-config input {
-            border: 1px solid #d1d5da;
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-family: monospace;
-            font-size: 14px;
+        /* 數據庫模擬器樣式 */
+        .db-debug {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+            display: none;
         }
     </style>
 </head>
 <body class="h-full">
-    <!-- GitHub 配置設定 -->
-    <div id="githubConfigModal" class="hidden modal-overlay">
-        <div class="modal-content">
-            <div class="p-6">
-                <div class="bilingual-text mb-4">
-                    <div class="english english-font text-xl font-semibold text-gray-800">GitHub Configuration</div>
-                    <div class="chinese chinese-font text-gray-600">GitHub 配置設定</div>
-                </div>
-                
-                <div class="github-config mb-4">
-                    <div class="bilingual-text mb-4">
-                        <div class="english english-font text-sm text-gray-700">
-                            <strong>Setup Instructions:</strong><br>
-                            1. Create a new GitHub repository<br>
-                            2. Enable GitHub Pages (Settings > Pages)<br>
-                            3. Upload this HTML file<br>
-                            4. Create a GitHub Personal Access Token
-                        </div>
-                        <div class="chinese chinese-font text-sm text-gray-700 mt-2">
-                            <strong>設置步驟:</strong><br>
-                            1. 創建新的 GitHub 倉庫<br>
-                            2. 啟用 GitHub Pages (設定 > Pages)<br>
-                            3. 上傳此 HTML 文件<br>
-                            4. 創建 GitHub Personal Access Token
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                                <span class="english">Repository Owner</span>
-                                <span class="chinese">倉庫擁有者</span>
-                            </label>
-                            <input type="text" id="repoOwner" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Your GitHub username">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                                <span class="english">Repository Name</span>
-                                <span class="chinese">倉庫名稱</span>
-                            </label>
-                            <input type="text" id="repoName" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="room-booking-system">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1 bilingual-label">
-                                <span class="english">GitHub Token</span>
-                                <span class="chinese">GitHub 令牌</span>
-                            </label>
-                            <input type="password" id="githubToken" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                            <div class="bilingual-text mt-1">
-                                <div class="english english-font text-xs text-gray-500">
-                                    Create token at: Settings > Developer settings > Personal access tokens > Tokens (classic)<br>
-                                    Required scopes: repo, write:discussion
-                                </div>
-                                <div class="chinese chinese-font text-xs text-gray-500">
-                                    創建令牌: 設定 > Developer settings > Personal access tokens > Tokens (classic)<br>
-                                    所需權限: repo, write:discussion
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="githubConfigError" class="hidden text-red-500 text-sm mb-4"></div>
-                
-                <div class="flex gap-3">
-                    <button onclick="saveGitHubConfig()" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Save Configuration</div>
-                            <div class="chinese chinese-font text-xs">儲存配置</div>
-                        </div>
-                    </button>
-                    <button onclick="closeGitHubConfig()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-                        <div class="bilingual-text items-center">
-                            <div class="english english-font">Cancel</div>
-                            <div class="chinese chinese-font text-xs">取消</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- 登入畫面 | Login Screen -->
     <div id="loginScreen" class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-100">
         <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
@@ -369,14 +267,6 @@
                 </div>
                 <h1 class="text-2xl font-bold text-gray-800 english-font">Counselling Room Booking System</h1>
                 <p class="text-gray-600 chinese-font">心理輔導室預約系統</p>
-                
-                <div class="mt-4">
-                    <button onclick="showGitHubConfig()" class="text-sm text-gray-500 hover:text-gray-700">
-                        <i class="fab fa-github mr-1"></i>
-                        <span class="english-font">GitHub Config</span>
-                        <span class="chinese-font ml-1">GitHub 設定</span>
-                    </button>
-                </div>
             </div>
             
             <div class="space-y-4">
@@ -424,21 +314,16 @@
                         <i class="fas fa-door-open text-white"></i>
                     </div>
                     <div class="bilingual-text">
-                        <div class="english english-font font-semibold text-gray-800">Room Booking</div>
-                        <div class="chinese chinese-font text-sm text-gray-500">歡迎, <span id="renterWelcomeName" class="font-medium"></span></div>
+                        <div class="english-font font-semibold text-gray-800">Room Booking</div>
+                        <div class="chinese-font text-sm text-gray-500">歡迎, <span id="renterWelcomeName" class="font-medium"></span></div>
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-2">
-                    <button onclick="refreshData()" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition" title="Refresh Data / 刷新數據">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button onclick="logout()" class="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition flex items-center gap-2">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="english-font">Logout</span>
-                        <span class="chinese-font ml-1">登出</span>
-                    </button>
-                </div>
+                <button onclick="logout()" class="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition flex items-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="english-font">Logout</span>
+                    <span class="chinese-font ml-1">登出</span>
+                </button>
             </div>
         </header>
         
@@ -697,16 +582,11 @@
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-2">
-                    <button onclick="refreshData()" class="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition" title="Refresh Data / 刷新數據">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button onclick="logout()" class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition flex items-center gap-2">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="english-font">Logout</span>
-                        <span class="chinese-font ml-1">登出</span>
-                    </button>
-                </div>
+                <button onclick="logout()" class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition flex items-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="english-font">Logout</span>
+                    <span class="chinese-font ml-1">登出</span>
+                </button>
             </div>
         </header>
         
@@ -1221,22 +1101,24 @@
     <div id="toast" class="hidden toast"></div>
     
     <script>
-        // ============ GitHub 配置 ============
-        let githubConfig = JSON.parse(localStorage.getItem('githubConfig')) || {
-            repoOwner: '',
-            repoName: 'room-booking-system',
-            githubToken: ''
+        // ============ 系統配置 | System Configuration ============
+        const defaultConfig = {
+            system_title: 'Counselling Room Booking System / 心理輔導室預約系統'
         };
         
-        let renters = [];
-        let bookings = [];
-        let roomPrices = [];
+        let config = { ...defaultConfig };
+        
+        // ============ 狀態管理 | State Management ============
+        // 使用 localStorage 模擬數據庫 | Using localStorage to simulate database
+        let renters = JSON.parse(localStorage.getItem('roomBooking_renters')) || [];
+        let bookings = JSON.parse(localStorage.getItem('roomBooking_bookings')) || [];
+        let roomPrices = JSON.parse(localStorage.getItem('roomBooking_roomPrices')) || [];
         let currentUser = null;
         let isStaff = false;
         let selectedSlots = [];
-        const staffPassword = '123'; // 職員密碼
+        const staffPassword = '123'; // 職員默認密碼 | Staff default password
         
-        // 默認房間配置
+        // 默認房間配置 | Default room configuration
         const defaultRooms = {
             jordan: [
                 { id: 'jordan-c', name: 'Room C / 房間 C', price: 140, facilities: 'Hypnotic Chair / 催眠椅', toyAvailable: false, toyPricePerHour: 0 },
@@ -1259,209 +1141,1292 @@
             ]
         };
         
-        // ============ GitHub API 函數 ============
+        // ============ 應用初始化 | Application Initialization ============
+        function initApp() {
+            console.log('Initializing application... / 初始化應用...');
+            
+            // 設置默認日期 | Set default date
+            const today = new Date();
+            document.getElementById('renterDateSelect').value = today.toISOString().split('T')[0];
+            document.getElementById('renterDateSelect').min = today.toISOString().split('T')[0];
+            
+            // 初始化月份/年份選擇 | Initialize month/year selects
+            initDateSelects();
+            
+            // 如果有示例數據，添加一些初始數據 | Add some initial data if there are no sample data
+            if (renters.length === 0) {
+                addSampleData();
+            }
+            
+            // 更新UI | Update UI
+            updateUI();
+        }
         
-        async function githubRequest(endpoint, method = 'GET', data = null) {
-            try {
-                const url = `https://api.github.com/repos/${githubConfig.repoOwner}/${githubConfig.repoName}/${endpoint}`;
-                
-                const headers = {
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Authorization': `token ${githubConfig.githubToken}`
-                };
-                
-                const options = {
-                    method: method,
-                    headers: headers
-                };
-                
-                if (data) {
-                    options.body = JSON.stringify(data);
-                    headers['Content-Type'] = 'application/json';
-                }
-                
-                const response = await fetch(url, options);
-                
-                if (!response.ok) {
-                    throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
-                }
-                
-                if (method !== 'DELETE') {
-                    return await response.json();
-                }
-                
-                return { success: true };
-            } catch (error) {
-                console.error('GitHub request error:', error);
-                throw error;
+        function initDateSelects() {
+            const months = [
+                'January / 一月', 'February / 二月', 'March / 三月', 'April / 四月',
+                'May / 五月', 'June / 六月', 'July / 七月', 'August / 八月',
+                'September / 九月', 'October / 十月', 'November / 十一月', 'December / 十二月'
+            ];
+            
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth();
+            
+            // 租用者統計選擇 | Renter statistics selects
+            const statsMonthSelect = document.getElementById('statsMonthSelect');
+            const statsYearSelect = document.getElementById('statsYearSelect');
+            
+            statsMonthSelect.innerHTML = '';
+            months.forEach((month, index) => {
+                statsMonthSelect.innerHTML += `<option value="${index}" ${index === currentMonth ? 'selected' : ''}>${month}</option>`;
+            });
+            
+            statsYearSelect.innerHTML = '';
+            for (let year = currentYear - 1; year <= currentYear + 1; year++) {
+                statsYearSelect.innerHTML += `<option value="${year}" ${year === currentYear ? 'selected' : ''}>${year}</option>`;
+            }
+            
+            // 職員報表選擇 | Staff report selects
+            const reportMonthSelect = document.getElementById('reportMonthSelect');
+            const reportYearSelect = document.getElementById('reportYearSelect');
+            
+            reportMonthSelect.innerHTML = '';
+            months.forEach((month, index) => {
+                reportMonthSelect.innerHTML += `<option value="${index}" ${index === currentMonth ? 'selected' : ''}>${month}</option>`;
+            });
+            
+            reportYearSelect.innerHTML = '';
+            for (let year = currentYear - 1; year <= currentYear + 1; year++) {
+                reportYearSelect.innerHTML += `<option value="${year}" ${year === currentYear ? 'selected' : ''}>${year}</option>`;
             }
         }
         
-        // 使用 GitHub Issues 作為數據庫
-        async function createIssue(title, body, labels = []) {
-            return await githubRequest('issues', 'POST', {
-                title: title,
-                body: body,
-                labels: labels
+        function addSampleData() {
+            // 添加示例租用者 | Add sample renters
+            const sampleRenters = [
+                { id: generateId(), name: 'Dr. Smith / 史密斯醫生', password: 'smith123', email: 'smith@example.com', phone: '9123-4567', createdAt: new Date().toISOString() },
+                { id: generateId(), name: 'Dr. Wong / 王醫生', password: 'wong123', email: 'wong@example.com', phone: '9876-5432', createdAt: new Date().toISOString() },
+                { id: generateId(), name: 'Dr. Johnson / 約翰遜醫生', password: 'johnson123', email: 'johnson@example.com', phone: '9234-5678', createdAt: new Date().toISOString() }
+            ];
+            
+            renters = [...sampleRenters];
+            saveData('renters', renters);
+            
+            // 添加示例預約 | Add sample bookings
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const sampleBookings = [
+                { 
+                    id: generateId(), 
+                    renterId: sampleRenters[0].id, 
+                    renterName: sampleRenters[0].name,
+                    roomId: 'jordan-c', 
+                    roomName: 'Room C / 房間 C', 
+                    branch: 'jordan',
+                    date: today.toISOString().split('T')[0], 
+                    startTime: '10:00', 
+                    endTime: '11:00',
+                    basePrice: 140,
+                    toyRental: false,
+                    toyPrice: 0,
+                    totalPrice: 280,
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                },
+                { 
+                    id: generateId(), 
+                    renterId: sampleRenters[1].id, 
+                    renterName: sampleRenters[1].name,
+                    roomId: 'wanchai-4', 
+                    roomName: 'Room 4 / 房間 4', 
+                    branch: 'wanchai',
+                    date: tomorrow.toISOString().split('T')[0], 
+                    startTime: '14:00', 
+                    endTime: '15:30',
+                    basePrice: 180,
+                    toyRental: true,
+                    toyPrice: 60,
+                    totalPrice: 330,
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                }
+            ];
+            
+            bookings = [...sampleBookings];
+            saveData('bookings', bookings);
+            
+            showToast('Sample data loaded / 示例數據已載入', 'info');
+        }
+        
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        
+        // ============ 數據保存/加載 | Data Save/Load ============
+        function saveData(type, data) {
+            localStorage.setItem(`roomBooking_${type}`, JSON.stringify(data));
+        }
+        
+        function loadData(type) {
+            return JSON.parse(localStorage.getItem(`roomBooking_${type}`)) || [];
+        }
+        
+        // ============ UI更新函數 | UI Update Functions ============
+        function updateUI() {
+            if (isStaff) {
+                updateStaffUI();
+            } else if (currentUser) {
+                updateRenterUI();
+            }
+        }
+        
+        function updateStaffUI() {
+            renderRentersList();
+            renderRoomSettings();
+            renderAllBookings();
+            generateReport();
+            updateReceiptRenterSelect();
+        }
+        
+        function updateRenterUI() {
+            renderMyBookings();
+            updateRenterStatistics();
+            loadTimeSlots();
+        }
+        
+        // ============ 認證功能 | Authentication Functions ============
+        function handleLogin() {
+            const name = document.getElementById('loginName').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!name || !password) {
+                showLoginError('Please enter name and password / 請輸入姓名和密碼');
+                return;
+            }
+            
+            const renter = renters.find(r => {
+                const names = r.name.split('/').map(n => n.trim());
+                return (names[0].toLowerCase() === name.toLowerCase() || 
+                       (names[1] && names[1].toLowerCase() === name.toLowerCase())) && 
+                       r.password === password;
+            });
+            
+            if (renter) {
+                currentUser = renter;
+                isStaff = false;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('renterDashboard').classList.remove('hidden');
+                document.getElementById('renterWelcomeName').textContent = renter.name.split('/')[0].trim();
+                updateRenterUI();
+                showToast('Login successful / 登入成功', 'success');
+            } else {
+                showLoginError('Invalid name or password / 姓名或密碼錯誤');
+            }
+        }
+        
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+        
+        function showStaffLogin() {
+            document.getElementById('staffLoginModal').classList.remove('hidden');
+        }
+        
+        function closeStaffLogin() {
+            document.getElementById('staffLoginModal').classList.add('hidden');
+            document.getElementById('staffPassword').value = '';
+            document.getElementById('staffLoginError').classList.add('hidden');
+        }
+        
+        function handleStaffLogin() {
+            const password = document.getElementById('staffPassword').value;
+            
+            if (password === staffPassword) {
+                isStaff = true;
+                currentUser = null;
+                closeStaffLogin();
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('staffDashboard').classList.remove('hidden');
+                updateStaffUI();
+                showToast('Staff login successful / 職員登入成功', 'success');
+            } else {
+                document.getElementById('staffLoginError').textContent = 'Invalid password / 密碼錯誤';
+                document.getElementById('staffLoginError').classList.remove('hidden');
+            }
+        }
+        
+        function logout() {
+            currentUser = null;
+            isStaff = false;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('renterDashboard').classList.add('hidden');
+            document.getElementById('staffDashboard').classList.add('hidden');
+            document.getElementById('loginName').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').classList.add('hidden');
+        }
+        
+        // ============ 租用者頁籤導航 | Renter Tab Navigation ============
+        function showRenterTab(tab) {
+            const tabs = ['booking', 'myBookings', 'statistics'];
+            tabs.forEach(t => {
+                const tabBtn = document.getElementById(`renterTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const section = document.getElementById(`renter${t.charAt(0).toUpperCase() + t.slice(1)}Section`);
+                
+                tabBtn.classList.remove('tab-active');
+                tabBtn.classList.add('tab-inactive');
+                section.classList.add('hidden');
+            });
+            
+            const activeTabBtn = document.getElementById(`renterTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+            const activeSection = document.getElementById(`renter${tab.charAt(0).toUpperCase() + tab.slice(1)}Section`);
+            
+            activeTabBtn.classList.remove('tab-inactive');
+            activeTabBtn.classList.add('tab-active');
+            activeSection.classList.remove('hidden');
+        }
+        
+        // ============ 職員頁籤導航 | Staff Tab Navigation ============
+        function showStaffTab(tab) {
+            const tabs = ['renters', 'rooms', 'allBookings', 'reports'];
+            tabs.forEach(t => {
+                const tabBtn = document.getElementById(`staffTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const section = document.getElementById(`staff${t.charAt(0).toUpperCase() + t.slice(1)}Section`);
+                
+                tabBtn.classList.remove('bg-slate-800', 'text-white');
+                tabBtn.classList.add('tab-inactive');
+                section.classList.add('hidden');
+            });
+            
+            const activeTabBtn = document.getElementById(`staffTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+            const activeSection = document.getElementById(`staff${tab.charAt(0).toUpperCase() + tab.slice(1)}Section`);
+            
+            activeTabBtn.classList.remove('tab-inactive');
+            activeTabBtn.classList.add('bg-slate-800', 'text-white');
+            activeSection.classList.remove('hidden');
+        }
+        
+        // ============ 房間功能 | Room Functions ============
+        function getRoomPrice(roomId) {
+            const savedPrice = roomPrices.find(p => p.roomId === roomId);
+            if (savedPrice) return savedPrice;
+            
+            for (const branch in defaultRooms) {
+                const room = defaultRooms[branch].find(r => r.id === roomId);
+                if (room) return room;
+            }
+            return null;
+        }
+        
+        function loadRoomsForBranch() {
+            const branch = document.getElementById('renterBranchSelect').value;
+            const roomSelect = document.getElementById('renterRoomSelect');
+            roomSelect.innerHTML = '<option value="">Select Room / 選擇房間</option>';
+            
+            if (branch && defaultRooms[branch]) {
+                defaultRooms[branch].forEach(room => {
+                    const price = getRoomPrice(room.id);
+                    const displayPrice = price ? price.price * 2 : room.price * 2;
+                    roomSelect.innerHTML += `<option value="${room.id}">${room.name} - $${displayPrice}/hr</option>`;
+                });
+            }
+            
+            document.getElementById('selectedRoomInfo').classList.add('hidden');
+            document.getElementById('timeSlotsContainer').classList.add('hidden');
+        }
+        
+        function loadTimeSlots() {
+            const branch = document.getElementById('renterBranchSelect').value;
+            const date = document.getElementById('renterDateSelect').value;
+            const roomId = document.getElementById('renterRoomSelect').value;
+            
+            if (!branch || !date || !roomId) {
+                document.getElementById('selectedRoomInfo').classList.add('hidden');
+                document.getElementById('timeSlotsContainer').classList.add('hidden');
+                return;
+            }
+            
+            // 顯示房間資訊 | Show room info
+            const room = defaultRooms[branch].find(r => r.id === roomId);
+            const roomPrice = getRoomPrice(roomId);
+            const price = roomPrice ? roomPrice.price : room.price;
+            const toyPrice = roomPrice ? roomPrice.toyPricePerHour : room.toyPricePerHour;
+            const pricePerHour = price * 2;
+            
+            document.getElementById('roomInfoName').textContent = room.name;
+            document.getElementById('roomInfoFacilities').textContent = room.facilities;
+            document.getElementById('roomInfoPrice').textContent = `$${pricePerHour}`;
+            document.getElementById('selectedRoomInfo').classList.remove('hidden');
+            
+            // 如果房間有玩具租用選項，顯示玩具選項 | If room has toy rental option, show toy option
+            if (room.toyAvailable) {
+                document.getElementById('toyRentalOption').classList.remove('hidden');
+                document.getElementById('toyPriceDisplay').textContent = toyPrice;
+            } else {
+                document.getElementById('toyRentalOption').classList.add('hidden');
+                document.getElementById('toyRentalCheckbox').checked = false;
+            }
+            
+            // 生成時間段 (9:00 AM 到 10:00 PM) | Generate time slots (9:00 AM to 10:00 PM)
+            const slotsContainer = document.getElementById('timeSlots');
+            slotsContainer.innerHTML = '';
+            selectedSlots = [];
+            
+            const now = new Date();
+            const selectedDate = new Date(date);
+            const isToday = selectedDate.toDateString() === now.toDateString();
+            
+            for (let hour = 9; hour < 22; hour++) {
+                for (let min = 0; min < 60; min += 30) {
+                    const timeStr = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+                    const endHour = min === 30 ? hour + 1 : hour;
+                    const endMin = min === 30 ? 0 : 30;
+                    const endTimeStr = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
+                    
+                    // 檢查時段是否已被預約 | Check if slot is already booked
+                    const isBooked = bookings.some(b => 
+                        b.roomId === roomId && 
+                        b.date === date && 
+                        b.status === 'active' &&
+                        b.startTime <= timeStr && 
+                        b.endTime > timeStr
+                    );
+                    
+                    // 檢查時段是否已過去 | Check if slot is in the past
+                    const slotTime = new Date(date + 'T' + timeStr);
+                    const isPast = isToday && slotTime <= now;
+                    
+                    const slotDiv = document.createElement('div');
+                    slotDiv.className = `p-2 text-center rounded-lg transition ${isBooked ? 'slot-booked' : isPast ? 'slot-past' : 'slot-available'}`;
+                    slotDiv.textContent = timeStr;
+                    slotDiv.dataset.time = timeStr;
+                    slotDiv.dataset.endTime = endTimeStr;
+                    
+                    if (!isBooked && !isPast) {
+                        slotDiv.onclick = () => toggleSlot(slotDiv, timeStr, endTimeStr);
+                    }
+                    
+                    slotsContainer.appendChild(slotDiv);
+                }
+            }
+            
+            document.getElementById('timeSlotsContainer').classList.remove('hidden');
+            document.getElementById('bookingSummary').classList.add('hidden');
+        }
+        
+        function toggleSlot(element, startTime, endTime) {
+            const index = selectedSlots.findIndex(s => s.start === startTime);
+            
+            if (index > -1) {
+                selectedSlots.splice(index, 1);
+                element.classList.remove('slot-selected');
+                element.classList.add('slot-available');
+            } else {
+                selectedSlots.push({ start: startTime, end: endTime });
+                element.classList.add('slot-selected');
+                element.classList.remove('slot-available');
+            }
+            
+            // 按開始時間排序 | Sort by start time
+            selectedSlots.sort((a, b) => a.start.localeCompare(b.start));
+            
+            updateBookingTotal();
+        }
+        
+        function updateBookingTotal() {
+            if (selectedSlots.length === 0) {
+                document.getElementById('bookingSummary').classList.add('hidden');
+                return;
+            }
+            
+            const roomId = document.getElementById('renterRoomSelect').value;
+            const branch = document.getElementById('renterBranchSelect').value;
+            const room = defaultRooms[branch].find(r => r.id === roomId);
+            const roomPrice = getRoomPrice(roomId);
+            const basePrice = roomPrice ? roomPrice.price : room.price;
+            const toyPrice = roomPrice ? roomPrice.toyPricePerHour : room.toyPricePerHour;
+            
+            const includeToys = document.getElementById('toyRentalCheckbox').checked;
+            const hours = selectedSlots.length * 0.5;
+            let total = selectedSlots.length * basePrice;
+            
+            if (includeToys && room.toyAvailable) {
+                total += hours * toyPrice;
+            }
+            
+            // 獲取連續時間範圍 | Get continuous time range
+            const firstSlot = selectedSlots[0];
+            const lastSlot = selectedSlots[selectedSlots.length - 1];
+            
+            document.getElementById('selectedTimeRange').textContent = `${firstSlot.start} - ${lastSlot.end} (${hours} hrs / 小時)`;
+            document.getElementById('bookingTotal').textContent = `$${total}`;
+            document.getElementById('bookingSummary').classList.remove('hidden');
+        }
+        
+        async function confirmBooking() {
+            if (selectedSlots.length === 0) return;
+            
+            const roomId = document.getElementById('renterRoomSelect').value;
+            const branch = document.getElementById('renterBranchSelect').value;
+            const date = document.getElementById('renterDateSelect').value;
+            const room = defaultRooms[branch].find(r => r.id === roomId);
+            const roomPrice = getRoomPrice(roomId);
+            const basePrice = roomPrice ? roomPrice.price : room.price;
+            const toyPrice = roomPrice ? roomPrice.toyPricePerHour : room.toyPricePerHour;
+            const includeToys = document.getElementById('toyRentalCheckbox').checked && room.toyAvailable;
+            
+            const firstSlot = selectedSlots[0];
+            const lastSlot = selectedSlots[selectedSlots.length - 1];
+            const hours = selectedSlots.length * 0.5;
+            let total = selectedSlots.length * basePrice;
+            if (includeToys) total += hours * toyPrice;
+            
+            const booking = {
+                id: generateId(),
+                renterId: currentUser.id,
+                renterName: currentUser.name,
+                roomId: roomId,
+                roomName: room.name,
+                branch: branch,
+                date: date,
+                startTime: firstSlot.start,
+                endTime: lastSlot.end,
+                basePrice: basePrice,
+                toyRental: includeToys,
+                toyPrice: includeToys ? toyPrice * hours : 0,
+                totalPrice: total,
+                status: 'active',
+                createdAt: new Date().toISOString()
+            };
+            
+            const btn = document.querySelector('#bookingSummary button');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Processing...</div><div class="chinese chinese-font text-xs">處理中...</div></div>';
+            
+            // 模擬API延遲 | Simulate API delay
+            setTimeout(() => {
+                bookings.push(booking);
+                saveData('bookings', bookings);
+                
+                btn.disabled = false;
+                btn.innerHTML = '<span class="english-font">Confirm Booking</span><span class="chinese-font ml-2">確認預約</span>';
+                
+                showToast('Booking confirmed! / 預約成功！', 'success');
+                selectedSlots = [];
+                loadTimeSlots();
+                renderMyBookings();
+                updateRenterStatistics();
+            }, 500);
+        }
+        
+        // ============ 我的預約 | My Bookings ============
+        function renderMyBookings() {
+            const container = document.getElementById('myBookingsList');
+            const noBookingsMessage = document.getElementById('noBookingsMessage');
+            
+            const myBookings = bookings.filter(b => b.renterId === currentUser.id && b.status === 'active');
+            
+            if (myBookings.length === 0) {
+                container.innerHTML = '';
+                noBookingsMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noBookingsMessage.classList.add('hidden');
+            
+            // 按日期和時間排序 | Sort by date and time
+            myBookings.sort((a, b) => {
+                if (a.date !== b.date) return a.date.localeCompare(b.date);
+                return a.startTime.localeCompare(b.startTime);
+            });
+            
+            container.innerHTML = myBookings.map(booking => {
+                const branchNames = { 
+                    jordan: 'Jordan / 佐敦', 
+                    wanchai: 'Wan Chai / 灣仔', 
+                    tsuenwan: 'Tsuen Wan / 荃灣' 
+                };
+                const isPast = new Date(booking.date + 'T' + booking.endTime) < new Date();
+                
+                return `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl ${isPast ? 'opacity-60' : ''}">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 ${booking.branch === 'jordan' ? 'bg-blue-100' : booking.branch === 'wanchai' ? 'bg-green-100' : 'bg-purple-100'} rounded-xl flex items-center justify-center">
+                                <i class="fas fa-door-open ${booking.branch === 'jordan' ? 'text-blue-600' : booking.branch === 'wanchai' ? 'text-green-600' : 'text-purple-600'}"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">${booking.roomName} - ${branchNames[booking.branch]}</p>
+                                <p class="text-sm text-gray-500">${booking.date} | ${booking.startTime} - ${booking.endTime}</p>
+                                ${booking.toyRental ? '<div class="bilingual-text mt-1"><span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">+ Toy Rental / 玩具</span></div>' : ''}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-gray-800">$${booking.totalPrice}</p>
+                            ${!isPast ? `
+                                <button onclick="showCancelBookingModal('${booking.id}', '${booking.roomName}', '${booking.date}', '${booking.startTime}')" 
+                                    class="text-sm text-red-500 hover:text-red-700 mt-1">
+                                    Cancel / 取消
+                                </button>
+                            ` : '<div class="bilingual-text"><span class="text-xs text-gray-400">Completed / 已完成</span></div>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function showCancelBookingModal(bookingId, roomName, date, time) {
+            document.getElementById('cancelBookingId').value = bookingId;
+            document.getElementById('cancelBookingDetails').textContent = `${roomName} on ${date} at ${time}`;
+            document.getElementById('cancelBookingModal').classList.remove('hidden');
+        }
+        
+        function closeCancelBookingModal() {
+            document.getElementById('cancelBookingModal').classList.add('hidden');
+        }
+        
+        async function confirmCancelBooking() {
+            const bookingId = document.getElementById('cancelBookingId').value;
+            const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+            
+            if (bookingIndex === -1) {
+                showToast('Booking not found / 找不到預約', 'error');
+                closeCancelBookingModal();
+                return;
+            }
+            
+            const btn = document.getElementById('confirmCancelBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Cancelling...</div><div class="chinese chinese-font text-xs">取消中...</div></div>';
+            
+            // 模擬API延遲 | Simulate API delay
+            setTimeout(() => {
+                bookings[bookingIndex].status = 'cancelled';
+                saveData('bookings', bookings);
+                
+                btn.disabled = false;
+                btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Cancel Booking</div><div class="chinese chinese-font text-xs">取消預約</div></div>';
+                
+                showToast('Booking cancelled / 預約已取消', 'success');
+                closeCancelBookingModal();
+                renderMyBookings();
+                updateRenterStatistics();
+            }, 500);
+        }
+        
+        // ============ 統計 | Statistics ============
+        function updateRenterStatistics() {
+            const month = parseInt(document.getElementById('statsMonthSelect').value);
+            const year = parseInt(document.getElementById('statsYearSelect').value);
+            
+            const myBookings = bookings.filter(b => {
+                if (b.renterId !== currentUser.id || b.status !== 'active') return false;
+                const bookingDate = new Date(b.date);
+                return bookingDate.getMonth() === month && bookingDate.getFullYear() === year;
+            });
+            
+            // 計算統計數據 | Calculate statistics
+            let totalHours = 0;
+            let totalAmount = 0;
+            
+            myBookings.forEach(b => {
+                const start = b.startTime.split(':').map(Number);
+                const end = b.endTime.split(':').map(Number);
+                const hours = (end[0] * 60 + end[1] - start[0] * 60 - start[1]) / 60;
+                totalHours += hours;
+                totalAmount += b.totalPrice;
+            });
+            
+            document.getElementById('statsBookingCount').textContent = myBookings.length;
+            document.getElementById('statsTotalHours').textContent = totalHours.toFixed(1);
+            document.getElementById('statsTotalAmount').textContent = `$${totalAmount}`;
+            
+            // 渲染詳細信息 | Render details
+            const detailsContainer = document.getElementById('statsBookingDetails');
+            const noStatsMessage = document.getElementById('noStatsMessage');
+            
+            if (myBookings.length === 0) {
+                detailsContainer.innerHTML = '';
+                noStatsMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noStatsMessage.classList.add('hidden');
+            
+            const branchNames = { 
+                jordan: 'Jordan / 佐敦', 
+                wanchai: 'Wan Chai / 灣仔', 
+                tsuenwan: 'Tsuen Wan / 荃灣' 
+            };
+            
+            myBookings.sort((a, b) => a.date.localeCompare(b.date));
+            
+            detailsContainer.innerHTML = myBookings.map(b => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-800">${b.roomName} - ${branchNames[b.branch]}</p>
+                        <p class="text-sm text-gray-500">${b.date} | ${b.startTime} - ${b.endTime}</p>
+                        ${b.toyRental ? '<div class="bilingual-text mt-1"><span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">+ Toy / 玩具</span></div>' : ''}
+                    </div>
+                    <p class="font-semibold text-gray-800">$${b.totalPrice}</p>
+                </div>
+            `).join('');
+        }
+        
+        // ============ 職員：租用者管理 | Staff: Renters Management ============
+        function renderRentersList() {
+            const container = document.getElementById('rentersList');
+            const noRentersMessage = document.getElementById('noRentersMessage');
+            
+            if (renters.length === 0) {
+                container.innerHTML = '';
+                noRentersMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noRentersMessage.classList.add('hidden');
+            
+            container.innerHTML = renters.map(renter => {
+                const renterBookings = bookings.filter(b => b.renterId === renter.id && b.status === 'active');
+                const totalSpent = renterBookings.reduce((sum, b) => sum + b.totalPrice, 0);
+                
+                return `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center">
+                                <span class="text-xl font-bold text-slate-600">${renter.name.split('/')[0].trim().charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">${renter.name}</p>
+                                <p class="text-sm text-gray-500">${renter.email || 'No email / 無電郵'} | ${renter.phone || 'No phone / 無電話'}</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Password / 密碼: ${renter.password}</span>
+                                    <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Bookings / 預約: ${renterBookings.length}</span>
+                                    <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">Total / 總計: $${totalSpent}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="editRenter('${renter.id}')" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteRenter('${renter.id}')" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // 更新篩選下拉菜單 | Update filter dropdown
+            const filterSelect = document.getElementById('staffBookingFilter');
+            filterSelect.innerHTML = '<option value="all">All Renters / 所有租用者</option>';
+            renters.forEach(r => {
+                filterSelect.innerHTML += `<option value="${r.id}">${r.name}</option>`;
             });
         }
         
-        async function updateIssue(issueNumber, updates) {
-            return await githubRequest(`issues/${issueNumber}`, 'PATCH', updates);
+        function showAddRenterModal() {
+            document.getElementById('addRenterModal').classList.remove('hidden');
+            document.getElementById('newRenterName').value = '';
+            document.getElementById('newRenterPassword').value = '';
+            document.getElementById('newRenterEmail').value = '';
+            document.getElementById('newRenterPhone').value = '';
+            document.getElementById('addRenterError').classList.add('hidden');
         }
         
-        async function getIssues() {
-            return await githubRequest('issues?state=all&per_page=100');
+        function closeAddRenterModal() {
+            document.getElementById('addRenterModal').classList.add('hidden');
         }
         
-        // 使用 GitHub Gists 作為小型數據庫（替代方案）
-        async function createOrUpdateGist(filename, content) {
-            // 先檢查是否已存在
-            const gists = await githubRequest('gists');
+        async function addRenter() {
+            const name = document.getElementById('newRenterName').value.trim();
+            const password = document.getElementById('newRenterPassword').value;
+            const email = document.getElementById('newRenterEmail').value.trim();
+            const phone = document.getElementById('newRenterPhone').value.trim();
             
-            // 查找名為 "booking-data" 的 gist
-            const existingGist = gists.find(g => 
-                Object.keys(g.files).includes('booking-data.json')
-            );
+            if (!name || !password) {
+                document.getElementById('addRenterError').textContent = 'Name and password are required / 姓名和密碼為必填';
+                document.getElementById('addRenterError').classList.remove('hidden');
+                return;
+            }
             
-            const data = {
-                files: {
-                    'booking-data.json': {
-                        content: JSON.stringify(content, null, 2)
-                    }
-                },
-                description: 'Room Booking System Data',
-                public: false
-            };
+            // 檢查重複姓名 | Check for duplicate name
+            if (renters.some(r => {
+                const names = r.name.split('/').map(n => n.trim());
+                return names[0].toLowerCase() === name.toLowerCase();
+            })) {
+                document.getElementById('addRenterError').textContent = 'Renter name already exists / 租用者姓名已存在';
+                document.getElementById('addRenterError').classList.remove('hidden');
+                return;
+            }
             
-            if (existingGist) {
-                return await githubRequest(`gists/${existingGist.id}`, 'PATCH', data);
-            } else {
-                return await githubRequest('gists', 'POST', data);
-            }
-        }
-        
-        async function getGistData() {
-            try {
-                const gists = await githubRequest('gists');
-                const bookingGist = gists.find(g => 
-                    Object.keys(g.files).includes('booking-data.json')
-                );
-                
-                if (bookingGist) {
-                    const response = await fetch(bookingGist.files['booking-data.json'].raw_url);
-                    return await response.json();
-                }
-                return null;
-            } catch (error) {
-                console.error('Error getting gist data:', error);
-                return null;
-            }
-        }
-        
-        // ============ 數據操作函數 ============
-        
-        async function loadAllData() {
-            try {
-                const data = await getGistData();
-                
-                if (data) {
-                    renters = data.renters || [];
-                    bookings = data.bookings || [];
-                    roomPrices = data.roomPrices || [];
-                } else {
-                    // 初始化空數據
-                    renters = [];
-                    bookings = [];
-                    roomPrices = [];
-                }
-                
-                console.log('Data loaded from GitHub:', { 
-                    renters: renters.length, 
-                    bookings: bookings.length,
-                    roomPrices: roomPrices.length 
-                });
-                
-                return true;
-            } catch (error) {
-                console.error('Error loading data:', error);
-                showToast('Error loading data / 載入數據錯誤', 'error');
-                return false;
-            }
-        }
-        
-        async function saveAllData() {
-            try {
-                const data = {
-                    renters: renters,
-                    bookings: bookings,
-                    roomPrices: roomPrices,
-                    lastUpdated: new Date().toISOString()
+            const btn = document.getElementById('addRenterBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Adding...</div><div class="chinese chinese-font text-xs">新增中...</div></div>';
+            
+            // 模擬API延遲 | Simulate API delay
+            setTimeout(() => {
+                const newRenter = {
+                    id: generateId(),
+                    name: name,
+                    password: password,
+                    email: email,
+                    phone: phone,
+                    createdAt: new Date().toISOString()
                 };
                 
-                await createOrUpdateGist('booking-data.json', data);
-                console.log('Data saved to GitHub');
-                return true;
-            } catch (error) {
-                console.error('Error saving data:', error);
-                showToast('Error saving data / 儲存數據錯誤', 'error');
-                return false;
-            }
+                renters.push(newRenter);
+                saveData('renters', renters);
+                
+                btn.disabled = false;
+                btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Add</div><div class="chinese chinese-font text-xs">新增</div></div>';
+                
+                showToast('Renter added successfully / 租用者已新增', 'success');
+                closeAddRenterModal();
+                renderRentersList();
+                updateReceiptRenterSelect();
+            }, 500);
         }
         
-        async function addRenterToGitHub(renterData) {
-            const newId = generateId();
-            const newRenter = {
-                id: newId,
-                ...renterData,
-                createdAt: new Date().toISOString()
-            };
+        function editRenter(renterId) {
+            const renter = renters.find(r => r.id === renterId);
+            if (!renter) return;
             
-            renters.push(newRenter);
-            await saveAllData();
-            return newId;
+            document.getElementById('editRenterId').value = renterId;
+            document.getElementById('editRenterName').value = renter.name;
+            document.getElementById('editRenterPassword').value = renter.password;
+            document.getElementById('editRenterEmail').value = renter.email || '';
+            document.getElementById('editRenterPhone').value = renter.phone || '';
+            document.getElementById('editRenterError').classList.add('hidden');
+            document.getElementById('editRenterModal').classList.remove('hidden');
         }
         
-        async function updateRenterInGitHub(renterId, renterData) {
-            const index = renters.findIndex(r => r.id === renterId);
-            if (index !== -1) {
-                renters[index] = { ...renters[index], ...renterData };
-                await saveAllData();
+        function closeEditRenterModal() {
+            document.getElementById('editRenterModal').classList.add('hidden');
+        }
+        
+        async function saveRenterEdit() {
+            const renterId = document.getElementById('editRenterId').value;
+            const name = document.getElementById('editRenterName').value.trim();
+            const password = document.getElementById('editRenterPassword').value;
+            const email = document.getElementById('editRenterEmail').value.trim();
+            const phone = document.getElementById('editRenterPhone').value.trim();
+            
+            if (!name || !password) {
+                document.getElementById('editRenterError').textContent = 'Name and password are required / 姓名和密碼為必填';
+                document.getElementById('editRenterError').classList.remove('hidden');
+                return;
             }
+            
+            const renterIndex = renters.findIndex(r => r.id === renterId);
+            if (renterIndex === -1) return;
+            
+            const btn = document.getElementById('saveRenterBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Saving...</div><div class="chinese chinese-font text-xs">儲存中...</div></div>';
+            
+            // 模擬API延遲 | Simulate API delay
+            setTimeout(() => {
+                renters[renterIndex] = {
+                    ...renters[renterIndex],
+                    name: name,
+                    password: password,
+                    email: email,
+                    phone: phone
+                };
+                
+                saveData('renters', renters);
+                
+                btn.disabled = false;
+                btn.innerHTML = '<div class="bilingual-text items-center"><div class="english english-font">Save</div><div class="chinese chinese-font text-xs">儲存</div></div>';
+                
+                showToast('Renter updated / 租用者已更新', 'success');
+                closeEditRenterModal();
+                renderRentersList();
+                updateReceiptRenterSelect();
+            }, 500);
         }
         
-        async function deleteRenterFromGitHub(renterId) {
-            renters = renters.filter(r => r.id !== renterId);
+        async function deleteRenter(renterId) {
+            const renter = renters.find(r => r.id === renterId);
+            if (!renter) return;
+            
+            if (!confirm(`Delete "${renter.name}"? / 刪除「${renter.name}」？`)) return;
+            
+            // 刪除租用者的所有預約 | Delete all bookings of the renter
             bookings = bookings.filter(b => b.renterId !== renterId);
-            await saveAllData();
+            saveData('bookings', bookings);
+            
+            // 刪除租用者 | Delete renter
+            renters = renters.filter(r => r.id !== renterId);
+            saveData('renters', renters);
+            
+            showToast('Renter deleted / 租用者已刪除', 'success');
+            renderRentersList();
+            updateReceiptRenterSelect();
         }
         
-        async function addBookingToGitHub(bookingData) {
-            const newId = generateId();
-            const newBooking = {
-                id: newId,
-                ...bookingData,
-                createdAt: new Date().toISOString()
+        // ============ 職員：房間設定 | Staff: Room Settings ============
+        function renderRoomSettings() {
+            const branches = { 
+                jordan: 'jordanRooms', 
+                wanchai: 'wanchaiRooms', 
+                tsuenwan: 'tsuenwanRooms' 
             };
             
-            bookings.push(newBooking);
-            await saveAllData();
-            return newId;
-        }
-        
-        async function cancelBookingInGitHub(bookingId) {
-            const index = bookings.findIndex(b => b.id === bookingId);
-            if (index !== -1) {
-                bookings[index].status = 'cancelled';
-                bookings[index].cancelledAt = new Date().toISOString();
-                await saveAllData();
+            for (const branch in branches) {
+                const container = document.getElementById(branches[branch]);
+                container.innerHTML = defaultRooms[branch].map(room => {
+                    const savedPrice = roomPrices.find(p => p.roomId === room.id);
+                    const currentPrice = savedPrice ? savedPrice.price : room.price;
+                    const currentToyPrice = savedPrice ? savedPrice.toyPricePerHour : room.toyPricePerHour;
+                    const pricePerHour = currentPrice * 2;
+                    
+                    return `
+                        <div class="room-card p-4 bg-gray-50 rounded-xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-medium text-gray-800">${room.name}</h4>
+                                <span class="text-xs text-gray-500">${room.facilities}</span>
+                            </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <label class="text-sm text-gray-600">Price / 租金/hr:</label>
+                                <input type="number" value="${pricePerHour}" 
+                                    onchange="updateRoomPrice('${room.id}', this.value / 2, ${currentToyPrice})"
+                                    class="w-24 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            ${room.toyAvailable ? `
+                                <div class="flex items-center gap-2">
+                                    <label class="text-sm text-gray-600">Toy / 玩具/hr:</label>
+                                    <input type="number" value="${currentToyPrice}" 
+                                        onchange="updateRoomPrice('${room.id}', ${currentPrice}, this.value)"
+                                        class="w-24 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
             }
         }
         
-        async function updateRoomPriceInGitHub(roomId, priceData) {
-            const index = roomPrices.findIndex(p => p.roomId === roomId);
+        async function updateRoomPrice(roomId, price, toyPrice) {
+            const existingPriceIndex = roomPrices.findIndex(p => p.roomId === roomId);
             
-            if (index !== -1) {
-                roomPrices[index] = { ...roomPrices[index], ...priceData };
+            // 獲取房間信息 | Get room information
+            let roomBranch = '';
+            let roomInfo = null;
+            for (const branch in defaultRooms) {
+                const found = defaultRooms[branch].find(r => r.id === roomId);
+                if (found) {
+                    roomBranch = branch;
+                    roomInfo = found;
+                    break;
+                }
+            }
+            
+            if (existingPriceIndex !== -1) {
+                roomPrices[existingPriceIndex] = {
+                    ...roomPrices[existingPriceIndex],
+                    price: parseFloat(price),
+                    toyPricePerHour: parseFloat(toyPrice)
+                };
             } else {
-               
+                roomPrices.push({
+                    id: generateId(),
+                    roomId: roomId,
+                    roomName: roomInfo.name,
+                    branch: roomBranch,
+                    price: parseFloat(price),
+                    facilities: roomInfo.facilities,
+                    toyAvailable: roomInfo.toyAvailable,
+                    toyPricePerHour: parseFloat(toyPrice)
+                });
+            }
+            
+            saveData('roomPrices', roomPrices);
+            showToast('Price updated / 價格已更新', 'success');
+        }
+        
+        // ============ 職員：所有預約 | Staff: All Bookings ============
+        function renderAllBookings() {
+            filterStaffBookings();
+        }
+        
+        function filterStaffBookings() {
+            const renterFilter = document.getElementById('staffBookingFilter').value;
+            const branchFilter = document.getElementById('staffBranchFilter').value;
+            
+            let filteredBookings = bookings.filter(b => b.status === 'active');
+            
+            if (renterFilter !== 'all') {
+                filteredBookings = filteredBookings.filter(b => b.renterId === renterFilter);
+            }
+            
+            if (branchFilter !== 'all') {
+                filteredBookings = filteredBookings.filter(b => b.branch === branchFilter);
+            }
+            
+            // 按日期排序 | Sort by date
+            filteredBookings.sort((a, b) => {
+                if (a.date !== b.date) return b.date.localeCompare(a.date);
+                return b.startTime.localeCompare(a.startTime);
+            });
+            
+            const container = document.getElementById('allBookingsList');
+            const noAllBookingsMessage = document.getElementById('noAllBookingsMessage');
+            const branchNames = { 
+                jordan: 'Jordan / 佐敦', 
+                wanchai: 'Wan Chai / 灣仔', 
+                tsuenwan: 'Tsuen Wan / 荃灣' 
+            };
+            
+            if (filteredBookings.length === 0) {
+                container.innerHTML = '';
+                noAllBookingsMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noAllBookingsMessage.classList.add('hidden');
+            
+            container.innerHTML = filteredBookings.map(b => {
+                const start = b.startTime.split(':').map(Number);
+                const end = b.endTime.split(':').map(Number);
+                const hours = (end[0] * 60 + end[1] - start[0] * 60 - start[1]) / 60;
+                
+                return `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 ${b.branch === 'jordan' ? 'bg-blue-200' : b.branch === 'wanchai' ? 'bg-green-200' : 'bg-purple-200'} rounded-xl flex items-center justify-center">
+                                <span class="text-xl font-bold ${b.branch === 'jordan' ? 'text-blue-600' : b.branch === 'wanchai' ? 'text-green-600' : 'text-purple-600'}">${b.renterName.split('/')[0].trim().charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">${b.renterName}</p>
+                                <p class="text-sm text-gray-600">${b.roomName} - ${branchNames[b.branch]}</p>
+                                <p class="text-sm text-gray-500">${b.date} | ${b.startTime} - ${b.endTime} (${hours.toFixed(1)} hrs)</p>
+                                ${b.toyRental ? '<div class="bilingual-text mt-1"><span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">+ Toy / 玩具</span></div>' : ''}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-gray-800">$${b.totalPrice}</p>
+                            <button onclick="cancelBookingByStaff('${b.id}')" class="text-sm text-red-500 hover:text-red-700 mt-1">
+                                Cancel / 取消
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function cancelBookingByStaff(bookingId) {
+            const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+            if (bookingIndex === -1) return;
+            
+            if (!confirm(`Cancel booking for ${bookings[bookingIndex].renterName}? / 取消${bookings[bookingIndex].renterName}的預約？`)) return;
+            
+            bookings[bookingIndex].status = 'cancelled';
+            saveData('bookings', bookings);
+            
+            showToast('Booking cancelled / 預約已取消', 'success');
+            renderAllBookings();
+            generateReport();
+        }
+        
+        // ============ 職員：報表 | Staff: Reports ============
+        function generateReport() {
+            const month = parseInt(document.getElementById('reportMonthSelect').value);
+            const year = parseInt(document.getElementById('reportYearSelect').value);
+            
+            const monthBookings = bookings.filter(b => {
+                const bookingDate = new Date(b.date);
+                return bookingDate.getMonth() === month && bookingDate.getFullYear() === year && b.status === 'active';
+            });
+            
+            // 計算總數 | Calculate totals
+            let totalHours = 0;
+            let totalRevenue = 0;
+            const activeRenterIds = new Set();
+            
+            monthBookings.forEach(b => {
+                const start = b.startTime.split(':').map(Number);
+                const end = b.endTime.split(':').map(Number);
+                const hours = (end[0] * 60 + end[1] - start[0] * 60 - start[1]) / 60;
+                totalHours += hours;
+                totalRevenue += b.totalPrice;
+                activeRenterIds.add(b.renterId);
+            });
+            
+            document.getElementById('reportTotalBookings').textContent = monthBookings.length;
+            document.getElementById('reportTotalHours').textContent = totalHours.toFixed(1);
+            document.getElementById('reportTotalRevenue').textContent = `$${totalRevenue.toFixed(2)}`;
+            document.getElementById('reportActiveRenters').textContent = activeRenterIds.size;
+            
+            // 設置列印信息 | Set print information
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const chineseMonths = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+            document.getElementById('printReportPeriod').textContent = `${months[month]} ${year} / ${chineseMonths[month]} ${year}`;
+            document.getElementById('printGeneratedDate').textContent = `${new Date().toLocaleDateString('en-US')} / ${new Date().toLocaleDateString('zh-HK')}`;
+            
+            // 按租用者分類 | Breakdown by renter
+            const renterBreakdown = {};
+            monthBookings.forEach(b => {
+                if (!renterBreakdown[b.renterId]) {
+                    renterBreakdown[b.renterId] = {
+                        name: b.renterName,
+                        bookings: [],
+                        totalHours: 0,
+                        totalAmount: 0
+                    };
+                }
+                
+                const start = b.startTime.split(':').map(Number);
+                const end = b.endTime.split(':').map(Number);
+                const hours = (end[0] * 60 + end[1] - start[0] * 60 - start[1]) / 60;
+                
+                renterBreakdown[b.renterId].bookings.push(b);
+                renterBreakdown[b.renterId].totalHours += hours;
+                renterBreakdown[b.renterId].totalAmount += b.totalPrice;
+            });
+            
+            const branchNames = { 
+                jordan: 'Jordan / 佐敦', 
+                wanchai: 'Wan Chai / 灣仔', 
+                tsuenwan: 'Tsuen Wan / 荃灣' 
+            };
+            const container = document.getElementById('reportByRenter');
+            const noReportMessage = document.getElementById('noReportMessage');
+            
+            if (Object.keys(renterBreakdown).length === 0) {
+                container.innerHTML = '';
+                noReportMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noReportMessage.classList.add('hidden');
+            
+            container.innerHTML = Object.values(renterBreakdown).map(renter => `
+                <div class="border border-gray-200 rounded-xl overflow-hidden print-border">
+                    <div class="bg-slate-50 px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-slate-200 rounded-lg flex items-center justify-center">
+                                <span class="font-bold text-slate-600">${renter.name.split('/')[0].trim().charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">${renter.name}</p>
+                                <p class="text-sm text-gray-500">${renter.bookings.length} bookings / 預約 | ${renter.totalHours.toFixed(1)} hrs / 小時</p>
+                            </div>
+                        </div>
+                        <p class="text-xl font-bold text-slate-800">$${renter.totalAmount.toFixed(2)}</p>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        ${renter.bookings.sort((a, b) => a.date.localeCompare(b.date)).map(b => `
+                            <div class="flex items-center justify-between text-sm p-2 bg-gray-50 rounded-lg">
+                                <div>
+                                    <span class="text-gray-800">${b.date}</span>
+                                    <span class="text-gray-500 mx-2">|</span>
+                                    <span class="text-gray-600">${b.startTime}-${b.endTime}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-gray-600">${b.roomName} (${branchNames[b.branch].split('/')[0].trim()})</span>
+                                    <span class="text-gray-800 font-medium ml-2">$${b.totalPrice.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function printReport() {
+            // 顯示列印元素 | Show print elements
+            document.querySelectorAll('.print-header, .print-footer').forEach(el => {
+                el.classList.remove('hidden');
+            });
+            
+            // 設置頁碼 | Set page numbers
+            document.querySelectorAll('.page-number').forEach((el, index) => {
+                el.textContent = index + 1;
+            });
+            
+            window.print();
+            
+            // 隱藏列印元素 | Hide print elements
+            setTimeout(() => {
+                document.querySelectorAll('.print-header, .print-footer').forEach(el => {
+                    el.classList.add('hidden');
+                });
+            }, 100);
+        }
+        
+        // ============ 職員：收據 | Staff: Receipts ============
+        function updateReceiptRenterSelect() {
+            const select = document.getElementById('receiptRenterSelect');
+            select.innerHTML = '<option value="">Select Renter / 選擇租用者</option>';
+            renters.forEach(r => {
+                select.innerHTML += `<option value="${r.id}">${r.name}</option>`;
+            });
+        }
+        
+        function generateReceipt() {
+            const renterId = document.getElementById('receiptRenterSelect').value;
+            const month = parseInt(document.getElementById('reportMonthSelect').value);
+            const year = parseInt(document.getElementById('reportYearSelect').value);
+            
+            if (!renterId) {
+                showToast('Please select a renter / 請選擇租用者', 'error');
+                return;
+            }
+            
+            const renter = renters.find(r => r.id === renterId);
+            if (!renter) return;
+            
+            const renterBookings = bookings.filter(b => {
+                if (b.renterId !== renterId || b.status !== 'active') return false;
+                const bookingDate = new Date(b.date);
+                return bookingDate.getMonth() === month && bookingDate.getFullYear() === year;
+            });
+            
+            let totalAmount = 0;
+            let totalHours = 0;
+            
+            renterBookings.forEach(b => {
+                totalAmount += b.totalPrice;
+                const start = b.startTime.split(':').map(Number);
+                const end = b.endTime.split(':').map(Number);
+                totalHours += (end[0] * 60 + end[1] - start[0] * 60 - start[1]) / 60;
+            });
+            
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const chineseMonths = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+            const branchNames = { 
+                jordan: 'Jordan / 佐敦', 
+                wanchai: 'Wan Chai / 灣仔', 
+                tsuenwan: 'Tsuen Wan / 荃灣' 
+            };
+            
+            const preview = document.getElementById('receiptPreview');
+            preview.classList.remove('hidden');
+            preview.innerHTML = `
+                <div class="max-w-md mx-auto">
+                    <!-- 收據表頭 | Receipt Header -->
+                    <div class="text-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 english-font">Counselling Room Rental Receipt</h2>
+                        <h3 class="text-lg text-gray-600 chinese-font">心理輔導室租用收據</h3>
+                        <p class="text-gray-500 mt-2">${months[month]} ${year} / ${chineseMonths[month]} ${year}</p>
+                    </div>
+                    
+                    <!-- 租用者信息 | Renter Information -->
+                    <div class="mb-6 pb-4 border-b border-gray-200">
+                        <div class="bilingual-text">
+                            <div class="english english-font text-gray-600">Renter:</div>
+                            <div class="chinese chinese-font text-gray-600">租用者:</div>
+                        </div>
+                        <p class="font-semibold text-gray-800 text-lg">${renter.name}</p>
+                        ${renter.email ? `<p class="text-sm text-gray-500">${renter.email}</p>` : ''}
+                        ${renter.phone ? `<p class="text-sm text-gray-500">${renter.phone}</p>` : ''}
+                    </div>
+                    
+                    <!-- 預約詳情 | Booking Details -->
+                    <div class="mb-6">
+                        <div class="bilingual-text mb-3">
+                            <div class="english english-font font-semibold text-gray-800">Booking Details</div>
+                            <div class="chinese chinese-font font-semibold text-gray-800">預約詳情</div>
+                        </div>
+                        
+                        ${renterBookings.length === 0 ? 
+                            '<div class="text-center py-4"><p class="text-gray-500 english-font">No bookings this month</p><p class="text-gray-500 chinese-font">本月無預約記錄</p></div>' :
+                            renterBookings.sort((a, b) => a.date.localeCompare(b.date)).map(b => `
+                                <div class="flex justify-between py-2 border-b border-gray-100 text-sm">
+                                    <div>
+                                        <p class="text-gray-800">${b.date}</p>
+                                        <p class="text-gray-500">${b.roomName} (${branchNames[b.branch].split('/')[0].trim()}) ${b.startTime}-${b.endTime}</p>
+                                        ${b.toyRental ? '<div class="bilingual-text"><p class="text-xs text-yellow-600 english-font">+ Toy Rental</p><p class="text-xs text-yellow-600 chinese-font">+ 玩具租用</p></div>' : ''}
+                                    </div>
+                                    <p class="font-medium text-gray-800">$${b.totalPrice.toFixed(2)}</p>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                    
+                    <!-- 總結 | Summary -->
+                    <div class="bg-slate-50 rounded-lg p-4 mt-4">
+                        <div class="flex justify-between mb-2">
+                            <div class="bilingual-text">
+                                <div class="english english-font text-gray-600">Total Hours:</div>
+                                <div class="chinese chinese-font text-gray-600">總時數:</div>
+                            </div>
+                            <span class="font-medium text-gray-800">${totalHours.toFixed(1)} hrs</span>
+                        </div>
+                        <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+                            <div class="bilingual-text">
+                                <div class="english english-font text-slate-800">Total Amount:</div>
+                                <div class="chinese chinese-font text-slate-800">總金額:</div>
+                            </div>
+                            <span class="text-slate-800">$${totalAmount.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 收據表尾 | Receipt Footer -->
+                    <div class="mt-8 pt-4 border-t border-gray-200 text-xs text-gray-500">
+                        <div class="bilingual-text">
+                            <div class="english english-font">Receipt generated on ${new Date().toLocaleDateString('en-US')}</div>
+                            <div class="chinese chinese-font">收據生成日期: ${new Date().toLocaleDateString('zh-HK')}</div>
+                        </div>
+                        <div class="bilingual-text mt-2">
+                            <div class="english english-font">This is an official receipt for room rental services.</div>
+                            <div class="chinese chinese-font">此為房間租用服務正式收據。</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 列印按鈕 | Print Button -->
+                    <div class="mt-6 text-center no-print">
+                        <button onclick="printReceipt()" class="px-6 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition">
+                            <i class="fas fa-print mr-2"></i>
+                            <span class="english-font">Print Receipt</span>
+                            <span class="chinese-font ml-2">列印收據</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function printReceipt() {
+            const receiptContent = document.getElementById('receiptPreview').innerHTML;
+            const originalContent = document.body.innerHTML;
+            
+            document.body.innerHTML = receiptContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+            
+            // 重新初始化應用 | Reinitialize application
+            initApp();
+            if (isStaff) {
+                document.getElementById('staffDashboard').classList.remove('hidden');
+            } else if (currentUser) {
+                document.getElementById('renterDashboard').classList.remove('hidden');
+            } else {
+                document.getElementById('loginScreen').classList.remove('hidden');
+            }
+        }
+        
+        // ============ 工具函數 | Utility Functions ============
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'}`;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // ============ 應用初始化 | Application Initialization ============
+        window.onload = function() {
+            initApp();
+        };
+    </script>
+</body>
+</html>
