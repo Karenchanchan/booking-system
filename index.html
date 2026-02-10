@@ -1,479 +1,398 @@
 <!doctype html>
-<html lang="en" class="h-full">
+<html lang="zh-HK" class="h-full">
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Room Booking System 房間預約系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/_sdk/element_sdk.js"></script>
   <script src="/_sdk/data_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
     body {
       box-sizing: border-box;
       font-family: 'Inter', 'Noto Sans TC', sans-serif;
     }
-    .print-only { display: none; }
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .card-shadow {
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .time-slot {
+      transition: all 0.2s ease;
+    }
+    .time-slot:hover:not(.booked):not(.selected) {
+      transform: scale(1.05);
+      background: #e0e7ff;
+    }
+    .time-slot.selected {
+      background: #4f46e5;
+      color: white;
+    }
+    .time-slot.booked {
+      background: #fee2e2;
+      color: #991b1b;
+      cursor: not-allowed;
+    }
     @media print {
       .no-print { display: none !important; }
       .print-only { display: block !important; }
       body { background: white !important; }
+      .card-shadow { box-shadow: none !important; }
     }
-    .booking-slot:hover:not(.booked):not(.past) {
-      transform: scale(1.02);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .booked { opacity: 0.5; cursor: not-allowed; }
-    .past { opacity: 0.3; cursor: not-allowed; }
-    .modal-backdrop {
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(4px);
-    }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a1a1a1; }
+    .print-only { display: none; }
   </style>
   <style>@view-transition { navigation: auto; }</style>
  </head>
- <body class="h-full bg-gradient-to-br from-slate-50 to-blue-50">
-  <div id="app" class="h-full overflow-auto custom-scrollbar"><!-- Login Screen -->
+ <body class="h-full bg-gray-50">
+  <div id="app" class="h-full overflow-auto"><!-- Login Screen -->
    <div id="loginScreen" class="min-h-full flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+    <div class="w-full max-w-md">
      <div class="text-center mb-8">
-      <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-2xl gradient-bg flex items-center justify-center">
        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
        </svg>
       </div>
-      <h1 id="systemTitle" class="text-2xl font-bold text-gray-800">Room Booking System</h1>
-      <p class="text-gray-500 mt-1">房間預約系統</p>
+      <h1 id="systemTitle" class="text-3xl font-bold text-gray-800">Room Booking System</h1>
+      <p class="text-gray-500 mt-2">房間預約系統</p>
      </div>
-     <div class="space-y-4">
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Name 姓名</label> <input type="text" id="loginName" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" placeholder="Enter your name 輸入姓名">
+     <div class="bg-white rounded-2xl card-shadow p-8">
+      <div class="space-y-6">
+       <div><label class="block text-sm font-medium text-gray-700 mb-2">Name 姓名</label> <input type="text" id="loginName" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" placeholder="Enter your name 輸入姓名">
+       </div>
+       <div><label class="block text-sm font-medium text-gray-700 mb-2">Password 密碼</label> <input type="password" id="loginPassword" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" placeholder="Enter password 輸入密碼">
+       </div>
+       <div id="loginError" class="hidden text-red-500 text-sm text-center"></div><button onclick="handleLogin()" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition transform hover:scale-[1.02]"> Login 登入 </button>
       </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Password 密碼</label> <input type="password" id="loginPassword" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" placeholder="Enter password 輸入密碼">
+      <div class="mt-6 pt-6 border-t border-gray-100"><button onclick="showStaffLogin()" class="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition"> Staff Login 工作人員登入 </button>
       </div>
-      <div id="loginError" class="hidden text-red-500 text-sm text-center"></div><button onclick="handleLogin()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 transition transform hover:scale-[1.02] active:scale-[0.98]"> Login 登入 </button>
-     </div>
-     <div class="mt-6 pt-6 border-t border-gray-100"><button onclick="showStaffLogin()" class="w-full text-gray-500 hover:text-gray-700 text-sm flex items-center justify-center gap-2">
-       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-       </svg> Staff Login 職員登入 </button>
      </div>
     </div>
    </div><!-- Renter Dashboard -->
    <div id="renterDashboard" class="hidden min-h-full">
-    <header class="bg-white shadow-sm sticky top-0 z-40 no-print">
-     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-       <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
+    <nav class="gradient-bg text-white p-4 no-print">
+     <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div>
+       <h1 class="text-xl font-bold">Welcome 歡迎, <span id="renterNameDisplay"></span></h1>
+       <p class="text-indigo-200 text-sm">Renter Dashboard 租用者介面</p>
+      </div><button onclick="logout()" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition"> Logout 登出 </button>
+     </div>
+    </nav>
+    <div class="max-w-7xl mx-auto p-4 space-y-6"><!-- Branch and Room Selection -->
+     <div class="bg-white rounded-2xl card-shadow p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-4">📍 Select Branch &amp; Room 選擇分店及房間</h2>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+       <div><label class="block text-sm font-medium text-gray-700 mb-2">Branch 分店</label> <select id="branchSelect" onchange="updateRoomList()" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"> <option value="">Select Branch 選擇分店</option> <option value="jordan">佐敦 Jordan</option> <option value="wanchai">灣仔 Wan Chai</option> <option value="tsuenwan">荃灣 Tsuen Wan</option> </select>
        </div>
+       <div><label class="block text-sm font-medium text-gray-700 mb-2">Date 日期</label> <input type="date" id="bookingDate" onchange="loadTimeSlots()" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500">
+       </div>
+      </div>
+      <div id="roomList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+     </div><!-- Time Slot Selection -->
+     <div id="timeSlotSection" class="hidden bg-white rounded-2xl card-shadow p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-2">🕐 Select Time 選擇時間</h2>
+      <p id="selectedRoomInfo" class="text-gray-600 mb-4"></p>
+      <div id="toyRentalOption" class="hidden mb-4 p-4 bg-amber-50 rounded-xl border border-amber-200"><label class="flex items-center space-x-3 cursor-pointer"> <input type="checkbox" id="toyRentalCheckbox" onchange="updatePriceDisplay()" class="w-5 h-5 text-indigo-600 rounded"> <span class="text-amber-800 font-medium"> <span id="toyRentalText">Add Toy Rental 加租玩具</span> <span id="toyPriceDisplay" class="text-amber-600"></span> </span> </label>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+       <div><label class="block text-sm font-medium text-gray-700 mb-2">Start Time 開始時間</label> <select id="startTimeSelect" onchange="updateEndTimeOptions()" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"> <option value="">Select start time 選擇開始時間</option> </select>
+       </div>
+       <div><label class="block text-sm font-medium text-gray-700 mb-2">End Time 結束時間</label> <select id="endTimeSelect" onchange="updatePriceDisplay()" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"> <option value="">Select end time 選擇結束時間</option> </select>
+       </div>
+      </div>
+      <div id="bookedSlotsWarning" class="hidden mb-4 p-4 bg-red-50 rounded-xl border border-red-200">
+       <p class="text-red-700 font-medium">⚠️ Some time slots are already booked 部分時段已被預約</p>
+       <p class="text-red-600 text-sm mt-1">Booked times 已預約時段: <span id="bookedTimesList"></span></p>
+      </div>
+      <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
        <div>
-        <h1 class="font-semibold text-gray-800">Room Booking 房間預約</h1>
-        <p class="text-sm text-gray-500">Welcome 歡迎, <span id="renterWelcomeName"></span></p>
-       </div>
-      </div><button onclick="logout()" class="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition flex items-center gap-2">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-       </svg> Logout 登出 </button>
-     </div>
-    </header>
-    <main class="max-w-7xl mx-auto px-4 py-6"><!-- Tab Navigation -->
-     <div class="flex gap-2 mb-6 no-print"><button onclick="showRenterTab('booking')" id="renterTabBooking" class="px-4 py-2 rounded-lg font-medium transition bg-blue-500 text-white"> Book Room 預約房間 </button> <button onclick="showRenterTab('myBookings')" id="renterTabMyBookings" class="px-4 py-2 rounded-lg font-medium transition bg-gray-100 text-gray-600 hover:bg-gray-200"> My Bookings 我的預約 </button> <button onclick="showRenterTab('statistics')" id="renterTabStatistics" class="px-4 py-2 rounded-lg font-medium transition bg-gray-100 text-gray-600 hover:bg-gray-200"> Statistics 統計 </button>
-     </div><!-- Booking Section -->
-     <div id="renterBookingSection">
-      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-       <h2 class="text-lg font-semibold text-gray-800 mb-4">Select Branch &amp; Date ���擇分店及日期</h2>
-       <div class="grid md:grid-cols-3 gap-4">
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Branch 分店</label> <select id="renterBranchSelect" onchange="loadRoomsForBranch()" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"> <option value="">Select Branch 選擇分店</option> <option value="jordan">Jordan 佐敦</option> <option value="wanchai">Wan Chai 灣仔</option> <option value="tsuenwan">Tsuen Wan 荃灣</option> </select>
-        </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Date 日期</label> <input type="date" id="renterDateSelect" onchange="loadTimeSlots()" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Room 房間</label> <select id="renterRoomSelect" onchange="loadTimeSlots()" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"> <option value="">Select Room 選擇房間</option> </select>
-        </div>
-       </div>
-      </div><!-- Room Info -->
-      <div id="selectedRoomInfo" class="hidden bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 mb-6">
-       <div class="flex items-start justify-between">
-        <div>
-         <h3 id="roomInfoName" class="text-xl font-semibold text-gray-800"></h3>
-         <p id="roomInfoFacilities" class="text-gray-600 mt-1"></p>
-        </div>
-        <div class="text-right">
-         <p class="text-sm text-gray-500">Price ���金</p>
-         <p id="roomInfoPrice" class="text-2xl font-bold text-blue-600"></p>
-         <p class="text-xs text-gray-400">per hour 每小時</p>
-        </div>
-       </div>
-      </div><!-- Time Slots -->
-      <div id="timeSlotsContainer" class="hidden bg-white rounded-2xl shadow-lg p-6">
-       <h2 class="text-lg font-semibold text-gray-800 mb-4">Available Time Slots 可預約時段</h2>
-       <p class="text-sm text-gray-500 mb-4">Click to select time slots (each slot = 30 mins) 點擊選擇時段（每格=30分鐘）</p>
-       <div id="timeSlots" class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2"></div>
-       <div id="bookingSummary" class="hidden mt-6 p-4 bg-blue-50 rounded-xl">
-        <div class="flex items-center justify-between mb-4">
-         <div>
-          <p class="text-sm text-gray-600">Selected Time 已選時段</p>
-          <p id="selectedTimeRange" class="font-semibold text-gray-800"></p>
-         </div>
-         <div class="text-right">
-          <p class="text-sm text-gray-600">Total 總計</p>
-          <p id="bookingTotal" class="text-xl font-bold text-blue-600"></p>
-         </div>
-        </div>
-        <div id="toyRentalOption" class="hidden mb-4 p-3 bg-white rounded-lg"><label class="flex items-center gap-3 cursor-pointer"> <input type="checkbox" id="toyRentalCheckbox" onchange="updateBookingTotal()" class="w-5 h-5 text-blue-600 rounded"> <span class="text-gray-700">Add Toy Rental 租用玩具 (+$<span id="toyPriceDisplay"></span>/hr)</span> </label>
-        </div><button onclick="confirmBooking()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 transition"> Confirm Booking 確認預約 </button>
+        <p class="text-gray-600">Duration 時長: <span id="durationDisplay" class="font-bold text-indigo-600">0</span> hours 小時</p>
+        <p class="text-gray-600">Total 總計: <span id="totalPriceDisplay" class="font-bold text-indigo-600">$0</span></p>
+       </div><button onclick="confirmBooking()" id="confirmBookingBtn" disabled class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-xl transition"> Confirm Booking 確認預約 </button>
+      </div>
+     </div><!-- Monthly Statistics -->
+     <div class="bg-white rounded-2xl card-shadow p-6">
+      <div class="flex justify-between items-center mb-4">
+       <h2 class="text-xl font-bold text-gray-800">📊 Rental Statistics 租用統計</h2>
+       <div class="flex items-center space-x-2"><select id="statsMonth" onchange="updateRenterStats()" class="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"> </select> <select id="statsYear" onchange="updateRenterStats()" class="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"> </select> <button onclick="downloadRenterReport()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition flex items-center space-x-2"> <span>📥</span> <span>Download 下載</span> </button>
        </div>
       </div>
-     </div><!-- My Bookings Section -->
-     <div id="renterMyBookingsSection" class="hidden">
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-       <h2 class="text-lg font-semibold text-gray-800 mb-4">My Bookings 我的預約</h2>
-       <div id="myBookingsList" class="space-y-3"></div>
-       <div id="noBookingsMessage" class="hidden text-center py-8 text-gray-500">
-        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <p>No bookings yet 暫無預約</p>
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+       <div class="bg-indigo-50 rounded-xl p-4 text-center">
+        <p class="text-indigo-600 text-sm">Total Hours 總時數</p>
+        <p id="statsTotalHours" class="text-3xl font-bold text-indigo-700">0</p>
+       </div>
+       <div class="bg-green-50 rounded-xl p-4 text-center">
+        <p class="text-green-600 text-sm">Bookings 預約次數</p>
+        <p id="statsTotalBookings" class="text-3xl font-bold text-green-700">0</p>
+       </div>
+       <div class="bg-amber-50 rounded-xl p-4 text-center">
+        <p class="text-amber-600 text-sm">Total Amount 總金額</p>
+        <p id="statsTotalAmount" class="text-3xl font-bold text-amber-700">$0</p>
        </div>
       </div>
-     </div><!-- Statistics Section -->
-     <div id="renterStatisticsSection" class="hidden">
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold text-gray-800">Monthly Statistics 月度統計</h2>
-        <div class="flex items-center gap-2"><select id="statsMonthSelect" onchange="updateRenterStatistics()" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"> </select> <select id="statsYearSelect" onchange="updateRenterStatistics()" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"> </select>
-        </div>
-       </div>
-       <div class="grid md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
-         <p class="text-sm text-blue-600 font-medium">Total Bookings 總預約次數</p>
-         <p id="statsBookingCount" class="text-3xl font-bold text-blue-700 mt-1">0</p>
-        </div>
-        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
-         <p class="text-sm text-green-600 font-medium">Total Hours 總時數</p>
-         <p id="statsTotalHours" class="text-3xl font-bold text-green-700 mt-1">0</p>
-        </div>
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
-         <p class="text-sm text-purple-600 font-medium">Total Amount 總金額</p>
-         <p id="statsTotalAmount" class="text-3xl font-bold text-purple-700 mt-1">$0</p>
-        </div>
-       </div>
-       <h3 class="font-semibold text-gray-800 mb-3">Booking Details 預約詳情</h3>
-       <div id="statsBookingDetails" class="space-y-2"></div>
+      <div id="renterBookingsList" class="space-y-2 max-h-96 overflow-auto"></div>
+      <div class="mt-4 text-sm text-gray-500 text-center">
+       ℹ️ Click the ✕ button to cancel a booking 點擊 ✕ 按鈕取消預約
       </div>
      </div>
-    </main>
+    </div>
    </div><!-- Staff Dashboard -->
    <div id="staffDashboard" class="hidden min-h-full">
-    <header class="bg-gradient-to-r from-slate-800 to-slate-900 shadow-lg sticky top-0 z-40 no-print">
-     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-       <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-       </div>
-       <div>
-        <h1 class="font-semibold text-white">Staff Portal 職員系統</h1>
-        <p class="text-sm text-slate-300">Administration 管理後台</p>
-       </div>
-      </div><button onclick="logout()" class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition flex items-center gap-2">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-       </svg> Logout 登出 </button>
+    <nav class="bg-slate-800 text-white p-4 no-print">
+     <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div>
+       <h1 class="text-xl font-bold">Staff Dashboard 工作人員介面</h1>
+       <p class="text-slate-400 text-sm">Management Console 管理控制台</p>
+      </div><button onclick="logout()" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition"> Logout 登出 </button>
      </div>
-    </header>
-    <main class="max-w-7xl mx-auto px-4 py-6"><!-- Staff Tab Navigation -->
-     <div class="flex flex-wrap gap-2 mb-6 no-print"><button onclick="showStaffTab('renters')" id="staffTabRenters" class="px-4 py-2 rounded-lg font-medium transition bg-slate-800 text-white"> Manage Renters 管理租用者 </button> <button onclick="showStaffTab('rooms')" id="staffTabRooms" class="px-4 py-2 rounded-lg font-medium transition bg-gray-100 text-gray-600 hover:bg-gray-200"> Room Settings 房間設定 </button> <button onclick="showStaffTab('allBookings')" id="staffTabAllBookings" class="px-4 py-2 rounded-lg font-medium transition bg-gray-100 text-gray-600 hover:bg-gray-200"> All Bookings 所有預約 </button> <button onclick="showStaffTab('reports')" id="staffTabReports" class="px-4 py-2 rounded-lg font-medium transition bg-gray-100 text-gray-600 hover:bg-gray-200"> Reports 報表 </button>
-     </div><!-- Manage Renters Section -->
-     <div id="staffRentersSection">
-      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">Renters 租用者</h2><button onclick="showAddRenterModal()" class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition flex items-center gap-2">
-         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-         </svg> Add Renter 新增租用者 </button>
-       </div>
-       <div id="rentersList" class="space-y-3"></div>
-       <div id="noRentersMessage" class="hidden text-center py-8 text-gray-500">
-        <p>No renters registered 暫無租用者</p>
-       </div>
+    </nav>
+    <div class="max-w-7xl mx-auto p-4"><!-- Staff Tabs -->
+     <div class="flex space-x-2 mb-6 overflow-x-auto no-print"><button onclick="showStaffTab('renters')" class="staff-tab px-4 py-2 rounded-lg font-medium transition bg-indigo-600 text-white" data-tab="renters"> 👥 Renters 租用者 </button> <button onclick="showStaffTab('rooms')" class="staff-tab px-4 py-2 rounded-lg font-medium transition bg-gray-200 text-gray-700" data-tab="rooms"> 🏠 Rooms 房間 </button> <button onclick="showStaffTab('bookings')" class="staff-tab px-4 py-2 rounded-lg font-medium transition bg-gray-200 text-gray-700" data-tab="bookings"> 📅 All Bookings 所有預約 </button> <button onclick="showStaffTab('reports')" class="staff-tab px-4 py-2 rounded-lg font-medium transition bg-gray-200 text-gray-700" data-tab="reports"> 📊 Reports 報表 </button>
+     </div><!-- Renters Management -->
+     <div id="staffRentersTab" class="staff-tab-content">
+      <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+       <h2 class="text-xl font-bold text-gray-800 mb-4">Add New Renter 新增租用者</h2>
+       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4"><input type="text" id="newRenterName" placeholder="Name 姓名" class="px-4 py-3 border border-gray-200 rounded-xl"> <input type="text" id="newRenterPassword" placeholder="Password 密碼" class="px-4 py-3 border border-gray-200 rounded-xl"> <input type="email" id="newRenterEmail" placeholder="Email 電郵" class="px-4 py-3 border border-gray-200 rounded-xl"> <input type="tel" id="newRenterPhone" placeholder="Phone 電話" class="px-4 py-3 border border-gray-200 rounded-xl">
+       </div><button onclick="addNewRenter()" class="mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition"> Add Renter 新增租用者 </button>
       </div>
-     </div><!-- Room Settings Section -->
-     <div id="staffRoomsSection" class="hidden">
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-       <h2 class="text-lg font-semibold text-gray-800 mb-4">Room Price Settings 房間價格設定</h2>
-       <p class="text-sm text-gray-500 mb-4">Changes will only affect new bookings 更改只會影響新預約</p>
+      <div class="bg-white rounded-2xl card-shadow p-6">
+       <h2 class="text-xl font-bold text-gray-800 mb-4">Renter List 租用者列��</h2>
+       <div id="renterList" class="space-y-3"></div>
+      </div>
+     </div><!-- Rooms Management -->
+     <div id="staffRoomsTab" class="staff-tab-content hidden">
+      <div class="bg-white rounded-2xl card-shadow p-6">
+       <h2 class="text-xl font-bold text-gray-800 mb-4">Room Pricing Management 房間價格管理</h2>
+       <p class="text-gray-600 mb-4 text-sm">⚠️ Price changes only affect new bookings 價格變更只影響新預約</p>
        <div class="space-y-6"><!-- Jordan -->
         <div>
-         <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="w-3 h-3 bg-blue-500 rounded-full"></span> Jordan 佐敦</h3>
-         <div id="jordanRooms" class="grid md:grid-cols-2 gap-3"></div>
+         <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center"><span class="w-3 h-3 bg-indigo-500 rounded-full mr-2"></span> 佐敦 Jordan</h3>
+         <div id="jordanRooms" class="grid md:grid-cols-2 gap-4"></div>
         </div><!-- Wan Chai -->
         <div>
-         <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="w-3 h-3 bg-green-500 rounded-full"></span> Wan Chai 灣仔</h3>
-         <div id="wanchaiRooms" class="grid md:grid-cols-2 gap-3"></div>
+         <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center"><span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span> 灣仔 Wan Chai</h3>
+         <div id="wanchaiRooms" class="grid md:grid-cols-2 gap-4"></div>
         </div><!-- Tsuen Wan -->
         <div>
-         <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><span class="w-3 h-3 bg-purple-500 rounded-full"></span> Tsuen Wan 荃灣</h3>
-         <div id="tsuenwanRooms" class="grid md:grid-cols-2 gap-3"></div>
+         <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center"><span class="w-3 h-3 bg-amber-500 rounded-full mr-2"></span> 荃灣 Tsuen Wan</h3>
+         <div id="tsuenwanRooms" class="grid md:grid-cols-2 gap-4"></div>
         </div>
        </div>
       </div>
-     </div><!-- All Bookings Section -->
-     <div id="staffAllBookingsSection" class="hidden">
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">All Bookings 所有預約</h2>
-        <div class="flex items-center gap-2"><select id="staffBookingFilter" onchange="filterStaffBookings()" class="px-3 py-2 border border-gray-200 rounded-lg text-sm"> <option value="all">All Renters 所有租用者</option> </select> <select id="staffBranchFilter" onchange="filterStaffBookings()" class="px-3 py-2 border border-gray-200 rounded-lg text-sm"> <option value="all">All Branches 所有分店</option> <option value="jordan">Jordan 佐敦</option> <option value="wanchai">Wan Chai 灣仔</option> <option value="tsuenwan">Tsuen Wan 荃灣</option> </select>
+     </div><!-- All Bookings -->
+     <div id="staffBookingsTab" class="staff-tab-content hidden">
+      <div class="bg-white rounded-2xl card-shadow p-6">
+       <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
+        <h2 class="text-xl font-bold text-gray-800">All Bookings 所有預約</h2>
+        <div class="flex items-center space-x-2"><select id="bookingsFilterMonth" onchange="filterBookings()" class="px-4 py-2 border border-gray-200 rounded-xl"> </select> <select id="bookingsFilterYear" onchange="filterBookings()" class="px-4 py-2 border border-gray-200 rounded-xl"> </select> <select id="bookingsFilterRenter" onchange="filterBookings()" class="px-4 py-2 border border-gray-200 rounded-xl"> <option value="">All Renters 所有租用者</option> </select> <button onclick="downloadAllBookings()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition"> 📥 Download 下載 </button>
         </div>
        </div>
-       <div id="allBookingsList" class="space-y-3"></div>
+       <div id="allBookingsList" class="space-y-2 max-h-[600px] overflow-auto"></div>
       </div>
-     </div><!-- Reports Section -->
-     <div id="staffReportsSection" class="hidden">
-      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">Monthly Report 月度報表</h2>
-        <div class="flex items-center gap-2"><select id="reportMonthSelect" onchange="generateReport()" class="px-3 py-2 border border-gray-200 rounded-lg"> </select> <select id="reportYearSelect" onchange="generateReport()" class="px-3 py-2 border border-gray-200 rounded-lg"> </select> <button onclick="printReport()" class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg> Print 列印 </button>
+     </div><!-- Reports -->
+     <div id="staffReportsTab" class="staff-tab-content hidden">
+      <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+       <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
+        <h2 class="text-xl font-bold text-gray-800">Monthly Report 月結報表</h2>
+        <div class="flex items-center space-x-2 no-print"><select id="reportMonth" onchange="generateReport()" class="px-4 py-2 border border-gray-200 rounded-xl"> </select> <select id="reportYear" onchange="generateReport()" class="px-4 py-2 border border-gray-200 rounded-xl"> </select> <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition"> 🖨️ Print 列印 </button>
         </div>
        </div>
        <div id="reportContent">
+        <div class="print-only text-center mb-6">
+         <h1 class="text-2xl font-bold">Room Rental Report 房間租用報表</h1>
+         <p id="reportPeriod" class="text-gray-600"></p>
+        </div>
         <div class="grid md:grid-cols-4 gap-4 mb-6">
-         <div class="bg-slate-50 rounded-xl p-4">
-          <p class="text-sm text-slate-600">Total Bookings 總預約</p>
-          <p id="reportTotalBookings" class="text-2xl font-bold text-slate-800">0</p>
+         <div class="bg-indigo-50 rounded-xl p-4 text-center">
+          <p class="text-indigo-600 text-sm">Total Revenue 總收入</p>
+          <p id="reportTotalRevenue" class="text-2xl font-bold text-indigo-700">$0</p>
          </div>
-         <div class="bg-slate-50 rounded-xl p-4">
-          <p class="text-sm text-slate-600">Total Hours 總時數</p>
-          <p id="reportTotalHours" class="text-2xl font-bold text-slate-800">0</p>
+         <div class="bg-green-50 rounded-xl p-4 text-center">
+          <p class="text-green-600 text-sm">Total Bookings 總預約</p>
+          <p id="reportTotalBookings" class="text-2xl font-bold text-green-700">0</p>
          </div>
-         <div class="bg-slate-50 rounded-xl p-4">
-          <p class="text-sm text-slate-600">Total Revenue 總收入</p>
-          <p id="reportTotalRevenue" class="text-2xl font-bold text-slate-800">$0</p>
+         <div class="bg-amber-50 rounded-xl p-4 text-center">
+          <p class="text-amber-600 text-sm">Total Hours 總時數</p>
+          <p id="reportTotalHours" class="text-2xl font-bold text-amber-700">0</p>
          </div>
-         <div class="bg-slate-50 rounded-xl p-4">
-          <p class="text-sm text-slate-600">Active Renters 活躍租用者</p>
-          <p id="reportActiveRenters" class="text-2xl font-bold text-slate-800">0</p>
+         <div class="bg-purple-50 rounded-xl p-4 text-center">
+          <p class="text-purple-600 text-sm">Active Renters 活躍租用者</p>
+          <p id="reportActiveRenters" class="text-2xl font-bold text-purple-700">0</p>
          </div>
         </div>
-        <h3 class="font-semibold text-gray-800 mb-3">Breakdown by Renter 按租用者分類</h3>
-        <div id="reportByRenter" class="space-y-4"></div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-3">By Renter 按租用者</h3>
+        <div id="reportByRenter" class="space-y-4 mb-6"></div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-3">By Room 按房間</h3>
+        <div id="reportByRoom" class="space-y-2"></div>
        </div>
       </div><!-- Individual Receipts -->
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">Generate Receipt 生成收據</h2>
+      <div class="bg-white rounded-2xl card-shadow p-6 no-print">
+       <h2 class="text-xl font-bold text-gray-800 mb-4">Generate Receipt 生成收據</h2>
+       <div class="flex items-center space-x-4"><select id="receiptRenter" class="px-4 py-2 border border-gray-200 rounded-xl flex-1"> <option value="">Select Renter 選擇租用者</option> </select> <select id="receiptMonth" class="px-4 py-2 border border-gray-200 rounded-xl"> </select> <select id="receiptYear" class="px-4 py-2 border border-gray-200 rounded-xl"> </select> <button onclick="generateReceipt()" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition"> Generate 生成 </button>
        </div>
-       <div class="flex items-center gap-4 mb-4"><select id="receiptRenterSelect" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl"> <option value="">Select Renter 選擇租用者</option> </select> <button onclick="generateReceipt()" class="px-6 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition"> Generate 生成 </button>
-       </div>
-       <div id="receiptPreview" class="hidden border-2 border-dashed border-gray-200 rounded-xl p-6"></div>
-      </div>
-     </div>
-    </main>
-   </div><!-- Add Renter Modal -->
-   <div id="addRenterModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="modal-backdrop absolute inset-0" onclick="closeAddRenterModal()"></div>
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10">
-     <div class="p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Add New Renter 新增租用者</h2>
-      <div class="space-y-4">
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">Name 姓名 *</label> <input type="text" id="newRenterName" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500">
-       </div>
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">Password 密碼 *</label> <input type="text" id="newRenterPassword" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="Set password for renter">
-       </div>
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">Email 電郵</label> <input type="email" id="newRenterEmail" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500">
-       </div>
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">Phone 電話</label> <input type="tel" id="newRenterPhone" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500">
-       </div>
-      </div>
-      <div id="addRenterError" class="hidden mt-3 text-red-500 text-sm"></div>
-      <div class="flex gap-3 mt-6"><button onclick="closeAddRenterModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition"> Cancel 取消 </button> <button onclick="addRenter()" id="addRenterBtn" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition"> Add 新增 </button>
       </div>
      </div>
     </div>
-   </div><!-- Edit Renter Modal -->
-   <div id="editRenterModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="modal-backdrop absolute inset-0" onclick="closeEditRenterModal()"></div>
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10">
-     <div class="p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Edit Renter 編輯租用者</h2><input type="hidden" id="editRenterId">
-      <div class="space-y-4">
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">Name 姓名 *</label> <input type="text" id="editRenterName" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500">
-       </div>
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">Password 密碼 *</label> <input type="text" id="editRenterPassword" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500">
-        <p class="text-xs text-gray-500 mt-1">Visible for password recovery 密碼可見以便找回</p>
-       </div>
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">Email 電郵</label> <input type="email" id="editRenterEmail" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500">
-       </div>
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">Phone 電話</label> <input type="tel" id="editRenterPhone" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500">
-       </div>
-      </div>
-      <div id="editRenterError" class="hidden mt-3 text-red-500 text-sm"></div>
-      <div class="flex gap-3 mt-6"><button onclick="closeEditRenterModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition"> Cancel 取消 </button> <button onclick="saveRenterEdit()" id="saveRenterBtn" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition"> Save 儲存 </button>
-      </div>
+   </div><!-- Receipt Modal -->
+   <div id="receiptModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto p-8">
+     <div id="receiptContent"></div>
+     <div class="flex justify-end space-x-4 mt-6 no-print"><button onclick="closeReceiptModal()" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-xl transition"> Close 關閉 </button> <button onclick="printReceipt()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition"> 📥 Download CSV 下載CSV </button>
      </div>
     </div>
-   </div><!-- Staff Login Modal -->
-   <div id="staffLoginModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="modal-backdrop absolute inset-0" onclick="closeStaffLogin()"></div>
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10">
-     <div class="p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Staff Login 職員登入</h2>
-      <div class="space-y-4">
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">Password 密碼</label> <input type="password" id="staffPassword" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="Enter staff password">
-       </div>
-      </div>
-      <div id="staffLoginError" class="hidden mt-3 text-red-500 text-sm"></div>
-      <div class="flex gap-3 mt-6"><button onclick="closeStaffLogin()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition"> Cancel 取消 </button> <button onclick="handleStaffLogin()" class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition"> Login 登入 </button>
-      </div>
-     </div>
-    </div>
-   </div><!-- Confirm Cancel Booking Modal -->
-   <div id="cancelBookingModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="modal-backdrop absolute inset-0" onclick="closeCancelBookingModal()"></div>
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10">
-     <div class="p-6 text-center">
-      <div class="w-16 h-16 bg-red-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-       <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-       </svg>
-      </div>
-      <h2 class="text-xl font-semibold text-gray-800 mb-2">Cancel Booking? 取消預約？</h2>
-      <p id="cancelBookingDetails" class="text-gray-600 mb-6"></p><input type="hidden" id="cancelBookingId">
-      <div class="flex gap-3"><button onclick="closeCancelBookingModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition"> Keep 保留 </button> <button onclick="confirmCancelBooking()" id="confirmCancelBtn" class="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition"> Cancel Booking 取消預約 </button>
-      </div>
+   </div><!-- Confirmation Modal -->
+   <div id="confirmModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6">
+     <h3 class="text-lg font-bold text-gray-800 mb-2">Confirm Cancellation 確認取消</h3>
+     <p id="confirmMessage" class="text-gray-600 mb-6"></p>
+     <div class="flex space-x-3"><button onclick="closeConfirmModal()" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-xl transition"> Cancel 取消 </button> <button onclick="confirmDelete()" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition"> Confirm 確認 </button>
      </div>
     </div>
    </div><!-- Toast Notification -->
-   <div id="toast" class="hidden fixed bottom-4 right-4 z-50 px-6 py-3 rounded-xl shadow-lg transition-all transform translate-y-2 opacity-0">
-   </div>
+   <div id="toast" class="hidden fixed bottom-4 right-4 px-6 py-4 rounded-xl shadow-lg z-50 transition-all transform translate-y-full"></div>
   </div>
   <script>
-    // ============ Configuration ============
+    // ============ DATA & STATE ============
+    let allData = [];
+    let currentUser = null;
+    let currentUserType = null;
+    let selectedRoom = null;
+    let selectedTimeSlots = [];
+    let pendingDeleteAction = null;
+    
     const defaultConfig = {
       system_title: 'Room Booking System'
     };
-
-    let config = { ...defaultConfig };
-
-    // ============ State Management ============
-    let allData = [];
-    let renters = [];
-    let bookings = [];
-    let roomPrices = [];
-    let currentUser = null;
-    let isStaff = false;
-    let selectedSlots = [];
-    let staffPassword = '123';
-
-    // Default room configuration
+    
     const defaultRooms = {
       jordan: [
-        { id: 'jordan-c', name: 'Room C', price: 140, facilities: '催眠椅', toyAvailable: false, toyPricePerHour: 0 },
-        { id: 'jordan-d', name: 'Room D', price: 190, facilities: '小組、沙盤遊戲治療', toyAvailable: true, toyPricePerHour: 50 },
-        { id: 'jordan-e', name: 'Room E', price: 170, facilities: '大房 家庭治療', toyAvailable: false, toyPricePerHour: 0 },
-        { id: 'jordan-f', name: 'Room F', price: 150, facilities: '落地窗輔導室', toyAvailable: false, toyPricePerHour: 0 },
-        { id: 'jordan-g', name: 'Room G', price: 150, facilities: '落地窗輔導室', toyAvailable: false, toyPricePerHour: 0 }
+        { id: 'room-c', name: 'Room C', pricePerHour: 140, facilities: '催眠椅 Hypnosis Chair', hasToyOption: false, toyRentalPrice: 0 },
+        { id: 'room-d', name: 'Room D', pricePerHour: 190, facilities: '小組、沙盤遊戲治療 Group/Sandplay', hasToyOption: true, toyRentalPrice: 50 },
+        { id: 'room-e', name: 'Room E', pricePerHour: 170, facilities: '大房 家庭治療 Family Therapy', hasToyOption: false, toyRentalPrice: 0 },
+        { id: 'room-f', name: 'Room F', pricePerHour: 150, facilities: '落地窗輔導��� Floor Window', hasToyOption: false, toyRentalPrice: 0 },
+        { id: 'room-g', name: 'Room G', pricePerHour: 150, facilities: '落地窗輔導室 Floor Window', hasToyOption: false, toyRentalPrice: 0 }
       ],
       wanchai: [
-        { id: 'wanchai-1', name: 'Room 1', price: 160, facilities: '窗口大房、長梳化', toyAvailable: false, toyPricePerHour: 0 },
-        { id: 'wanchai-2', name: 'Room 2', price: 140, facilities: '舒適輔導室', toyAvailable: false, toyPricePerHour: 0 },
-        { id: 'wanchai-3', name: 'Room 3', price: 140, facilities: '舒適輔導室', toyAvailable: false, toyPricePerHour: 0 },
-        { id: 'wanchai-4', name: 'Room 4', price: 180, facilities: '小組、沙盤遊戲治療', toyAvailable: true, toyPricePerHour: 40 }
+        { id: 'room-1', name: 'Room 1', pricePerHour: 160, facilities: '窗口大房長沙化 Large/Long Sofa', hasToyOption: false, toyRentalPrice: 0 },
+        { id: 'room-2', name: 'Room 2', pricePerHour: 140, facilities: '舒適輔導室 Comfortable', hasToyOption: false, toyRentalPrice: 0 },
+        { id: 'room-3', name: 'Room 3', pricePerHour: 140, facilities: '舒適輔導室 Comfortable', hasToyOption: false, toyRentalPrice: 0 },
+        { id: 'room-4', name: 'Room 4', pricePerHour: 180, facilities: '小組、沙盤遊戲治療 Group/Sandplay', hasToyOption: true, toyRentalPrice: 40 }
       ],
       tsuenwan: [
-        { id: 'tsuenwan-5', name: 'Room 5', price: 130, facilities: '輔導室', toyAvailable: false, toyPricePerHour: 0 },
-        { id: 'tsuenwan-6', name: 'Room 6', price: 140, facilities: '輔導室', toyAvailable: false, toyPricePerHour: 0 },
-        { id: 'tsuenwan-7', name: 'Room 7', price: 140, facilities: '輔導室', toyAvailable: false, toyPricePerHour: 0 },
-        { id: 'tsuenwan-8', name: 'Room 8', price: 160, facilities: '大窗輔導室', toyAvailable: false, toyPricePerHour: 0 }
+        { id: 'room-5', name: 'Room 5', pricePerHour: 130, facilities: '標準輔導室 Standard', hasToyOption: false, toyRentalPrice: 0 },
+        { id: 'room-6', name: 'Room 6', pricePerHour: 140, facilities: '標準輔導室 Standard', hasToyOption: false, toyRentalPrice: 0 },
+        { id: 'room-7', name: 'Room 7', pricePerHour: 140, facilities: '標準輔導室 Standard', hasToyOption: false, toyRentalPrice: 0 },
+        { id: 'room-8', name: 'Room 8', pricePerHour: 160, facilities: '大窗輔導室 Large Window', hasToyOption: false, toyRentalPrice: 0 }
       ]
     };
-
-    // ============ SDK Initialization ============
+    
+    const timeSlots = [];
+    for (let h = 9; h < 22; h++) {
+      timeSlots.push(`${h.toString().padStart(2, '0')}:00`);
+      timeSlots.push(`${h.toString().padStart(2, '0')}:30`);
+    }
+    timeSlots.push('22:00');
+    
+    // ============ INITIALIZATION ============
     const dataHandler = {
       onDataChanged(data) {
         allData = data;
-        renters = data.filter(d => d.type === 'renter');
-        bookings = data.filter(d => d.type === 'booking' && d.status === 'active');
-        roomPrices = data.filter(d => d.type === 'room_price');
         
-        updateUI();
+        if (currentUserType === 'renter' && currentUser) {
+          updateRenterStats();
+          if (selectedRoom) {
+            loadTimeSlots();
+          }
+        } else if (currentUserType === 'staff') {
+          renderRenterList();
+          renderRoomPricing();
+          filterBookings();
+          generateReport();
+          populateRenterDropdowns();
+        }
       }
     };
-
+    
     async function initApp() {
-      // Set default date
-      const today = new Date();
-      document.getElementById('renterDateSelect').value = today.toISOString().split('T')[0];
-      document.getElementById('renterDateSelect').min = today.toISOString().split('T')[0];
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            const title = config.system_title || defaultConfig.system_title;
+            const titleEl = document.getElementById('systemTitle');
+            if (titleEl) titleEl.textContent = title;
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ['system_title', config.system_title || defaultConfig.system_title]
+          ])
+        });
+      }
       
-      // Initialize month/year selects
-      initDateSelects();
-      
-      // Initialize Data SDK
       const result = await window.dataSdk.init(dataHandler);
       if (!result.isOk) {
-        showToast('Failed to initialize system 系統初始化失敗', 'error');
+        showToast('Failed to initialize 初始化失敗', 'error');
       }
+      
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('bookingDate').value = today;
+      
+      populateDateSelectors();
     }
-
-    function initDateSelects() {
+    
+    function populateDateSelectors() {
       const months = [
-        'January 一月', 'February 二月', 'March 三月', 'April 四月',
-        'May 五月', 'June 六月', 'July 七月', 'August 八月',
-        'September 九月', 'October 十月', 'November 十一月', 'December 十二月'
+        { value: 0, label: 'January 一月' },
+        { value: 1, label: 'February 二月' },
+        { value: 2, label: 'March 三月' },
+        { value: 3, label: 'April 四月' },
+        { value: 4, label: 'May 五月' },
+        { value: 5, label: 'June 六月' },
+        { value: 6, label: 'July 七月' },
+        { value: 7, label: 'August 八月' },
+        { value: 8, label: 'September 九月' },
+        { value: 9, label: 'October 十月' },
+        { value: 10, label: 'November 十一月' },
+        { value: 11, label: 'December 十二月' }
       ];
       
       const currentYear = new Date().getFullYear();
       const currentMonth = new Date().getMonth();
+      const years = [];
+      for (let y = currentYear - 2; y <= currentYear + 1; y++) {
+        years.push(y);
+      }
       
-      // Stats month selects
-      const statsMonthSelect = document.getElementById('statsMonthSelect');
-      const statsYearSelect = document.getElementById('statsYearSelect');
+      const monthSelects = ['statsMonth', 'bookingsFilterMonth', 'reportMonth', 'receiptMonth'];
+      const yearSelects = ['statsYear', 'bookingsFilterYear', 'reportYear', 'receiptYear'];
       
-      months.forEach((month, index) => {
-        statsMonthSelect.innerHTML += `<option value="${index}" ${index === currentMonth ? 'selected' : ''}>${month}</option>`;
+      monthSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (select) {
+          select.innerHTML = months.map(m => 
+            `<option value="${m.value}" ${m.value === currentMonth ? 'selected' : ''}>${m.label}</option>`
+          ).join('');
+        }
       });
       
-      for (let year = currentYear - 2; year <= currentYear + 1; year++) {
-        statsYearSelect.innerHTML += `<option value="${year}" ${year === currentYear ? 'selected' : ''}>${year}</option>`;
-      }
-      
-      // Report month selects
-      const reportMonthSelect = document.getElementById('reportMonthSelect');
-      const reportYearSelect = document.getElementById('reportYearSelect');
-      
-      months.forEach((month, index) => {
-        reportMonthSelect.innerHTML += `<option value="${index}" ${index === currentMonth ? 'selected' : ''}>${month}</option>`;
+      yearSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (select) {
+          select.innerHTML = years.map(y => 
+            `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`
+          ).join('');
+        }
       });
-      
-      for (let year = currentYear - 2; year <= currentYear + 1; year++) {
-        reportYearSelect.innerHTML += `<option value="${year}" ${year === currentYear ? 'selected' : ''}>${year}</option>`;
-      }
     }
-
-    // ============ UI Update Functions ============
-    function updateUI() {
-      if (isStaff) {
-        updateStaffUI();
-      } else if (currentUser) {
-        updateRenterUI();
-      }
-    }
-
-    function updateStaffUI() {
-      renderRentersList();
-      renderRoomSettings();
-      renderAllBookings();
-      generateReport();
-      updateReceiptRenterSelect();
-    }
-
-    function updateRenterUI() {
-      renderMyBookings();
-      updateRenterStatistics();
-      loadTimeSlots();
-    }
-
-    // ============ Authentication ============
+    
+    // ============ AUTHENTICATION ============
     function handleLogin() {
       const name = document.getElementById('loginName').value.trim();
       const password = document.getElementById('loginPassword').value;
@@ -483,57 +402,75 @@
         return;
       }
       
-      const renter = renters.find(r => r.name.toLowerCase() === name.toLowerCase() && r.password === password);
+      const renter = allData.find(d => d.type === 'renter' && d.name === name && d.password === password);
       
       if (renter) {
         currentUser = renter;
-        isStaff = false;
+        currentUserType = 'renter';
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('renterDashboard').classList.remove('hidden');
-        document.getElementById('renterWelcomeName').textContent = renter.name;
-        updateRenterUI();
-        showToast('Login successful 登入成功', 'success');
+        document.getElementById('renterNameDisplay').textContent = name;
+        updateRenterStats();
       } else {
-        showLoginError('Invalid name or password 姓名或密碼錯誤');
+        showLoginError('Invalid credentials 登入資料無效');
       }
     }
-
-    function showLoginError(message) {
-      const errorDiv = document.getElementById('loginError');
-      errorDiv.textContent = message;
-      errorDiv.classList.remove('hidden');
-    }
-
+    
     function showStaffLogin() {
-      document.getElementById('staffLoginModal').classList.remove('hidden');
-    }
-
-    function closeStaffLogin() {
-      document.getElementById('staffLoginModal').classList.add('hidden');
-      document.getElementById('staffPassword').value = '';
-      document.getElementById('staffLoginError').classList.add('hidden');
-    }
-
-    function handleStaffLogin() {
-      const password = document.getElementById('staffPassword').value;
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50';
+      modal.innerHTML = `
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Staff Login 工作人員登入</h2>
+          <input type="password" id="staffPasswordInput" placeholder="Enter password 輸入密碼" 
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 mb-4">
+          <div class="flex space-x-3">
+            <button onclick="cancelStaffLogin()" class="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl transition">
+              Cancel 取消
+            </button>
+            <button onclick="confirmStaffLogin()" class="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition">
+              Login 登入
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById('staffPasswordInput').focus();
       
-      if (password === staffPassword) {
-        isStaff = true;
-        currentUser = null;
-        closeStaffLogin();
+      document.getElementById('staffPasswordInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          confirmStaffLogin();
+        }
+      });
+    }
+    
+    function cancelStaffLogin() {
+      const modal = document.querySelector('.fixed.inset-0');
+      if (modal) modal.remove();
+    }
+    
+    function confirmStaffLogin() {
+      const password = document.getElementById('staffPasswordInput').value;
+      if (password === '123') {
+        currentUserType = 'staff';
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('staffDashboard').classList.remove('hidden');
-        updateStaffUI();
-        showToast('Staff login successful 職員登入成功', 'success');
+        cancelStaffLogin();
+        renderRenterList();
+        renderRoomPricing();
+        filterBookings();
+        generateReport();
+        populateRenterDropdowns();
       } else {
-        document.getElementById('staffLoginError').textContent = 'Invalid password 密碼錯誤';
-        document.getElementById('staffLoginError').classList.remove('hidden');
+        showToast('Invalid staff password 工作人員密碼無效', 'error');
       }
     }
-
+    
     function logout() {
       currentUser = null;
-      isStaff = false;
+      currentUserType = null;
+      selectedRoom = null;
+      selectedTimeSlots = [];
       document.getElementById('loginScreen').classList.remove('hidden');
       document.getElementById('renterDashboard').classList.add('hidden');
       document.getElementById('staffDashboard').classList.add('hidden');
@@ -541,501 +478,423 @@
       document.getElementById('loginPassword').value = '';
       document.getElementById('loginError').classList.add('hidden');
     }
-
-    // ============ Renter Tab Navigation ============
-    function showRenterTab(tab) {
-      const tabs = ['booking', 'myBookings', 'statistics'];
-      tabs.forEach(t => {
-        document.getElementById(`renterTab${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.remove('bg-blue-500', 'text-white');
-        document.getElementById(`renterTab${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('bg-gray-100', 'text-gray-600');
-        document.getElementById(`renter${t.charAt(0).toUpperCase() + t.slice(1)}Section`).classList.add('hidden');
-      });
-      
-      document.getElementById(`renterTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('bg-blue-500', 'text-white');
-      document.getElementById(`renterTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('bg-gray-100', 'text-gray-600');
-      document.getElementById(`renter${tab.charAt(0).toUpperCase() + tab.slice(1)}Section`).classList.remove('hidden');
+    
+    function showLoginError(msg) {
+      const el = document.getElementById('loginError');
+      el.textContent = msg;
+      el.classList.remove('hidden');
     }
-
-    // ============ Staff Tab Navigation ============
-    function showStaffTab(tab) {
-      const tabs = ['renters', 'rooms', 'allBookings', 'reports'];
-      tabs.forEach(t => {
-        const tabBtn = document.getElementById(`staffTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
-        const section = document.getElementById(`staff${t.charAt(0).toUpperCase() + t.slice(1)}Section`);
-        tabBtn.classList.remove('bg-slate-800', 'text-white');
-        tabBtn.classList.add('bg-gray-100', 'text-gray-600');
-        section.classList.add('hidden');
-      });
-      
-      document.getElementById(`staffTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('bg-slate-800', 'text-white');
-      document.getElementById(`staffTab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('bg-gray-100', 'text-gray-600');
-      document.getElementById(`staff${tab.charAt(0).toUpperCase() + tab.slice(1)}Section`).classList.remove('hidden');
+    
+    // ============ CONFIRMATION MODAL ============
+    function showConfirmModal(message, onConfirm) {
+      document.getElementById('confirmMessage').textContent = message;
+      document.getElementById('confirmModal').classList.remove('hidden');
+      pendingDeleteAction = onConfirm;
     }
-
-    // ============ Room Functions ============
-    function getRoomPrice(roomId) {
-      const savedPrice = roomPrices.find(p => p.roomId === roomId);
-      if (savedPrice) return savedPrice;
-      
-      for (const branch in defaultRooms) {
-        const room = defaultRooms[branch].find(r => r.id === roomId);
-        if (room) return room;
+    
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+      pendingDeleteAction = null;
+    }
+    
+    async function confirmDelete() {
+      if (pendingDeleteAction) {
+        await pendingDeleteAction();
+        pendingDeleteAction = null;
       }
-      return null;
+      closeConfirmModal();
     }
-
-    function getAllRooms() {
-      const rooms = [];
-      for (const branch in defaultRooms) {
-        defaultRooms[branch].forEach(room => {
-          const savedPrice = roomPrices.find(p => p.roomId === room.id);
-          rooms.push({
-            ...room,
-            branch,
-            price: savedPrice ? savedPrice.price : room.price,
-            toyPricePerHour: savedPrice ? savedPrice.toyPricePerHour : room.toyPricePerHour
-          });
-        });
+    
+    // ============ RENTER FUNCTIONS ============
+    function getRoomConfig(roomId, branch) {
+      const roomConfig = allData.find(d => d.type === 'room_config' && d.roomId === roomId);
+      if (roomConfig) {
+        return {
+          id: roomConfig.roomId,
+          name: roomConfig.roomName,
+          pricePerHour: roomConfig.pricePerHour,
+          facilities: roomConfig.facilities,
+          hasToyOption: roomConfig.hasToyOption,
+          toyRentalPrice: roomConfig.toyRentalPrice || 0
+        };
       }
-      return rooms;
+      const defaults = defaultRooms[branch] || [];
+      return defaults.find(r => r.id === roomId) || null;
     }
-
-    function loadRoomsForBranch() {
-      const branch = document.getElementById('renterBranchSelect').value;
-      const roomSelect = document.getElementById('renterRoomSelect');
-      roomSelect.innerHTML = '<option value="">Select Room 選擇房間</option>';
+    
+    function updateRoomList() {
+      const branch = document.getElementById('branchSelect').value;
+      const roomListEl = document.getElementById('roomList');
       
-      if (branch && defaultRooms[branch]) {
-        defaultRooms[branch].forEach(room => {
-          const price = getRoomPrice(room.id);
-          const displayPrice = price ? price.price * 2 : room.price * 2;
-          roomSelect.innerHTML += `<option value="${room.id}">${room.name} - $${displayPrice}/hr</option>`;
-        });
-      }
-      
-      document.getElementById('selectedRoomInfo').classList.add('hidden');
-      document.getElementById('timeSlotsContainer').classList.add('hidden');
-    }
-
-    function loadTimeSlots() {
-      const branch = document.getElementById('renterBranchSelect').value;
-      const date = document.getElementById('renterDateSelect').value;
-      const roomId = document.getElementById('renterRoomSelect').value;
-      
-      if (!branch || !date || !roomId) {
-        document.getElementById('selectedRoomInfo').classList.add('hidden');
-        document.getElementById('timeSlotsContainer').classList.add('hidden');
+      if (!branch) {
+        roomListEl.innerHTML = '<p class="text-gray-500 col-span-full text-center py-8">Please select a branch 請選擇分店</p>';
+        document.getElementById('timeSlotSection').classList.add('hidden');
         return;
       }
       
-      // Show room info
-      const room = defaultRooms[branch].find(r => r.id === roomId);
-      const roomPrice = getRoomPrice(roomId);
-      const price = roomPrice ? roomPrice.price : room.price;
-      const toyPrice = roomPrice ? roomPrice.toyPricePerHour : room.toyPricePerHour;
-      const pricePerHour = price * 2;
+      const branchRooms = defaultRooms[branch] || [];
       
-      document.getElementById('roomInfoName').textContent = room.name;
-      document.getElementById('roomInfoFacilities').textContent = room.facilities;
-      document.getElementById('roomInfoPrice').textContent = `$${pricePerHour}`;
-      document.getElementById('selectedRoomInfo').classList.remove('hidden');
-      
-      // Show toy option if available
-      if (room.toyAvailable) {
-        document.getElementById('toyRentalOption').classList.remove('hidden');
-        document.getElementById('toyPriceDisplay').textContent = toyPrice;
-      } else {
-        document.getElementById('toyRentalOption').classList.add('hidden');
-        document.getElementById('toyRentalCheckbox').checked = false;
-      }
-      
-      // Generate time slots (9:00 AM to 10:00 PM)
-      const slotsContainer = document.getElementById('timeSlots');
-      slotsContainer.innerHTML = '';
-      selectedSlots = [];
-      
-      const now = new Date();
-      const selectedDate = new Date(date);
-      const isToday = selectedDate.toDateString() === now.toDateString();
-      
-      for (let hour = 9; hour < 22; hour++) {
-        for (let min = 0; min < 60; min += 30) {
-          const timeStr = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
-          const endHour = min === 30 ? hour + 1 : hour;
-          const endMin = min === 30 ? 0 : 30;
-          const endTimeStr = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
-          
-          // Check if slot is booked
-          const isBooked = bookings.some(b => 
-            b.roomId === roomId && 
-            b.date === date && 
-            b.startTime <= timeStr && 
-            b.endTime > timeStr
-          );
-          
-          // Check if slot is in the past
-          const slotTime = new Date(date + 'T' + timeStr);
-          const isPast = isToday && slotTime <= now;
-          
-          const slotDiv = document.createElement('div');
-          slotDiv.className = `booking-slot p-2 text-center rounded-lg cursor-pointer transition ${
-            isBooked ? 'booked bg-gray-100 text-gray-400' :
-            isPast ? 'past bg-gray-100 text-gray-400' :
-            'bg-blue-50 text-blue-700 hover:bg-blue-100'
-          }`;
-          slotDiv.textContent = timeStr;
-          slotDiv.dataset.time = timeStr;
-          slotDiv.dataset.endTime = endTimeStr;
-          
-          if (!isBooked && !isPast) {
-            slotDiv.onclick = () => toggleSlot(slotDiv, timeStr, endTimeStr);
-          }
-          
-          slotsContainer.appendChild(slotDiv);
-        }
-      }
-      
-      document.getElementById('timeSlotsContainer').classList.remove('hidden');
-      document.getElementById('bookingSummary').classList.add('hidden');
-    }
-
-    function toggleSlot(element, startTime, endTime) {
-      const index = selectedSlots.findIndex(s => s.start === startTime);
-      
-      if (index > -1) {
-        selectedSlots.splice(index, 1);
-        element.classList.remove('bg-blue-500', 'text-white');
-        element.classList.add('bg-blue-50', 'text-blue-700');
-      } else {
-        selectedSlots.push({ start: startTime, end: endTime });
-        element.classList.add('bg-blue-500', 'text-white');
-        element.classList.remove('bg-blue-50', 'text-blue-700');
-      }
-      
-      // Sort slots by start time
-      selectedSlots.sort((a, b) => a.start.localeCompare(b.start));
-      
-      updateBookingTotal();
-    }
-
-    function updateBookingTotal() {
-      if (selectedSlots.length === 0) {
-        document.getElementById('bookingSummary').classList.add('hidden');
-        return;
-      }
-      
-      const roomId = document.getElementById('renterRoomSelect').value;
-      const branch = document.getElementById('renterBranchSelect').value;
-      const room = defaultRooms[branch].find(r => r.id === roomId);
-      const roomPrice = getRoomPrice(roomId);
-      const basePrice = roomPrice ? roomPrice.price : room.price;
-      const toyPrice = roomPrice ? roomPrice.toyPricePerHour : room.toyPricePerHour;
-      
-      const includeToys = document.getElementById('toyRentalCheckbox').checked;
-      const hours = selectedSlots.length * 0.5;
-      let total = selectedSlots.length * basePrice;
-      
-      if (includeToys && room.toyAvailable) {
-        total += hours * toyPrice;
-      }
-      
-      // Get continuous time range
-      const firstSlot = selectedSlots[0];
-      const lastSlot = selectedSlots[selectedSlots.length - 1];
-      
-      document.getElementById('selectedTimeRange').textContent = `${firstSlot.start} - ${lastSlot.end} (${hours} hrs 小時)`;
-      document.getElementById('bookingTotal').textContent = `$${total}`;
-      document.getElementById('bookingSummary').classList.remove('hidden');
-    }
-
-    async function confirmBooking() {
-      if (selectedSlots.length === 0) return;
-      
-      if (allData.filter(d => d.type === 'booking').length >= 999) {
-        showToast('Maximum booking limit reached 已達預約上限', 'error');
-        return;
-      }
-      
-      const roomId = document.getElementById('renterRoomSelect').value;
-      const branch = document.getElementById('renterBranchSelect').value;
-      const date = document.getElementById('renterDateSelect').value;
-      const room = defaultRooms[branch].find(r => r.id === roomId);
-      const roomPrice = getRoomPrice(roomId);
-      const basePrice = roomPrice ? roomPrice.price : room.price;
-      const toyPrice = roomPrice ? roomPrice.toyPricePerHour : room.toyPricePerHour;
-      const includeToys = document.getElementById('toyRentalCheckbox').checked && room.toyAvailable;
-      
-      const firstSlot = selectedSlots[0];
-      const lastSlot = selectedSlots[selectedSlots.length - 1];
-      const hours = selectedSlots.length * 0.5;
-      let total = selectedSlots.length * basePrice;
-      if (includeToys) total += hours * toyPrice;
-      
-      const booking = {
-        type: 'booking',
-        roomId: roomId,
-        roomName: room.name,
-        branch: branch,
-        date: date,
-        startTime: firstSlot.start,
-        endTime: lastSlot.end,
-        renterId: currentUser.__backendId,
-        renterName: currentUser.name,
-        basePrice: basePrice,
-        toyRental: includeToys,
-        toyPrice: includeToys ? toyPrice * hours : 0,
-        totalPrice: total,
-        status: 'active',
-        createdAt: new Date().toISOString()
-      };
-      
-      const btn = document.querySelector('#bookingSummary button');
-      btn.disabled = true;
-      btn.textContent = 'Processing... 處理中...';
-      
-      const result = await window.dataSdk.create(booking);
-      
-      btn.disabled = false;
-      btn.textContent = 'Confirm Booking 確認預約';
-      
-      if (result.isOk) {
-        showToast('Booking confirmed! 預約成功！', 'success');
-        selectedSlots = [];
-        loadTimeSlots();
-      } else {
-        showToast('Booking failed 預約失敗', 'error');
-      }
-    }
-
-    // ============ My Bookings ============
-    function renderMyBookings() {
-      const container = document.getElementById('myBookingsList');
-      const noBookingsMessage = document.getElementById('noBookingsMessage');
-      
-      const myBookings = bookings.filter(b => b.renterId === currentUser.__backendId);
-      
-      if (myBookings.length === 0) {
-        container.innerHTML = '';
-        noBookingsMessage.classList.remove('hidden');
-        return;
-      }
-      
-      noBookingsMessage.classList.add('hidden');
-      
-      // Sort by date and time
-      myBookings.sort((a, b) => {
-        if (a.date !== b.date) return a.date.localeCompare(b.date);
-        return a.startTime.localeCompare(b.startTime);
-      });
-      
-      container.innerHTML = myBookings.map(booking => {
-        const branchNames = { jordan: 'Jordan 佐敦', wanchai: 'Wan Chai 灣仔', tsuenwan: 'Tsuen Wan 荃灣' };
-        const isPast = new Date(booking.date + 'T' + booking.endTime) < new Date();
-        
+      roomListEl.innerHTML = branchRooms.map(room => {
+        const config = getRoomConfig(room.id, branch);
         return `
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl ${isPast ? 'opacity-60' : ''}">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-gray-800">${booking.roomName} - ${branchNames[booking.branch]}</p>
-                <p class="text-sm text-gray-500">${booking.date} | ${booking.startTime} - ${booking.endTime}</p>
-                ${booking.toyRental ? '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">+ Toy Rental 玩具</span>' : ''}
-              </div>
-            </div>
-            <div class="text-right">
-              <p class="font-semibold text-gray-800">$${booking.totalPrice}</p>
-              ${!isPast ? `
-                <button onclick="showCancelBookingModal('${booking.__backendId}', '${booking.roomName}', '${booking.date}', '${booking.startTime}')" 
-                  class="text-sm text-red-500 hover:text-red-700 mt-1">
-                  Cancel 取消
-                </button>
-              ` : '<span class="text-xs text-gray-400">Completed 已完成</span>'}
-            </div>
+          <div onclick="selectRoom('${room.id}', '${branch}')" class="cursor-pointer p-4 border-2 border-gray-200 hover:border-indigo-500 rounded-xl transition ${selectedRoom?.id === room.id ? 'border-indigo-500 bg-indigo-50' : ''}">
+            <h3 class="font-bold text-gray-800">${config.name}</h3>
+            <p class="text-indigo-600 font-semibold">$${config.pricePerHour}/hr</p>
+            <p class="text-gray-500 text-sm">${config.facilities}</p>
+            ${config.hasToyOption ? `<p class="text-amber-600 text-sm mt-1">🧸 +$${config.toyRentalPrice}/hr toy rental</p>` : ''}
           </div>
         `;
       }).join('');
     }
-
-    function showCancelBookingModal(bookingId, roomName, date, time) {
-      document.getElementById('cancelBookingId').value = bookingId;
-      document.getElementById('cancelBookingDetails').textContent = `${roomName} on ${date} at ${time}`;
-      document.getElementById('cancelBookingModal').classList.remove('hidden');
+    
+    function selectRoom(roomId, branch) {
+      const config = getRoomConfig(roomId, branch);
+      selectedRoom = { ...config, branch };
+      selectedTimeSlots = [];
+      document.getElementById('toyRentalCheckbox').checked = false;
+      updateRoomList();
+      loadTimeSlots();
     }
-
-    function closeCancelBookingModal() {
-      document.getElementById('cancelBookingModal').classList.add('hidden');
-    }
-
-    async function confirmCancelBooking() {
-      const bookingId = document.getElementById('cancelBookingId').value;
-      const booking = bookings.find(b => b.__backendId === bookingId);
+    
+    function loadTimeSlots() {
+      if (!selectedRoom) return;
       
-      if (!booking) {
-        showToast('Booking not found 找不到預約', 'error');
-        closeCancelBookingModal();
+      const date = document.getElementById('bookingDate').value;
+      if (!date) {
+        showToast('Please select a date 請選擇日期', 'warning');
         return;
       }
       
-      const btn = document.getElementById('confirmCancelBtn');
-      btn.disabled = true;
-      btn.textContent = 'Cancelling... 取消中...';
+      document.getElementById('timeSlotSection').classList.remove('hidden');
+      document.getElementById('selectedRoomInfo').textContent = 
+        `${selectedRoom.name} - $${selectedRoom.pricePerHour}/hr - ${selectedRoom.facilities}`;
       
-      const result = await window.dataSdk.delete(booking);
-      
-      btn.disabled = false;
-      btn.textContent = 'Cancel Booking 取消預約';
-      
-      if (result.isOk) {
-        showToast('Booking cancelled ���約已取消', 'success');
-        closeCancelBookingModal();
+      const toyOption = document.getElementById('toyRentalOption');
+      if (selectedRoom.hasToyOption) {
+        toyOption.classList.remove('hidden');
+        document.getElementById('toyPriceDisplay').textContent = ` (+$${selectedRoom.toyRentalPrice}/hr)`;
       } else {
-        showToast('Failed to cancel 取消失敗', 'error');
+        toyOption.classList.add('hidden');
+      }
+      
+      const bookedSlots = allData
+        .filter(d => d.type === 'booking' && d.roomId === selectedRoom.id && d.date === date)
+        .map(b => b.startTime);
+      
+      const startSelect = document.getElementById('startTimeSelect');
+      startSelect.innerHTML = '<option value="">Select start time 選擇開始時間</option>' + 
+        timeSlots.slice(0, -1).map(slot => {
+          const isBooked = bookedSlots.includes(slot);
+          return `<option value="${slot}" ${isBooked ? 'disabled style="color: #999; background: #f3f4f6;"' : ''}>${slot}${isBooked ? ' (已預約 Booked)' : ''}</option>`;
+        }).join('');
+      
+      document.getElementById('endTimeSelect').innerHTML = '<option value="">Select end time 選擇結束時間</option>';
+      document.getElementById('startTimeSelect').value = '';
+      document.getElementById('endTimeSelect').value = '';
+      
+      updatePriceDisplay();
+    }
+    
+    function updateEndTimeOptions() {
+      const startTime = document.getElementById('startTimeSelect').value;
+      const endSelect = document.getElementById('endTimeSelect');
+      
+      if (!startTime) {
+        endSelect.innerHTML = '<option value="">Select end time 選擇結束時間</option>';
+        updatePriceDisplay();
+        return;
+      }
+      
+      const date = document.getElementById('bookingDate').value;
+      const bookedSlots = allData
+        .filter(d => d.type === 'booking' && d.roomId === selectedRoom.id && d.date === date)
+        .map(b => b.startTime);
+      
+      const startIdx = timeSlots.indexOf(startTime);
+      const availableEndTimes = [];
+      
+      for (let i = startIdx + 1; i < timeSlots.length; i++) {
+        const checkSlot = timeSlots[i - 1];
+        if (bookedSlots.includes(checkSlot)) {
+          break;
+        }
+        availableEndTimes.push(timeSlots[i]);
+      }
+      
+      endSelect.innerHTML = '<option value="">Select end time 選擇結束時間</option>' +
+        availableEndTimes.map(time => 
+          `<option value="${time}">${time}</option>`
+        ).join('');
+      
+      updatePriceDisplay();
+    }
+    
+    function updatePriceDisplay() {
+      const startTime = document.getElementById('startTimeSelect').value;
+      const endTime = document.getElementById('endTimeSelect').value;
+      
+      if (!startTime || !endTime) {
+        document.getElementById('durationDisplay').textContent = '0';
+        document.getElementById('totalPriceDisplay').textContent = '$0';
+        document.getElementById('confirmBookingBtn').disabled = true;
+        document.getElementById('bookedSlotsWarning').classList.add('hidden');
+        return;
+      }
+      
+      const startIdx = timeSlots.indexOf(startTime);
+      const endIdx = timeSlots.indexOf(endTime);
+      const duration = (endIdx - startIdx) * 0.5;
+      
+      const toyRental = document.getElementById('toyRentalCheckbox').checked;
+      const basePrice = selectedRoom ? selectedRoom.pricePerHour : 0;
+      const toyPrice = (toyRental && selectedRoom?.hasToyOption) ? selectedRoom.toyRentalPrice : 0;
+      const total = duration * (basePrice + toyPrice);
+      
+      document.getElementById('durationDisplay').textContent = duration;
+      document.getElementById('totalPriceDisplay').textContent = `$${total}`;
+      document.getElementById('confirmBookingBtn').disabled = false;
+      
+      const date = document.getElementById('bookingDate').value;
+      const bookedSlots = allData
+        .filter(d => d.type === 'booking' && d.roomId === selectedRoom.id && d.date === date)
+        .map(b => b.startTime);
+      
+      const slotsInRange = [];
+      for (let i = startIdx; i < endIdx; i++) {
+        slotsInRange.push(timeSlots[i]);
+      }
+      
+      const conflictingSlots = slotsInRange.filter(s => bookedSlots.includes(s));
+      if (conflictingSlots.length > 0) {
+        document.getElementById('bookedSlotsWarning').classList.remove('hidden');
+        document.getElementById('bookedTimesList').textContent = conflictingSlots.join(', ');
+        document.getElementById('confirmBookingBtn').disabled = true;
+      } else {
+        document.getElementById('bookedSlotsWarning').classList.add('hidden');
       }
     }
-
-    // ============ Statistics ============
-    function updateRenterStatistics() {
-      const month = parseInt(document.getElementById('statsMonthSelect').value);
-      const year = parseInt(document.getElementById('statsYearSelect').value);
+    
+    async function confirmBooking() {
+      if (!selectedRoom || !currentUser) return;
       
-      const myBookings = bookings.filter(b => {
-        if (b.renterId !== currentUser.__backendId) return false;
-        const bookingDate = new Date(b.date);
+      const startTime = document.getElementById('startTimeSelect').value;
+      const endTime = document.getElementById('endTimeSelect').value;
+      
+      if (!startTime || !endTime) {
+        showToast('Please select start and end time 請選擇開始和結束時間', 'warning');
+        return;
+      }
+      
+      const date = document.getElementById('bookingDate').value;
+      const toyRental = document.getElementById('toyRentalCheckbox').checked && selectedRoom.hasToyOption;
+      const toyPrice = toyRental ? selectedRoom.toyRentalPrice : 0;
+      
+      document.getElementById('confirmBookingBtn').disabled = true;
+      document.getElementById('confirmBookingBtn').textContent = 'Booking... 預約中...';
+      
+      const startIdx = timeSlots.indexOf(startTime);
+      const endIdx = timeSlots.indexOf(endTime);
+      const slotsToBook = [];
+      
+      for (let i = startIdx; i < endIdx; i++) {
+        slotsToBook.push(timeSlots[i]);
+      }
+      
+      let successCount = 0;
+      for (const slot of slotsToBook) {
+        const slotEndHour = parseInt(slot.split(':')[0]);
+        const slotEndMin = parseInt(slot.split(':')[1]) + 30;
+        const slotEndTime = slotEndMin >= 60 
+          ? `${(slotEndHour + 1).toString().padStart(2, '0')}:00`
+          : `${slotEndHour.toString().padStart(2, '0')}:30`;
+        
+        const booking = {
+          type: 'booking',
+          roomId: selectedRoom.id,
+          roomName: selectedRoom.name,
+          branch: selectedRoom.branch,
+          date: date,
+          startTime: slot,
+          endTime: slotEndTime,
+          renterId: currentUser.__backendId,
+          renterName: currentUser.name,
+          basePrice: selectedRoom.pricePerHour / 2,
+          toyRental: toyRental,
+          toyPrice: toyRental ? toyPrice / 2 : 0,
+          totalPrice: (selectedRoom.pricePerHour + toyPrice) / 2,
+          createdAt: new Date().toISOString()
+        };
+        
+        const result = await window.dataSdk.create(booking);
+        if (result.isOk) successCount++;
+      }
+      
+      if (successCount > 0) {
+        showToast(`Booked ${startTime} to ${endTime} successfully 成功預約 ${startTime} 至 ${endTime}`, 'success');
+        document.getElementById('startTimeSelect').value = '';
+        document.getElementById('endTimeSelect').value = '';
+        loadTimeSlots();
+      } else {
+        showToast('Booking failed 預約失敗', 'error');
+      }
+      
+      document.getElementById('confirmBookingBtn').disabled = false;
+      document.getElementById('confirmBookingBtn').textContent = 'Confirm Booking 確認預約';
+    }
+    
+    function updateRenterStats() {
+      if (!currentUser) return;
+      
+      const month = parseInt(document.getElementById('statsMonth').value);
+      const year = parseInt(document.getElementById('statsYear').value);
+      
+      const bookings = allData.filter(d => {
+        if (d.type !== 'booking' || d.renterId !== currentUser.__backendId) return false;
+        const bookingDate = new Date(d.date);
         return bookingDate.getMonth() === month && bookingDate.getFullYear() === year;
       });
       
-      // Calculate stats
-      let totalHours = 0;
-      let totalAmount = 0;
+      const totalHours = bookings.length * 0.5;
+      const totalAmount = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
       
-      myBookings.forEach(b => {
-        const start = b.startTime.split(':').map(Number);
-        const end = b.endTime.split(':').map(Number);
-        const hours = (end[0] * 60 + end[1] - start[0] * 60 - start[1]) / 60;
-        totalHours += hours;
-        totalAmount += b.totalPrice;
-      });
-      
-      document.getElementById('statsBookingCount').textContent = myBookings.length;
-      document.getElementById('statsTotalHours').textContent = totalHours.toFixed(1);
+      document.getElementById('statsTotalHours').textContent = totalHours;
+      document.getElementById('statsTotalBookings').textContent = bookings.length;
       document.getElementById('statsTotalAmount').textContent = `$${totalAmount}`;
       
-      // Render details
-      const detailsContainer = document.getElementById('statsBookingDetails');
-      
-      if (myBookings.length === 0) {
-        detailsContainer.innerHTML = '<p class="text-center text-gray-500 py-4">No bookings this month 本月暫無預約</p>';
+      const listEl = document.getElementById('renterBookingsList');
+      if (bookings.length === 0) {
+        listEl.innerHTML = '<p class="text-gray-500 text-center py-4">No bookings this month 本月沒有預約</p>';
         return;
       }
       
-      const branchNames = { jordan: 'Jordan 佐敦', wanchai: 'Wan Chai 灣仔', tsuenwan: 'Tsuen Wan 荃灣' };
+      bookings.sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        if (a.roomId !== b.roomId) return a.roomId.localeCompare(b.roomId);
+        return a.startTime.localeCompare(b.startTime);
+      });
       
-      myBookings.sort((a, b) => a.date.localeCompare(b.date));
+      const mergedBookings = [];
+      let current = null;
       
-      detailsContainer.innerHTML = myBookings.map(b => `
-        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-          <div>
-            <p class="font-medium text-gray-800">${b.roomName} - ${branchNames[b.branch]}</p>
-            <p class="text-sm text-gray-500">${b.date} | ${b.startTime} - ${b.endTime}</p>
+      bookings.forEach(b => {
+        if (!current) {
+          current = {
+            date: b.date,
+            roomId: b.roomId,
+            roomName: b.roomName,
+            branch: b.branch,
+            startTime: b.startTime,
+            endTime: b.endTime,
+            toyRental: b.toyRental,
+            totalPrice: b.totalPrice,
+            bookingIds: [b.__backendId]
+          };
+        } else if (
+          current.date === b.date &&
+          current.roomId === b.roomId &&
+          current.endTime === b.startTime &&
+          current.toyRental === b.toyRental
+        ) {
+          current.endTime = b.endTime;
+          current.totalPrice += b.totalPrice;
+          current.bookingIds.push(b.__backendId);
+        } else {
+          mergedBookings.push(current);
+          current = {
+            date: b.date,
+            roomId: b.roomId,
+            roomName: b.roomName,
+            branch: b.branch,
+            startTime: b.startTime,
+            endTime: b.endTime,
+            toyRental: b.toyRental,
+            totalPrice: b.totalPrice,
+            bookingIds: [b.__backendId]
+          };
+        }
+      });
+      
+      if (current) {
+        mergedBookings.push(current);
+      }
+      
+      const grouped = {};
+      mergedBookings.forEach(b => {
+        if (!grouped[b.date]) grouped[b.date] = [];
+        grouped[b.date].push(b);
+      });
+      
+      listEl.innerHTML = Object.entries(grouped)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([date, items]) => `
+          <div class="border border-gray-200 rounded-lg p-3">
+            <div class="font-semibold text-gray-800 mb-2">${formatDate(date)}</div>
+            ${items.map(b => `
+              <div class="flex justify-between items-center text-sm text-gray-600 py-1 border-t border-gray-100 gap-2">
+                <span class="flex-1">${b.roomName} (${getBranchName(b.branch)})</span>
+                <span>${b.startTime} - ${b.endTime}</span>
+                <span class="font-medium">$${b.totalPrice}${b.toyRental ? ' 🧸' : ''}</span>
+                <button onclick="cancelMergedBooking('${b.bookingIds.join(',')}', '${b.roomName}', '${b.startTime}', '${b.endTime}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs transition">
+                  ✕
+                </button>
+              </div>
+            `).join('')}
           </div>
-          <p class="font-semibold text-gray-800">$${b.totalPrice}</p>
-        </div>
-      `).join('');
+        `).join('');
     }
-
-    // ============ Staff: Renters Management ============
-    function renderRentersList() {
-      const container = document.getElementById('rentersList');
-      const noRentersMessage = document.getElementById('noRentersMessage');
+    
+    function cancelMergedBooking(bookingIds, roomName, startTime, endTime) {
+      const ids = bookingIds.split(',');
+      const message = `Cancel booking for ${roomName} from ${startTime} to ${endTime}?\n取消 ${roomName} ${startTime} 至 ${endTime} 的預約?`;
       
-      if (renters.length === 0) {
-        container.innerHTML = '';
-        noRentersMessage.classList.remove('hidden');
-        return;
-      }
-      
-      noRentersMessage.classList.add('hidden');
-      
-      container.innerHTML = renters.map(renter => `
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center">
-              <span class="text-xl font-bold text-slate-600">${renter.name.charAt(0).toUpperCase()}</span>
-            </div>
-            <div>
-              <p class="font-medium text-gray-800">${renter.name}</p>
-              <p class="text-sm text-gray-500">${renter.email || 'No email'} | ${renter.phone || 'No phone'}</p>
-              <p class="text-xs text-blue-600">Password 密碼: ${renter.password}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="editRenter('${renter.__backendId}')" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-              </svg>
-            </button>
-            <button onclick="deleteRenter('${renter.__backendId}')" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      `).join('');
-      
-      // Update filter dropdown
-      const filterSelect = document.getElementById('staffBookingFilter');
-      filterSelect.innerHTML = '<option value="all">All Renters 所有租用者</option>';
-      renters.forEach(r => {
-        filterSelect.innerHTML += `<option value="${r.__backendId}">${r.name}</option>`;
+      showConfirmModal(message, async () => {
+        let successCount = 0;
+        for (const id of ids) {
+          const booking = allData.find(d => d.__backendId === id);
+          if (booking) {
+            const result = await window.dataSdk.delete(booking);
+            if (result.isOk) successCount++;
+          }
+        }
+        
+        if (successCount > 0) {
+          showToast(`Cancelled ${successCount} booking slots 已取消 ${successCount} 個時段`, 'success');
+        } else {
+          showToast('Failed to cancel booking 取消失敗', 'error');
+        }
       });
     }
-
-    function showAddRenterModal() {
-      document.getElementById('addRenterModal').classList.remove('hidden');
-      document.getElementById('newRenterName').value = '';
-      document.getElementById('newRenterPassword').value = '';
-      document.getElementById('newRenterEmail').value = '';
-      document.getElementById('newRenterPhone').value = '';
-      document.getElementById('addRenterError').classList.add('hidden');
+    
+    // ============ STAFF FUNCTIONS ============
+    function showStaffTab(tab) {
+      document.querySelectorAll('.staff-tab').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('bg-gray-200', 'text-gray-700');
+      });
+      document.querySelector(`[data-tab="${tab}"]`).classList.remove('bg-gray-200', 'text-gray-700');
+      document.querySelector(`[data-tab="${tab}"]`).classList.add('bg-indigo-600', 'text-white');
+      
+      document.querySelectorAll('.staff-tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`staff${tab.charAt(0).toUpperCase() + tab.slice(1)}Tab`).classList.remove('hidden');
     }
-
-    function closeAddRenterModal() {
-      document.getElementById('addRenterModal').classList.add('hidden');
-    }
-
-    async function addRenter() {
+    
+    async function addNewRenter() {
       const name = document.getElementById('newRenterName').value.trim();
       const password = document.getElementById('newRenterPassword').value;
       const email = document.getElementById('newRenterEmail').value.trim();
       const phone = document.getElementById('newRenterPhone').value.trim();
       
       if (!name || !password) {
-        document.getElementById('addRenterError').textContent = 'Name and password are required 姓名和密碼為必填';
-        document.getElementById('addRenterError').classList.remove('hidden');
+        showToast('Name and password required 需要姓名和密碼', 'warning');
         return;
       }
       
-      // Check for duplicate name
-      if (renters.some(r => r.name.toLowerCase() === name.toLowerCase())) {
-        document.getElementById('addRenterError').textContent = 'Renter name already exists 租用者姓名已存在';
-        document.getElementById('addRenterError').classList.remove('hidden');
+      const existing = allData.find(d => d.type === 'renter' && d.name === name);
+      if (existing) {
+        showToast('Renter name already exists 租用者名稱已存���', 'error');
         return;
       }
-      
-      if (allData.length >= 999) {
-        document.getElementById('addRenterError').textContent = 'Maximum data limit reached 已達資料上限';
-        document.getElementById('addRenterError').classList.remove('hidden');
-        return;
-      }
-      
-      const btn = document.getElementById('addRenterBtn');
-      btn.disabled = true;
-      btn.textContent = 'Adding... 新增中...';
       
       const result = await window.dataSdk.create({
         type: 'renter',
@@ -1046,511 +905,580 @@
         createdAt: new Date().toISOString()
       });
       
-      btn.disabled = false;
-      btn.textContent = 'Add 新增';
-      
       if (result.isOk) {
-        showToast('Renter added successfully 租用者已新增', 'success');
-        closeAddRenterModal();
+        showToast('Renter added 已新增租用者', 'success');
+        document.getElementById('newRenterName').value = '';
+        document.getElementById('newRenterPassword').value = '';
+        document.getElementById('newRenterEmail').value = '';
+        document.getElementById('newRenterPhone').value = '';
       } else {
-        document.getElementById('addRenterError').textContent = 'Failed to add renter 新增失敗';
-        document.getElementById('addRenterError').classList.remove('hidden');
+        showToast('Failed to add renter 新增租用者失敗', 'error');
       }
     }
-
-    function editRenter(renterId) {
-      const renter = renters.find(r => r.__backendId === renterId);
-      if (!renter) return;
+    
+    function renderRenterList() {
+      const renters = allData.filter(d => d.type === 'renter');
+      const listEl = document.getElementById('renterList');
       
-      document.getElementById('editRenterId').value = renterId;
-      document.getElementById('editRenterName').value = renter.name;
-      document.getElementById('editRenterPassword').value = renter.password;
-      document.getElementById('editRenterEmail').value = renter.email || '';
-      document.getElementById('editRenterPhone').value = renter.phone || '';
-      document.getElementById('editRenterError').classList.add('hidden');
-      document.getElementById('editRenterModal').classList.remove('hidden');
-    }
-
-    function closeEditRenterModal() {
-      document.getElementById('editRenterModal').classList.add('hidden');
-    }
-
-    async function saveRenterEdit() {
-      const renterId = document.getElementById('editRenterId').value;
-      const name = document.getElementById('editRenterName').value.trim();
-      const password = document.getElementById('editRenterPassword').value;
-      const email = document.getElementById('editRenterEmail').value.trim();
-      const phone = document.getElementById('editRenterPhone').value.trim();
-      
-      if (!name || !password) {
-        document.getElementById('editRenterError').textContent = 'Name and password are required 姓名和密碼為必填';
-        document.getElementById('editRenterError').classList.remove('hidden');
+      if (renters.length === 0) {
+        listEl.innerHTML = '<p class="text-gray-500 text-center py-4">No renters yet 尚無租用者</p>';
         return;
       }
       
-      const renter = renters.find(r => r.__backendId === renterId);
+      listEl.innerHTML = renters.map(r => `
+        <div class="border border-gray-200 rounded-lg p-4 flex flex-wrap justify-between items-center gap-4">
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-gray-800">${r.name}</h3>
+            <p class="text-sm text-gray-500">${r.email || 'No email'} | ${r.phone || 'No phone'}</p>
+            <p class="text-sm text-indigo-600">Password 密碼: ${r.password}</p>
+          </div>
+          <div class="flex space-x-2">
+            <button onclick="editRenter('${r.__backendId}')" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition">
+              Edit 編輯
+            </button>
+            <button onclick="deleteRenter('${r.__backendId}', '${r.name}')" class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm transition">
+              Delete 刪除
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    async function editRenter(id) {
+      const renter = allData.find(d => d.__backendId === id);
       if (!renter) return;
       
-      const btn = document.getElementById('saveRenterBtn');
-      btn.disabled = true;
-      btn.textContent = 'Saving... 儲存中...';
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50';
+      modal.innerHTML = `
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Edit Renter 編輯租用者</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Name 姓名</label>
+              <input type="text" id="editRenterName" value="${renter.name}" class="w-full px-4 py-3 border border-gray-200 rounded-xl">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Password 密碼</label>
+              <input type="text" id="editRenterPassword" value="${renter.password}" class="w-full px-4 py-3 border border-gray-200 rounded-xl">
+            </div>
+          </div>
+          <div class="flex space-x-3 mt-6">
+            <button onclick="closeEditRenterModal()" class="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl transition">
+              Cancel 取消
+            </button>
+            <button onclick="saveRenterEdit('${id}')" class="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition">
+              Save 儲存
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.id = 'editRenterModal';
+    }
+    
+    function closeEditRenterModal() {
+      const modal = document.getElementById('editRenterModal');
+      if (modal) modal.remove();
+    }
+    
+    async function saveRenterEdit(id) {
+      const renter = allData.find(d => d.__backendId === id);
+      if (!renter) return;
+      
+      const newName = document.getElementById('editRenterName').value.trim();
+      const newPassword = document.getElementById('editRenterPassword').value;
+      
+      if (!newName || !newPassword) {
+        showToast('Name and password required 需要姓名和密碼', 'warning');
+        return;
+      }
       
       const result = await window.dataSdk.update({
         ...renter,
-        name: name,
-        password: password,
-        email: email,
-        phone: phone
+        name: newName,
+        password: newPassword
       });
-      
-      btn.disabled = false;
-      btn.textContent = 'Save 儲存';
       
       if (result.isOk) {
         showToast('Renter updated 租用者已更新', 'success');
         closeEditRenterModal();
       } else {
-        document.getElementById('editRenterError').textContent = 'Failed to update 更新失敗';
-        document.getElementById('editRenterError').classList.remove('hidden');
+        showToast('Failed to update renter 更新失敗', 'error');
       }
     }
-
-    async function deleteRenter(renterId) {
-      const renter = renters.find(r => r.__backendId === renterId);
+    
+    function deleteRenter(id, name) {
+      const renter = allData.find(d => d.__backendId === id);
       if (!renter) return;
       
-      // Use inline confirmation instead of confirm()
-      const confirmed = await showInlineConfirm(`Delete "${renter.name}"? 刪除「${renter.name}」？`);
-      if (!confirmed) return;
-      
-      const result = await window.dataSdk.delete(renter);
-      
-      if (result.isOk) {
-        showToast('Renter deleted 租用者已刪除', 'success');
-      } else {
-        showToast('Failed to delete 刪除失敗', 'error');
-      }
+      showConfirmModal(`Delete ${name}? 刪除 ${name}?`, async () => {
+        const result = await window.dataSdk.delete(renter);
+        if (result.isOk) {
+          showToast('Renter deleted 租用者已刪除', 'success');
+        } else {
+          showToast('Failed to delete renter 刪除失敗', 'error');
+        }
+      });
     }
-
-    // ============ Staff: Room Settings ============
-    function renderRoomSettings() {
-      const branches = { jordan: 'jordanRooms', wanchai: 'wanchaiRooms', tsuenwan: 'tsuenwanRooms' };
-      
-      for (const branch in branches) {
-        const container = document.getElementById(branches[branch]);
-        container.innerHTML = defaultRooms[branch].map(room => {
-          const savedPrice = roomPrices.find(p => p.roomId === room.id);
-          const currentPrice = savedPrice ? savedPrice.price : room.price;
-          const currentToyPrice = savedPrice ? savedPrice.toyPricePerHour : room.toyPricePerHour;
-          const pricePerHour = currentPrice * 2;
-          
+    
+    function renderRoomPricing() {
+      ['jordan', 'wanchai', 'tsuenwan'].forEach(branch => {
+        const rooms = defaultRooms[branch] || [];
+        const containerEl = document.getElementById(`${branch}Rooms`);
+        
+        containerEl.innerHTML = rooms.map(room => {
+          const config = getRoomConfig(room.id, branch);
           return `
-            <div class="p-4 bg-gray-50 rounded-xl">
-              <div class="flex items-center justify-between mb-2">
-                <h4 class="font-medium text-gray-800">${room.name}</h4>
-                <span class="text-xs text-gray-500">${room.facilities}</span>
+            <div class="border border-gray-200 rounded-lg p-4">
+              <h4 class="font-semibold text-gray-800">${config.name}</h4>
+              <p class="text-sm text-gray-500 mb-2">${config.facilities}</p>
+              <div class="flex items-center space-x-2 mb-2">
+                <label class="text-sm text-gray-600">Price 租金:</label>
+                <input type="number" value="${config.pricePerHour}" 
+                  onchange="updateRoomPrice('${room.id}', '${room.name}', '${branch}', this.value, '${config.facilities}', ${config.hasToyOption}, ${config.toyRentalPrice})"
+                  class="w-24 px-2 py-1 border border-gray-200 rounded-lg text-center">
+                <span class="text-sm text-gray-500">/hr</span>
               </div>
-              <div class="flex items-center gap-2">
-                <label class="text-sm text-gray-600">Price 租金/hr:</label>
-                <input type="number" value="${pricePerHour}" 
-                  onchange="updateRoomPrice('${room.id}', this.value / 2, ${currentToyPrice})"
-                  class="w-24 px-3 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-              </div>
-              ${room.toyAvailable ? `
-                <div class="flex items-center gap-2 mt-2">
-                  <label class="text-sm text-gray-600">Toy 玩具/hr:</label>
-                  <input type="number" value="${currentToyPrice}" 
-                    onchange="updateRoomPrice('${room.id}', ${currentPrice}, this.value)"
-                    class="w-24 px-3 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
+              ${config.hasToyOption ? `
+                <div class="flex items-center space-x-2">
+                  <label class="text-sm text-gray-600">Toy 玩具:</label>
+                  <input type="number" value="${config.toyRentalPrice}" 
+                    onchange="updateRoomPrice('${room.id}', '${room.name}', '${branch}', ${config.pricePerHour}, '${config.facilities}', true, this.value)"
+                    class="w-24 px-2 py-1 border border-gray-200 rounded-lg text-center">
+                  <span class="text-sm text-gray-500">/hr</span>
                 </div>
               ` : ''}
             </div>
           `;
         }).join('');
-      }
-    }
-
-    async function updateRoomPrice(roomId, price, toyPrice) {
-      const existingPrice = roomPrices.find(p => p.roomId === roomId);
-      
-      // Get room info for branch
-      let roomBranch = '';
-      let roomInfo = null;
-      for (const branch in defaultRooms) {
-        const found = defaultRooms[branch].find(r => r.id === roomId);
-        if (found) {
-          roomBranch = branch;
-          roomInfo = found;
-          break;
-        }
-      }
-      
-      if (existingPrice) {
-        const result = await window.dataSdk.update({
-          ...existingPrice,
-          price: parseInt(price),
-          toyPricePerHour: parseInt(toyPrice)
-        });
-        
-        if (result.isOk) {
-          showToast('Price updated 價格已更新', 'success');
-        }
-      } else {
-        if (allData.length >= 999) {
-          showToast('Maximum data limit reached 已達資料上限', 'error');
-          return;
-        }
-        
-        const result = await window.dataSdk.create({
-          type: 'room_price',
-          roomId: roomId,
-          roomName: roomInfo.name,
-          branch: roomBranch,
-          price: parseInt(price),
-          facilities: roomInfo.facilities,
-          toyAvailable: roomInfo.toyAvailable,
-          toyPricePerHour: parseInt(toyPrice)
-        });
-        
-        if (result.isOk) {
-          showToast('Price saved 價格已儲存', 'success');
-        }
-      }
-    }
-
-    // ============ Staff: All Bookings ============
-    function renderAllBookings() {
-      filterStaffBookings();
-    }
-
-    function filterStaffBookings() {
-      const renterFilter = document.getElementById('staffBookingFilter').value;
-      const branchFilter = document.getElementById('staffBranchFilter').value;
-      
-      let filteredBookings = [...bookings];
-      
-      if (renterFilter !== 'all') {
-        filteredBookings = filteredBookings.filter(b => b.renterId === renterFilter);
-      }
-      
-      if (branchFilter !== 'all') {
-        filteredBookings = filteredBookings.filter(b => b.branch === branchFilter);
-      }
-      
-      // Sort by date
-      filteredBookings.sort((a, b) => {
-        if (a.date !== b.date) return b.date.localeCompare(a.date);
-        return b.startTime.localeCompare(a.startTime);
       });
-      
-      const container = document.getElementById('allBookingsList');
-      const branchNames = { jordan: 'Jordan 佐敦', wanchai: 'Wan Chai 灣仔', tsuenwan: 'Tsuen Wan 荃灣' };
-      
-      if (filteredBookings.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-500 py-8">No bookings found 找不到預約</p>';
-        return;
-      }
-      
-      container.innerHTML = filteredBookings.map(b => `
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center">
-              <span class="text-xl font-bold text-slate-600">${b.renterName.charAt(0).toUpperCase()}</span>
-            </div>
-            <div>
-              <p class="font-medium text-gray-800">${b.renterName}</p>
-              <p class="text-sm text-gray-600">${b.roomName} - ${branchNames[b.branch]}</p>
-              <p class="text-sm text-gray-500">${b.date} | ${b.startTime} - ${b.endTime}</p>
-              ${b.toyRental ? '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">+ Toy 玩具</span>' : ''}
-            </div>
-          </div>
-          <div class="text-right">
-            <p class="font-semibold text-gray-800">$${b.totalPrice}</p>
-            <button onclick="cancelBookingByStaff('${b.__backendId}')" class="text-sm text-red-500 hover:text-red-700 mt-1">
-              Cancel 取消
-            </button>
-          </div>
-        </div>
-      `).join('');
     }
-
-    async function cancelBookingByStaff(bookingId) {
-      const booking = bookings.find(b => b.__backendId === bookingId);
-      if (!booking) return;
+    
+    async function updateRoomPrice(roomId, roomName, branch, price, facilities, hasToyOption, toyPrice) {
+      const existing = allData.find(d => d.type === 'room_config' && d.roomId === roomId);
       
-      const confirmed = await showInlineConfirm(`Cancel booking for ${booking.renterName}? 取消${booking.renterName}的預約？`);
-      if (!confirmed) return;
+      const roomConfig = {
+        type: 'room_config',
+        roomId: roomId,
+        roomName: roomName,
+        branch: branch,
+        pricePerHour: parseInt(price),
+        facilities: facilities,
+        hasToyOption: hasToyOption,
+        toyRentalPrice: parseInt(toyPrice) || 0,
+        updatedAt: new Date().toISOString()
+      };
       
-      const result = await window.dataSdk.delete(booking);
+      let result;
+      if (existing) {
+        result = await window.dataSdk.update({ ...existing, ...roomConfig });
+      } else {
+        result = await window.dataSdk.create(roomConfig);
+      }
       
       if (result.isOk) {
-        showToast('Booking cancelled 預約已取消', 'success');
-      } else {
-        showToast('Failed to cancel 取消失敗', 'error');
+        showToast('Room price updated 房間價格已更新', 'success');
       }
     }
-
-    // ============ Staff: Reports ============
-    function generateReport() {
-      const month = parseInt(document.getElementById('reportMonthSelect').value);
-      const year = parseInt(document.getElementById('reportYearSelect').value);
+    
+    function filterBookings() {
+      const month = parseInt(document.getElementById('bookingsFilterMonth').value);
+      const year = parseInt(document.getElementById('bookingsFilterYear').value);
+      const renterFilter = document.getElementById('bookingsFilterRenter').value;
       
-      const monthBookings = bookings.filter(b => {
-        const bookingDate = new Date(b.date);
-        return bookingDate.getMonth() === month && bookingDate.getFullYear() === year;
+      let bookings = allData.filter(d => {
+        if (d.type !== 'booking') return false;
+        const bookingDate = new Date(d.date);
+        if (bookingDate.getMonth() !== month || bookingDate.getFullYear() !== year) return false;
+        if (renterFilter && d.renterId !== renterFilter) return false;
+        return true;
       });
       
-      // Calculate totals
-      let totalHours = 0;
-      let totalRevenue = 0;
-      const activeRenterIds = new Set();
-      
-      monthBookings.forEach(b => {
-        const start = b.startTime.split(':').map(Number);
-        const end = b.endTime.split(':').map(Number);
-        const hours = (end[0] * 60 + end[1] - start[0] * 60 - start[1]) / 60;
-        totalHours += hours;
-        totalRevenue += b.totalPrice;
-        activeRenterIds.add(b.renterId);
+      bookings.sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.startTime.localeCompare(b.startTime);
       });
       
-      document.getElementById('reportTotalBookings').textContent = monthBookings.length;
-      document.getElementById('reportTotalHours').textContent = totalHours.toFixed(1);
-      document.getElementById('reportTotalRevenue').textContent = `$${totalRevenue}`;
-      document.getElementById('reportActiveRenters').textContent = activeRenterIds.size;
+      const listEl = document.getElementById('allBookingsList');
       
-      // Breakdown by renter
-      const renterBreakdown = {};
-      monthBookings.forEach(b => {
-        if (!renterBreakdown[b.renterId]) {
-          renterBreakdown[b.renterId] = {
-            name: b.renterName,
-            bookings: [],
-            totalHours: 0,
-            totalAmount: 0
-          };
-        }
-        
-        const start = b.startTime.split(':').map(Number);
-        const end = b.endTime.split(':').map(Number);
-        const hours = (end[0] * 60 + end[1] - start[0] * 60 - start[1]) / 60;
-        
-        renterBreakdown[b.renterId].bookings.push(b);
-        renterBreakdown[b.renterId].totalHours += hours;
-        renterBreakdown[b.renterId].totalAmount += b.totalPrice;
-      });
-      
-      const branchNames = { jordan: 'Jordan 佐敦', wanchai: 'Wan Chai 灣仔', tsuenwan: 'Tsuen Wan 荃灣' };
-      const container = document.getElementById('reportByRenter');
-      
-      if (Object.keys(renterBreakdown).length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-500 py-4">No bookings this month 本月暫無預約</p>';
+      if (bookings.length === 0) {
+        listEl.innerHTML = '<p class="text-gray-500 text-center py-4">No bookings found 沒有找到預約</p>';
         return;
       }
       
-      container.innerHTML = Object.values(renterBreakdown).map(renter => `
-        <div class="border border-gray-200 rounded-xl overflow-hidden">
-          <div class="bg-slate-50 px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-slate-200 rounded-lg flex items-center justify-center">
-                <span class="font-bold text-slate-600">${renter.name.charAt(0).toUpperCase()}</span>
-              </div>
-              <div>
-                <p class="font-medium text-gray-800">${renter.name}</p>
-                <p class="text-sm text-gray-500">${renter.bookings.length} bookings | ${renter.totalHours.toFixed(1)} hrs</p>
-              </div>
-            </div>
-            <p class="text-xl font-bold text-slate-800">$${renter.totalAmount}</p>
+      listEl.innerHTML = bookings.map(b => `
+        <div class="border border-gray-200 rounded-lg p-3 flex flex-wrap justify-between items-center gap-2">
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-gray-800">${b.renterName}</div>
+            <div class="text-sm text-gray-500">${formatDate(b.date)} | ${b.startTime} - ${b.endTime}</div>
           </div>
-          <div class="p-4 space-y-2">
-            ${renter.bookings.sort((a, b) => a.date.localeCompare(b.date)).map(b => `
-              <div class="flex items-center justify-between text-sm p-2 bg-gray-50 rounded-lg">
-                <div>
-                  <span class="text-gray-800">${b.date}</span>
-                  <span class="text-gray-500 mx-2">|</span>
-                  <span class="text-gray-600">${b.startTime}-${b.endTime}</span>
-                </div>
-                <div class="text-right">
-                  <span class="text-gray-600">${b.roomName} (${branchNames[b.branch].split(' ')[0]})</span>
-                  <span class="text-gray-800 font-medium ml-2">$${b.totalPrice}</span>
-                </div>
-              </div>
-            `).join('')}
+          <div class="text-center">
+            <div class="font-medium text-gray-800">${b.roomName}</div>
+            <div class="text-sm text-gray-500">${getBranchName(b.branch)}</div>
           </div>
+          <div class="text-right">
+            <div class="font-bold text-indigo-600">$${b.totalPrice}</div>
+            ${b.toyRental ? '<div class="text-xs text-amber-600">🧸 Toy 玩具</div>' : ''}
+          </div>
+          <button onclick="deleteBookingStaff('${b.__backendId}', '${b.renterName.replace(/'/g, "\\'")}', '${b.roomName}', '${b.date}', '${b.startTime}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm transition">
+            ✕ Delete 刪除
+          </button>
         </div>
       `).join('');
     }
-
-    function printReport() {
-      window.print();
-    }
-
-    // ============ Staff: Receipts ============
-    function updateReceiptRenterSelect() {
-      const select = document.getElementById('receiptRenterSelect');
-      select.innerHTML = '<option value="">Select Renter 選擇租用者</option>';
-      renters.forEach(r => {
-        select.innerHTML += `<option value="${r.__backendId}">${r.name}</option>`;
+    
+    function deleteBookingStaff(id, renterName, roomName, date, time) {
+      const booking = allData.find(d => d.__backendId === id);
+      if (!booking) return;
+      
+      showConfirmModal(`Delete booking for ${renterName}?\n${roomName} on ${date} at ${time}\n\n刪除 ${renterName} 的預約？\n${roomName} ${date} ${time}`, async () => {
+        const result = await window.dataSdk.delete(booking);
+        if (result.isOk) {
+          showToast('Booking deleted 預約已刪除', 'success');
+        } else {
+          showToast('Failed to delete booking 刪除失敗', 'error');
+        }
       });
     }
-
-    function generateReceipt() {
-      const renterId = document.getElementById('receiptRenterSelect').value;
-      const month = parseInt(document.getElementById('reportMonthSelect').value);
-      const year = parseInt(document.getElementById('reportYearSelect').value);
+    
+    function populateRenterDropdowns() {
+      const renters = allData.filter(d => d.type === 'renter');
+      const options = '<option value="">All Renters 所有租用者</option>' + 
+        renters.map(r => `<option value="${r.__backendId}">${r.name}</option>`).join('');
       
-      if (!renterId) {
-        showToast('Please select a renter 請選擇租用者', 'error');
-        return;
-      }
+      document.getElementById('bookingsFilterRenter').innerHTML = options;
       
-      const renter = renters.find(r => r.__backendId === renterId);
-      if (!renter) return;
+      const receiptOptions = '<option value="">Select Renter 選擇租用者</option>' + 
+        renters.map(r => `<option value="${r.__backendId}">${r.name}</option>`).join('');
+      document.getElementById('receiptRenter').innerHTML = receiptOptions;
+    }
+    
+    function generateReport() {
+      const month = parseInt(document.getElementById('reportMonth').value);
+      const year = parseInt(document.getElementById('reportYear').value);
       
-      const renterBookings = bookings.filter(b => {
-        if (b.renterId !== renterId) return false;
-        const bookingDate = new Date(b.date);
+      const bookings = allData.filter(d => {
+        if (d.type !== 'booking') return false;
+        const bookingDate = new Date(d.date);
         return bookingDate.getMonth() === month && bookingDate.getFullYear() === year;
       });
       
-      let totalAmount = 0;
-      let totalHours = 0;
+      const totalRevenue = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+      const totalHours = bookings.length * 0.5;
       
-      renterBookings.forEach(b => {
-        totalAmount += b.totalPrice;
-        const start = b.startTime.split(':').map(Number);
-        const end = b.endTime.split(':').map(Number);
-        totalHours += (end[0] * 60 + end[1] - start[0] * 60 - start[1]) / 60;
+      const byRenter = {};
+      bookings.forEach(b => {
+        if (!byRenter[b.renterId]) {
+          byRenter[b.renterId] = { name: b.renterName, bookings: [], total: 0 };
+        }
+        byRenter[b.renterId].bookings.push(b);
+        byRenter[b.renterId].total += b.totalPrice || 0;
       });
       
-      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      const branchNames = { jordan: 'Jordan 佐敦', wanchai: 'Wan Chai 灣仔', tsuenwan: 'Tsuen Wan 荃灣' };
+      const byRoom = {};
+      bookings.forEach(b => {
+        const key = `${b.branch}-${b.roomId}`;
+        if (!byRoom[key]) {
+          byRoom[key] = { name: b.roomName, branch: b.branch, count: 0, total: 0 };
+        }
+        byRoom[key].count++;
+        byRoom[key].total += b.totalPrice || 0;
+      });
       
-      const preview = document.getElementById('receiptPreview');
-      preview.classList.remove('hidden');
-      preview.innerHTML = `
-        <div class="max-w-md mx-auto">
-          <div class="text-center mb-6">
-            <h2 class="text-xl font-bold text-gray-800">Room Rental Receipt 房間租用收據</h2>
-            <p class="text-gray-500">${months[month]} ${year}</p>
+      const monthNames = ['January 一月', 'February 二月', 'March 三月', 'April 四月', 'May 五月', 'June 六月', 
+        'July 七月', 'August 八月', 'September 九月', 'October 十月', 'November 十一月', 'December 十二月'];
+      
+      document.getElementById('reportPeriod').textContent = `${monthNames[month]} ${year}`;
+      document.getElementById('reportTotalRevenue').textContent = `$${totalRevenue}`;
+      document.getElementById('reportTotalBookings').textContent = bookings.length;
+      document.getElementById('reportTotalHours').textContent = totalHours;
+      document.getElementById('reportActiveRenters').textContent = Object.keys(byRenter).length;
+      
+      document.getElementById('reportByRenter').innerHTML = Object.values(byRenter).map(r => `
+        <div class="border border-gray-200 rounded-lg p-4">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="font-bold text-gray-800">${r.name}</h4>
+            <span class="text-lg font-bold text-indigo-600">$${r.total}</span>
           </div>
-          
-          <div class="mb-4 pb-4 border-b border-gray-200">
-            <p class="text-gray-600">Renter 租用者:</p>
-            <p class="font-semibold text-gray-800">${renter.name}</p>
-            ${renter.email ? `<p class="text-sm text-gray-500">${renter.email}</p>` : ''}
-          </div>
-          
-          <div class="mb-4">
-            <h3 class="font-semibold text-gray-800 mb-2">Booking Details 預約詳情</h3>
-            ${renterBookings.length === 0 ? 
-              '<p class="text-gray-500 text-center py-4">No bookings 無預約記錄</p>' :
-              renterBookings.sort((a, b) => a.date.localeCompare(b.date)).map(b => `
-                <div class="flex justify-between py-2 border-b border-gray-100 text-sm">
-                  <div>
-                    <p class="text-gray-800">${b.date}</p>
-                    <p class="text-gray-500">${b.roomName} (${branchNames[b.branch].split(' ')[0]}) ${b.startTime}-${b.endTime}</p>
-                    ${b.toyRental ? '<p class="text-xs text-yellow-600">+ 玩具租用 Toy Rental ($' + b.toyPrice + ')</p>' : ''}
-                  </div>
-                  <p class="font-medium text-gray-800">$${b.totalPrice}</p>
-                </div>
-              `).join('')
-            }
-          </div>
-          
-          <div class="bg-slate-50 rounded-lg p-4 mt-4">
-            <div class="flex justify-between mb-2">
-              <span class="text-gray-600">Total Hours 總時數:</span>
-              <span class="font-medium text-gray-800">${totalHours.toFixed(1)} hrs</span>
-            </div>
-            <div class="flex justify-between text-lg">
-              <span class="font-semibold text-gray-800">Total Amount 總金額:</span>
-              <span class="font-bold text-slate-800">$${totalAmount}</span>
-            </div>
-          </div>
-          
-          <div class="mt-6 text-center">
-            <button onclick="window.print()" class="px-6 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition no-print">
-              Print Receipt 列印收據
-            </button>
+          <div class="text-sm text-gray-600">
+            ${r.bookings.length} bookings 預約 | ${r.bookings.length * 0.5} hours 小時
           </div>
         </div>
-      `;
+      `).join('');
+      
+      document.getElementById('reportByRoom').innerHTML = Object.values(byRoom).map(r => `
+        <div class="flex justify-between items-center border-b border-gray-100 py-2">
+          <span class="text-gray-800">${r.name} (${getBranchName(r.branch)})</span>
+          <span class="text-gray-600">${r.count} slots | ${r.count * 0.5}hrs</span>
+          <span class="font-medium text-indigo-600">$${r.total}</span>
+        </div>
+      `).join('');
     }
-
-    // ============ Utility Functions ============
+    
+    function generateReceipt() {
+      const renterId = document.getElementById('receiptRenter').value;
+      const month = parseInt(document.getElementById('receiptMonth').value);
+      const year = parseInt(document.getElementById('receiptYear').value);
+      
+      if (!renterId) {
+        showToast('Please select a renter 請選擇租用者', 'warning');
+        return;
+      }
+      
+      const renter = allData.find(d => d.__backendId === renterId);
+      if (!renter) return;
+      
+      const bookings = allData.filter(d => {
+        if (d.type !== 'booking' || d.renterId !== renterId) return false;
+        const bookingDate = new Date(d.date);
+        return bookingDate.getMonth() === month && bookingDate.getFullYear() === year;
+      });
+      
+      const total = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+      
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      
+      document.getElementById('receiptContent').innerHTML = `
+        <div class="text-center mb-6">
+          <h1 class="text-2xl font-bold text-gray-800">Room Rental Receipt</h1>
+          <h2 class="text-xl text-gray-600">房間租用收據</h2>
+          <p class="text-gray-500 mt-2">${monthNames[month]} ${year}</p>
+        </div>
+        
+        <div class="border-b border-gray-200 pb-4 mb-4">
+          <h3 class="font-semibold text-gray-700">Renter 租用者: ${renter.name}</h3>
+          <p class="text-gray-500">${renter.email || ''} ${renter.phone || ''}</p>
+        </div>
+        
+        <table class="w-full text-sm mb-6">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-2">Date 日期</th>
+              <th class="text-left py-2">Room 房間</th>
+              <th class="text-left py-2">Time 時間</th>
+              <th class="text-right py-2">Amount 金額</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bookings.map(b => `
+              <tr class="border-b border-gray-100">
+                <td class="py-2">${formatDate(b.date)}</td>
+                <td class="py-2">${b.roomName}</td>
+                <td class="py-2">${b.startTime}-${b.endTime}${b.toyRental ? ' 🧸' : ''}</td>
+                <td class="py-2 text-right">$${b.totalPrice}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <div class="flex justify-between items-center text-xl font-bold border-t border-gray-300 pt-4">
+          <span>Total 總計:</span>
+          <span class="text-indigo-600">$${total}</span>
+        </div>
+        
+        <div class="text-center mt-8 text-gray-500 text-sm">
+          <p>Generated on 生成日期: ${new Date().toLocaleDateString()}</p>
+        </div>
+      `;
+      
+      document.getElementById('receiptModal').classList.remove('hidden');
+    }
+    
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').classList.add('hidden');
+    }
+    
+    function printReceipt() {
+      const renterId = document.getElementById('receiptRenter').value;
+      const month = parseInt(document.getElementById('receiptMonth').value);
+      const year = parseInt(document.getElementById('receiptYear').value);
+      
+      const renter = allData.find(d => d.__backendId === renterId);
+      if (!renter) return;
+      
+      const bookings = allData.filter(d => {
+        if (d.type !== 'booking' || d.renterId !== renterId) return false;
+        const bookingDate = new Date(d.date);
+        return bookingDate.getMonth() === month && bookingDate.getFullYear() === year;
+      });
+      
+      const total = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      
+      let csvContent = '\uFEFF';
+      csvContent += `Room Rental Receipt\n`;
+      csvContent += `Period: ${monthNames[month]} ${year}\n`;
+      csvContent += `Renter: ${renter.name}\n`;
+      csvContent += `Contact: ${renter.email || ''} ${renter.phone || ''}\n\n`;
+      csvContent += `Date,Room,Start Time,End Time,Amount,Toy Rental\n`;
+      
+      bookings.forEach(b => {
+        csvContent += `${b.date},${b.roomName},${b.startTime},${b.endTime},$${b.totalPrice},${b.toyRental ? 'Yes' : 'No'}\n`;
+      });
+      
+      csvContent += `\nTotal,$${total}\n`;
+      csvContent += `\nGenerated on,${new Date().toLocaleDateString()}\n`;
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Receipt_${renter.name}_${monthNames[month]}_${year}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      showToast('Receipt downloaded 收據已下載', 'success');
+      closeReceiptModal();
+    }
+    
+    // ============ UTILITIES ============
+    function downloadRenterReport() {
+      if (!currentUser) return;
+      
+      const month = parseInt(document.getElementById('statsMonth').value);
+      const year = parseInt(document.getElementById('statsYear').value);
+      
+      const bookings = allData.filter(d => {
+        if (d.type !== 'booking' || d.renterId !== currentUser.__backendId) return false;
+        const bookingDate = new Date(d.date);
+        return bookingDate.getMonth() === month && bookingDate.getFullYear() === year;
+      });
+      
+      const totalAmount = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+      const totalHours = bookings.length * 0.5;
+      
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      
+      let csvContent = '\uFEFF';
+      csvContent += `Rental Report for ${currentUser.name}\n`;
+      csvContent += `Period: ${monthNames[month]} ${year}\n`;
+      csvContent += `Total Bookings: ${bookings.length}\n`;
+      csvContent += `Total Hours: ${totalHours}\n`;
+      csvContent += `Total Amount: $${totalAmount}\n\n`;
+      csvContent += `Date,Room,Branch,Start Time,End Time,Price,Toy Rental\n`;
+      
+      bookings.sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.startTime.localeCompare(b.startTime);
+      });
+      
+      bookings.forEach(b => {
+        csvContent += `${b.date},${b.roomName},${getBranchName(b.branch)},${b.startTime},${b.endTime},$${b.totalPrice},${b.toyRental ? 'Yes' : 'No'}\n`;
+      });
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${currentUser.name}_${monthNames[month]}_${year}_Report.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      showToast('Report downloaded 報表已下載', 'success');
+    }
+    
+    function downloadAllBookings() {
+      const month = parseInt(document.getElementById('bookingsFilterMonth').value);
+      const year = parseInt(document.getElementById('bookingsFilterYear').value);
+      const renterFilter = document.getElementById('bookingsFilterRenter').value;
+      
+      let bookings = allData.filter(d => {
+        if (d.type !== 'booking') return false;
+        const bookingDate = new Date(d.date);
+        if (bookingDate.getMonth() !== month || bookingDate.getFullYear() !== year) return false;
+        if (renterFilter && d.renterId !== renterFilter) return false;
+        return true;
+      });
+      
+      bookings.sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.startTime.localeCompare(b.startTime);
+      });
+      
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      
+      const totalAmount = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+      const totalHours = bookings.length * 0.5;
+      
+      let csvContent = '\uFEFF';
+      csvContent += `All Bookings Report\n`;
+      csvContent += `Period: ${monthNames[month]} ${year}\n`;
+      if (renterFilter) {
+        const renter = allData.find(d => d.__backendId === renterFilter);
+        csvContent += `Renter: ${renter ? renter.name : 'Unknown'}\n`;
+      }
+      csvContent += `Total Bookings: ${bookings.length}\n`;
+      csvContent += `Total Hours: ${totalHours}\n`;
+      csvContent += `Total Amount: $${totalAmount}\n\n`;
+      csvContent += `Date,Renter,Room,Branch,Start Time,End Time,Price,Toy Rental\n`;
+      
+      bookings.forEach(b => {
+        csvContent += `${b.date},${b.renterName},${b.roomName},${getBranchName(b.branch)},${b.startTime},${b.endTime},$${b.totalPrice},${b.toyRental ? 'Yes' : 'No'}\n`;
+      });
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      const filterText = renterFilter ? `_${allData.find(d => d.__backendId === renterFilter)?.name || 'Filtered'}` : '_All';
+      link.setAttribute('download', `Bookings_${monthNames[month]}_${year}${filterText}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      showToast('Bookings downloaded 預約紀錄已下載', 'success');
+    }
+    
+    function getBranchName(branch) {
+      const names = {
+        jordan: '佐敦 Jordan',
+        wanchai: '灣仔 Wan Chai',
+        tsuenwan: '���灣 Tsuen Wan'
+      };
+      return names[branch] || branch;
+    }
+    
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('zh-HK', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    
     function showToast(message, type = 'info') {
       const toast = document.getElementById('toast');
+      const colors = {
+        success: 'bg-green-500 text-white',
+        error: 'bg-red-500 text-white',
+        warning: 'bg-amber-500 text-white',
+        info: 'bg-indigo-500 text-white'
+      };
+      
+      toast.className = `fixed bottom-4 right-4 px-6 py-4 rounded-xl shadow-lg z-50 transition-all transform ${colors[type] || colors.info}`;
       toast.textContent = message;
-      toast.className = `fixed bottom-4 right-4 z-50 px-6 py-3 rounded-xl shadow-lg transition-all transform ${
-        type === 'success' ? 'bg-green-500 text-white' :
-        type === 'error' ? 'bg-red-500 text-white' :
-        'bg-gray-800 text-white'
-      }`;
-      toast.classList.remove('hidden', 'translate-y-2', 'opacity-0');
+      toast.classList.remove('hidden', 'translate-y-full');
       
       setTimeout(() => {
-        toast.classList.add('translate-y-2', 'opacity-0');
+        toast.classList.add('translate-y-full');
         setTimeout(() => toast.classList.add('hidden'), 300);
       }, 3000);
     }
-
-    function showInlineConfirm(message) {
-      return new Promise((resolve) => {
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
-        modal.innerHTML = `
-          <div class="modal-backdrop absolute inset-0" onclick="this.parentElement.remove()"></div>
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm relative z-10 p-6 text-center">
-            <p class="text-gray-800 mb-4">${message}</p>
-            <div class="flex gap-3">
-              <button class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50" 
-                onclick="this.closest('.fixed').remove()">
-                Cancel 取消
-              </button>
-              <button class="flex-1 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 confirm-btn">
-                Confirm 確認
-              </button>
-            </div>
-          </div>
-        `;
-        
-        modal.querySelector('.confirm-btn').onclick = () => {
-          modal.remove();
-          resolve(true);
-        };
-        
-        modal.querySelector('.modal-backdrop').onclick = () => {
-          modal.remove();
-          resolve(false);
-        };
-        
-        document.body.appendChild(modal);
-      });
-    }
-
-    // ============ Element SDK Integration ============
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange: async (newConfig) => {
-          config = { ...defaultConfig, ...newConfig };
-          document.getElementById('systemTitle').textContent = config.system_title || defaultConfig.system_title;
-        },
-        mapToCapabilities: (config) => ({
-          recolorables: [],
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ['system_title', config.system_title || defaultConfig.system_title]
-        ])
-      });
-    }
-
-    // Initialize app
+    
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7676947393b44b',t:'MTc3MDAwMTQ4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cbc2387012784ff',t:'MTc3MDczMjA4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
