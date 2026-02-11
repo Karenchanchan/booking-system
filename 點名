@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幼小參觀・點名分組標籤系統</title>
+    <!-- 引入 html2canvas 與 jspdf (以備日後擴充列印，但本系統使用瀏覽器直接列印標籤) -->
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #f2f7fc;
+            font-family: 'Segoe UI', 'Microsoft YaHei', 微軟正黑體, sans-serif;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .system-container {
+            max-width: 1400px;
+            width: 100%;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-radius: 28px;
+            padding: 30px 35px;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            color: #0a4b7a;
+            border-left: 10px solid #ffb347;
+            padding-left: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: #5e7e9c;
+            margin-left: 8px;
+        }
+        .two-columns {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .left-panel {
+            flex: 1.2;
+            min-width: 400px;
+        }
+        .right-panel {
+            flex: 1;
+            min-width: 350px;
+            background: #f9fbff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: inset 0 0 0 1px rgba(0,70,120,0.08);
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,20,40,0.03);
+            border: 1px solid #e9f0f5;
+        }
+        .card h2 {
+            font-size: 1.3rem;
+            color: #1d4e6f;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px dashed #cbdae4;
+            padding-bottom: 10px;
+        }
+        .student-master-list {
+            background: #eef6fa;
+            border-radius: 16px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        textarea {
+            width: 100%;
+            border: 2px solid #ccdfe9;
+            border-radius: 16px;
+            padding: 15px 18px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            background: white;
+            transition: 0.2s;
+        }
+        textarea:focus {
+            border-color: #2a8bbf;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42,139,191,0.1);
+        }
+        .row-flex {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .input-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #3f6c8a;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ccdfe9;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            background: white;
+            transition: 0.2s;
+        }
+        input:focus {
+            border-color: #2a8bbf;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42,139,191,0.1);
+        }
+        button {
+            background: #1e6e9c;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 14px rgba(0,60,100,0.1);
+        }
+        button:hover {
+            background: #135b82;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 18px rgba(0,60,100,0.15);
+        }
+        .btn-warning {
+            background: #f39c12;
+            color: #1d2c3a;
+        }
+        .btn-warning:hover {
+            background: #e08e0b;
+        }
+        .btn-light {
+            background: #d4e3ed;
+            color: #1a4058;
+            box-shadow: none;
+        }
+        .btn-light:hover {
+            background: #c2d6e4;
+        }
+        .group-count-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0 10px;
+        }
+        #groupCount {
+            width: 100px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .today-attendance {
+            background: #ffffffd9;
+            border-radius: 18px;
+            padding: 18px;
+            margin: 15px 0;
+            border: 2px solid #aad0e6;
+        }
+        .attendance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .badge {
+            background: #0a4b7a;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+        }
+        .student-check-list {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #d8e6ed;
+            border-radius: 16px;
+            padding: 10px;
+            background: white;
+            margin-top: 10px;
+        }
+        .student-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eaf1f6;
+            font-size: 1rem;
+        }
+        .student-item:last-child {
+            border-bottom: none;
+        }
+        .student-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 15px;
+            accent-color: #2a8bbf;
+            border-radius: 5px;
+        }
+        .label-preview-section {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #f1c6a0;
+            box-shadow: 0 6px 0 #ffe4ce;
+        }
+        .label-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: flex-start;
+            margin: 15px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 8px 4px;
+        }
+        .label-card {
+            width: 180px;
+            height: 100px;
+            border-radius: 14px;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 12px;
+            border-left: 12px solid;
+            font-size: 0.95rem;
+            transition: 0.1s;
+            word-break: break-word;
+        }
+        .label-card .student-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .label-card .group-tag {
+            display: inline-block;
+            background: rgba(0,0,0,0.06);
+            padding: 4px 10px;
+            border-radius: 40px;
+            margin-top: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #1f5068;
+        }
+        .label-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        hr {
+            border: none;
+            border-top: 2px solid #d1e0e8;
+            margin: 25px 0 15px;
+        }
+        .color-indicator {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            margin-right: 6px;
+        }
+        .footer-note {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #6a8ca0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="system-container">
+    <h1>
+        🏫 幼稚園參觀·即時點名分組
+        <small>按當天出席平均分組・印學生＋家長標籤</small>
+    </h1>
+    
+    <div class="two-columns">
+        <!-- 左側：學生總表輸入＋點名＋分組控制 -->
+        <div class="left-panel">
+            <div class="card">
+                <h2>📋 1. 貼上本次邀請學生名單</h2>
+                <textarea id="studentMasterInput" rows="5" placeholder="每行一位學生姓名，例如：&#10;陳大文&#10;李小欣&#10;張子軒&#10;何家欣&#10;黃子晴&#10; ...">陳大文
+李小欣
+張子軒
+何家欣
+黃子晴
+林一謙
+葉子蕎
+吳宥廷</textarea>
+                <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                    <button id="loadMasterBtn" class="btn-light">📌 載入名單到點名區</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>✅ 2. 當天出席點名</h2>
+                <div class="today-attendance">
+                    <div class="attendance-header">
+                        <span style="font-weight:600;">👥 已報名學生 (點選今日出席)</span>
+                        <span class="badge" id="attendanceCount">0/0</span>
+                    </div>
+                    <div id="studentChecklistContainer" class="student-check-list">
+                        <!-- 動態生成核取方塊 -->
+                        <div style="color: #6a8ca0; text-align: center; padding: 15px;">請先「載入名單到點名區」</div>
+                    </div>
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 18px;">
+                        <button id="checkAllBtn" class="btn-light">✅ 全選出席</button>
+                        <button id="uncheckAllBtn" class="btn-light">🔄 全部取消</button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 25px;">
+                    <h2>🧑‍🏫 3. 設定分組數目 & 即時分組</h2>
+                    <div class="group-count-area">
+                        <div class="input-group">
+                            <label>本次參觀分組數</label>
+                            <input type="number" id="groupCount" min="1" max="12" value="4" step="1">
+                        </div>
+                        <button id="assignGroupsBtn" style="background: #2e8b57;">🔄 依照出席名單平均分組</button>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #436b7c; margin-top: 5px;">
+                        ⚡ 系統會將「已勾選出席」的學生平均分到各組，每組人數盡量相等。
+                    </p>
+                </div>
+            </div>
+            
+            <!-- 分組結果摘要 -->
+            <div class="card" style="background: #e1f0f5;">
+                <h2>📊 分組摘要</h2>
+                <div id="groupSummary">
+                    <p style="color: #396377;">尚未進行分組，請設定組數並點擊「依照出席名單平均分組」。</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右側：彩色標籤預覽＋列印區 -->
+        <div class="right-panel">
+            <h2 style="margin-top: 0; color: #0e4d64;">🏷️ 彩色分組標籤 (預覽)</h2>
+            <div style="background: #ffe9d7; padding: 12px 16px; border-radius: 16px; margin-bottom: 10px;">
+                <span style="font-weight:600;">🎨 組別配色</span>
+                <div id="colorPalette" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;">
+                    <!-- 動態顯示組別顏色 -->
+                </div>
+            </div>
+            
+            <div class="label-preview-section">
+                <div style="display: flex; gap: 30px; align-items: baseline;">
+                    <h3 style="font-size: 1.2rem; margin:0;">🖨️ 學生標籤 + 家長標籤</h3>
+                    <span style="background: #fff1cf; padding: 5px 12px; border-radius: 40px; font-size:0.8rem;">
+                        📍 左側色條＝組別顏色
+                    </span>
+                </div>
+                <!-- 標籤展示區: 學生標籤 與 家長標籤 兩列? 這裡統一在一個容器呈現，但每張label均清楚標示是學生or家長 -->
+                <div id="labelPreviewArea" class="label-container">
+                    <div style="color: #718e9e; width: 100%; text-align: center; padding: 20px;">👉 完成分組後，標籤會自動產生</div>
+                </div>
+                
+                <div class="label-actions">
+                    <button id="printLabelsBtn" class="btn-warning">🖨️ 列印所有標籤</button>
+                    <button id="clearLabelsBtn" class="btn-light">🗑️ 清空預覽</button>
+                </div>
+                <p style="font-size: 0.8rem; margin-top: 10px; color: #3b6d85;">
+                    ※ 列印時建議使用標籤紙(A4) · 直接按瀏覽器列印，可自行調整縮放。每個標籤左框顏色代表組別。
+                </p>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div style="display: flex; gap: 30px; justify-content: space-between; flex-wrap: wrap;">
+        <div style="font-size: 0.9rem; color: #1a576b;"><span style="font-weight:700;">💡 操作流程：</span> ①貼上名單→載入 ②勾選今天實際出席 ③設定分組數→按分組 ④右側立即出標籤，可列印。</div>
+        <div style="display: flex; gap: 8px;" id="dynamicGroupIndicators"></div>
+    </div>
+    <div class="footer-note">
+        ⚡ 系統自動為「出席學生」平均分組，並為每位學生產生「學生姓名」標籤 & 「學生姓名＋家長」標籤。組別顏色不同，一目瞭然。
+    </div>
+</div>
+
+<script>
+    (function(){
+        'use strict';
+
+        // ----- 狀態管理 -----
+        let masterStudentList = [];        // 原始所有報名學生 (字串陣列)
+        let attendanceChecked = [];       // 布林陣列，與masterStudentList對應, true=出席
+        let currentGroups = [];           // 分組後: [{ groupId, groupName, studentNames: [...] }, ...]
+        let groupColors = [];            // 各組顏色 (十六進位)
+        
+        // 預設配色 (可擴充)
+        const colorSet = [
+            '#FFB3BA', '#C4E6C3', '#B5D3E7', '#FFD8B1', '#E0BBE4', '#FEE08B', 
+            '#FBC7C7', '#ACE7C4', '#A0C4FF', '#FFC6A8', '#D4B8D9', '#C0E0DF'
+        ];
+
+        // ----- DOM 元素 -----
+        const studentMasterInput = document.getElementById('studentMasterInput');
+        const loadMasterBtn = document.getElementById('loadMasterBtn');
+        const checklistContainer = document.getElementById('studentChecklistContainer');
+        const attendanceCountSpan = document.getElementById('attendanceCount');
+        const groupCountInput = document.getElementById('groupCount');
+        const assignGroupsBtn = document.getElementById('assignGroupsBtn');
+        const groupSummaryDiv = document.getElementById('groupSummary');
+        const labelPreviewArea = document.getElementById('labelPreviewArea');
+        const colorPaletteDiv = document.getElementById('colorPalette');
+        const printLabelsBtn = document.getElementById('printLabelsBtn');
+        const clearLabelsBtn = document.getElementById('clearLabelsBtn');
+        const checkAllBtn = document.getElementById('checkAllBtn');
+        const uncheckAllBtn = document.getElementById('uncheckAllBtn');
+
+        // ----- 輔助函式 -----
+        function generateGroupColors(groupCount) {
+            groupColors = [];
+            for (let i = 0; i < groupCount; i++) {
+                groupColors.push(colorSet[i % colorSet.length]);
+            }
+            renderColorPalette();
+        }
+
+        function renderColorPalette() {
+            if (!colorPaletteDiv) return;
+            let html = '';
+            currentGroups.forEach((g, idx) => {
+                const color = groupColors[idx] || '#cccccc';
+                html += `<span><span class="color-indicator" style="background:${color};"></span> ${g.groupName}</span>`;
+            });
+            colorPaletteDiv.innerHTML = html || '<span>尚未分組</span>';
+        }
+
+        // 渲染點名核取清單 (根據masterStudentList)
+        function renderChecklist() {
+            if (!masterStudentList || masterStudentList.length === 0) {
+                checklistContainer.innerHTML = '<div style="color: #6a8ca0; text-align: center; padding: 20px;">⚠️ 尚未載入名單，請先貼上學生姓名並按「載入名單」。</div>';
+                attendanceCountSpan.innerText = '0/0';
+                return;
+            }
+            // 確保 attendanceChecked 長度一致
+            while (attendanceChecked.length < masterStudentList.length) attendanceChecked.push(true);  // 預設出席為true方便
+            while (attendanceChecked.length > masterStudentList.length) attendanceChecked.pop();
+            
+            let html = '';
+            masterStudentList.forEach((student, index) => {
+                const isChecked = attendanceChecked[index] ? 'checked' : '';
+                html += `<div class="student-item">
+                            <input type="checkbox" id="chk_${index}" ${isChecked} data-index="${index}">
+                            <label for="chk_${index}" style="flex:1; font-weight:500;">${escapeHtml(student)}</label>
+                        </div>`;
+            });
+            checklistContainer.innerHTML = html;
+            updateAttendanceCount();
+            
+            // 綁定 checkbox 事件
+            document.querySelectorAll('.student-item input[type=checkbox]').forEach(chk => {
+                chk.addEventListener('change', function(e) {
+                    const idx = parseInt(this.dataset.index, 10);
+                    if (!isNaN(idx) && idx >= 0 && idx < attendanceChecked.length) {
+                        attendanceChecked[idx] = this.checked;
+                        updateAttendanceCount();
+                    }
+                });
+            });
+        }
+
+        // 簡單跳脫
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe.replace(/[&<>"]/g, function(m) {
+                if(m === '&') return '&amp;';
+                if(m === '<') return '&lt;';
+                if(m === '>') return '&gt;';
+                if(m === '"') return '&quot;';
+                return m;
+            });
+        }
+
+        // 更新出席人數顯示
+        function updateAttendanceCount() {
+            const total = masterStudentList.length;
+            const checkedCount = attendanceChecked.filter(v => v === true).length;
+            attendanceCountSpan.innerText = `${checkedCount}/${total}`;
+        }
+
+        // 取得出席學生名單
+        function getPresentStudentList() {
+            return masterStudentList.filter((_, idx) => attendanceChecked[idx] === true);
+        }
+
+        // **** 核心：平均分組演算法 ****
+        function assignToGroups() {
+            const presentList = getPresentStudentList();
+            const groupCount = parseInt(groupCountInput.value, 10);
+            if (isNaN(groupCount) || groupCount <= 0) {
+                alert('請輸入有效的組數 (至少1組)');
+                return;
+            }
+            if (presentList.length === 0) {
+                alert('今天沒有出席學生，無法分組。請勾選出席學生。');
+                return;
+            }
+
+            // 平均分配
+            const shuffled = [...presentList]; // 我們依照原始順序分配即可達到基本平均(保留隨機性? 可隨機洗牌，但學校可能希望照順序，採用依序輪流)
+            // 但平均分組最好稍微隨機分配? 但為簡單清楚，使用S型或輪流。這裡採用「輪流分發」以達平均
+            const groups = Array.from({ length: groupCount }, () => []);
+            for (let i = 0; i < shuffled.length; i++) {
+                const groupIdx = i % groupCount;
+                groups[groupIdx].push(shuffled[i]);
+            }
+            
+            // 建構 currentGroups
+            currentGroups = groups.map((students, idx) => ({
+                groupId: idx + 1,
+                groupName: `第 ${idx + 1} 組`,
+                studentNames: students
+            }));
+            
+            generateGroupColors(groupCount);
+            renderGroupSummary();
+            generateLabels();    // 立即產生標籤預覽
+        }
+
+        // 顯示分組摘要
+        function renderGroupSummary() {
+            if (!currentGroups || currentGroups.length === 0) {
+                groupSummaryDiv.innerHTML = '<p style="color: #396377;">尚未進行分組，請設定組數並點擊分組。</p>';
+                return;
+            }
+            let html = '<ul style="list-style-type:none; padding-left:0;">';
+            currentGroups.forEach((g, i) => {
+                const color = groupColors[i] || '#aaa';
+                html += `<li style="margin-bottom: 12px; display: flex; align-items: center;">
+                            <span class="color-indicator" style="background: ${color};"></span>
+                            <span style="font-weight:600; min-width: 80px;">${g.groupName}</span>
+                            <span style="background: #f4f9fd; padding: 3px 12px; border-radius: 30px;">
+                                ${g.studentNames.length} 人
+                            </span>
+                            <span style="margin-left: 12px; color: #2e5c73;">${g.studentNames.join('、')}</span>
+                        </li>`;
+            });
+            html += `</ul><p style="margin-top:8px;">✅ 總出席人數：${getPresentStudentList().length} 人，共 ${currentGroups.length} 組</p>`;
+            groupSummaryDiv.innerHTML = html;
+        }
+
+        // **** 產生學生+家長彩色標籤 (每張label清楚標示) ****
+        function generateLabels() {
+            if (!currentGroups || currentGroups.length === 0 || getPresentStudentList().length === 0) {
+                labelPreviewArea.innerHTML = '<div style="color: #718e9e; width: 100%; text-align: center; padding: 20px;">👆 請先完成分組，標籤預覽將顯示在這裡</div>';
+                return;
+            }
+
+            let labelsHtml = '';
+            // 遍歷每一組，每一個學生
+            currentGroups.forEach((group, groupIndex) => {
+                const groupName = group.groupName;
+                const borderColor = groupColors[groupIndex] || '#CCCCCC';
+                
+                group.studentNames.forEach(studentName => {
+                    // 1. 學生標籤
+                    labelsHtml += `<div class="label-card" style="border-left-color: ${borderColor};">
+                                    <div class="student-name">${escapeHtml(studentName)}</div>
+                                    <div style="font-size:0.8rem; color: #34626c;">學生</div>
+                                    <span class="group-tag">${groupName}</span>
+                                </div>`;
+                    
+                    // 2. 家長標籤： 「陳大文家長」
+                    labelsHtml += `<div class="label-card" style="border-left-color: ${borderColor};">
+                                    <div class="student-name">${escapeHtml(studentName)}家長</div>
+                                    <div style="font-size:0.8rem; color: #8a6e4b;">家長</div>
+                                    <span class="group-tag">${groupName}</span>
+                                </div>`;
+                });
+            });
+            
+            labelPreviewArea.innerHTML = labelsHtml;
+        }
+
+        // ----- 列印功能 (簡單呼叫瀏覽器列印，只列印標籤區域) -----
+        function printLabels() {
+            const labelContent = labelPreviewArea.innerHTML;
+            if (!labelContent || labelContent.includes('請先完成分組')) {
+                alert('沒有可列印的標籤，請先分組產生標籤。');
+                return;
+            }
+            
+            // 建立新視窗進行列印
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            if (!printWindow) {
+                alert('請允許彈出視窗以便列印。');
+                return;
+            }
+            
+            const style = document.querySelector('style').innerHTML;
+            const colorPaletteHtml = document.getElementById('colorPalette')?.innerHTML || '';
+            
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>列印分組彩色標籤 - 學生與家長</title>
+                    <style>
+                        ${style}
+                        body { background: white; padding: 20px; }
+                        .label-container { display: flex; flex-wrap: wrap; gap: 16px; }
+                        .label-card { 
+                            width: 180px; height: 100px; 
+                            border-radius: 14px; background: white; 
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+                            display: flex; flex-direction: column; 
+                            justify-content: center; align-items: center; 
+                            padding: 12px; border-left: 12px solid; 
+                            page-break-inside: avoid; 
+                            break-inside: avoid;
+                        }
+                        .print-header { margin-bottom: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-header">
+                        <h3>🏷️ 參觀分組標籤 · 學生＋家長 (組別顏色標示)</h3>
+                        <div style="display:flex; gap: 15px; flex-wrap:wrap;">${colorPaletteHtml}</div>
+                        <hr>
+                    </div>
+                    <div class="label-container">
+                        ${labelPreviewArea.innerHTML}
+                    </div>
+                    <p style="margin-top:30px; color:gray; font-size:0.8rem;">列印時間: ${new Date().toLocaleString()}</p>
+                    <script>window.onload = function() { window.print(); window.close(); } <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // 清空預覽 (但保留分組)
+        function clearPreview() {
+            labelPreviewArea.innerHTML = '<div style="color: #718e9e; width: 100%; text-align: center; padding: 20px;">🧹 標籤已清空，可重新分組產生。</div>';
+        }
+
+        // ----- 初始化與事件綁定 -----
+        function init() {
+            // 載入名單按鈕
+            loadMasterBtn.addEventListener('click', function() {
+                const rawText = studentMasterInput.value.trim();
+                if (!rawText) {
+                    alert('請輸入學生姓名，每行一位');
+                    return;
+                }
+                // 拆分成陣列，去除空行與空白
+                masterStudentList = rawText.split('\n')
+                                        .map(s => s.trim())
+                                        .filter(s => s !== '');
+                if (masterStudentList.length === 0) return;
+                
+                // 預設所有學生出席 (true)
+                attendanceChecked = new Array(masterStudentList.length).fill(true);
+                renderChecklist();
+                // 同時清除之前分組
+                currentGroups = [];
+                groupSummaryDiv.innerHTML = '<p style="color: #396377;">已載入新名單，請設定組數並進行分組。</p>';
+                labelPreviewArea.innerHTML = '<div style="color: #718e9e; width: 100%; text-align: center; padding: 20px;">✅ 名已載入，請進行分組。</div>';
+                colorPaletteDiv.innerHTML = '';
+            });
+
+            // 全選/取消
+            checkAllBtn.addEventListener('click', function() {
+                attendanceChecked = attendanceChecked.map(() => true);
+                renderChecklist();
+            });
+            uncheckAllBtn.addEventListener('click', function() {
+                attendanceChecked = attendanceChecked.map(() => false);
+                renderChecklist();
+            });
+
+            // 分組按鈕
+            assignGroupsBtn.addEventListener('click', assignToGroups);
+
+            // 列印
+            printLabelsBtn.addEventListener('click', printLabels);
+            
+            // 清空標籤預覽(僅視覺)
+            clearLabelsBtn.addEventListener('click', clearPreview);
+
+            // 點擊組數輸入框限制
+            // 初始化預設載入demo名單(方便測試)
+            setTimeout(() => {
+                if (masterStudentList.length === 0) {
+                    // 自動載入預設範例
+                    const demoText = studentMasterInput.value.trim();
+                    if (demoText) {
+                        masterStudentList = demoText.split('\n').map(s => s.trim()).filter(s => s !== '');
+                        attendanceChecked = new Array(masterStudentList.length).fill(true);
+                        renderChecklist();
+                    }
+                }
+            }, 50);
+        }
+
+        init();
+    })();
+</script>
+
+</body>
+</html>
